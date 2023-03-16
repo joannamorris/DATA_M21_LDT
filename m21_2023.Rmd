@@ -79,23 +79,103 @@ fviz_pca_ind(res.pca)
 sv_202303.na<-bind_cols(sv_202303.na,res.pca$ind$coord)
 ```
 
-# Load RT data and bind to pca data
+
+Loads RT data and join to PCA dataset
+
 
 ```{r}
-CW_rt <- read_csv("CW_rt.csv")
-NW_rt <- read_csv("NW_rt.csv")
+cw_frq <- read_csv("CW_frq.csv")
+nw_frq <- read_csv("NW_frq.csv")
 
-cw_rt.all <- inner_join(sv_202303.na, CW_rt, by = "SubjID") 
-nw_rt.all <- inner_join(sv_202303.na, NW_rt, by = "SubjID")
+CW_rt <- read_csv("CW_rt_2.csv")
+CW_rt$cw_target <- NULL
+CW_rt <- rename(CW_rt, cw_target = target_lower)
+
+NW_rt <- read_csv("NW_rt_2.csv")
+NW_rt$nw_target <- NULL
+NW_rt <- rename(NW_rt, nw_target = target_lower)
+
+cw_rt_pca <- inner_join(sv_202303.na, CW_rt, by = "SubjID")  #join subject PCA data
+nw_rt_pca <- inner_join(sv_202303.na, NW_rt, by = "SubjID")
+
+cw <- left_join(cw_rt_pca, cw_frq, by = c("cw_target")) #join word frequency data
+nw <- left_join(nw_rt_pca, nw_frq, by = c("nw_target"))
+
+
+
+rm(CW_rt)  #remove original rt file after joining neuropsych data
+rm(NW_rt)
+
 ```
+
+Removes  rts for errors (column rt.err) and then imputes missing values with the mean for the dataset (column "rt.err.imp") then creates a new column with inverse RTs
+
+```{r replacewithmean}
+library(tidyr)
+cw <- cw |> mutate(rt.err = response_time * correct)  # convert error rts to 0
+cw <- cw |> mutate(rt.err = na_if(rt.err, 0))         # convert 0 rts to NA
+cw.mean <- mean(cw$rt.err, na.rm = TRUE)  # get mean rt excluding errors
+cw <- cw |> mutate(rt.err.imp = ifelse(is.na(rt.err), cw.mean, rt.err))  # replace missing values with mean
+cw <- cw |> mutate(inv.rt = 1/rt.err.imp)  # creates new column with inverse RTs
+
+
+nw <- nw |> mutate(rt.err = response_time * correct)  # convert error rts to 0
+nw <- nw |> mutate(rt.err = na_if(rt.err, 0))         # convert 0 rts to NA
+nw.mean <- mean(nw$rt.err, na.rm = TRUE)  # get mean rt excluding errors
+nw <- nw |> mutate(rt.err.imp = ifelse(is.na(rt.err), nw.mean, rt.err))  # replace missing values with mean
+nw <- nw |> mutate(inv.rt = 1/rt.err.imp)  # creates new column with inverst RTs
+```
+
+Divide participants based on median split of Dim2.  Higher values on this factor indicate that spelling scores were relatively higher than vocabulary, 
+
+```{r}
+cw.median <- median(cw$Dim.2)
+(cw <- cw |>
+    mutate(lang_type = case_when(
+      Dim.2 <= cw.median ~ "Semantic",
+      Dim.2 > cw.median ~ "Orthographic"
+    )))
+
+nw.median <- median(nw$Dim.2)
+(nw <- nw |>
+    mutate(lang_type = case_when(
+      Dim.2 <= nw.median ~ "Semantic",
+      Dim.2 > nw.median ~ "Orthographic"
+    )))
+
+```
+
+
+With RT as dependent variable
 
 ```{r}
 library(ez)
-ezANOVA(cw_rt.all, 
-        dv = cw_response_time,
+library(car)
+(m.cw <- ezANOVA(cw, 
+        dv = rt.err.imp,
         wid = SubjID,
         within = cw_famsize,
-        within_covariates = cw_LogBf,
-        between_covariates = Dim.2)
+        between = lang_type))
+
+(m.nw <- ezANOVA(nw, 
+        dv = rt.err.imp,
+        wid = SubjID,
+        within = .(nw_famsize, complexity),
+        between = lang_type))
 ```
+
+Define standard error of the means function
+
+```{r}
+sem <- function(x) sd(x)/sqrt(length(x))
+```
+
+
+Get condition means
+
+```{r}
+(cw.cond.means <- cw |> group_by(cw_famsize, lang_type) |> summarise(mean = mean(rt.err.imp), se = sem(rt.err.imp)))
+(nw.cond.means <- nw |> group_by(nw_famsize, complexity, lang_type) |> summarise(mean = mean(rt.err.imp), se = sem(rt.err.imp)))
+```
+
 
