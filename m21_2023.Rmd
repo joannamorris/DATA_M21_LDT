@@ -2,13 +2,15 @@
 title: "m21_202303"
 author: "Joanna Morris"
 date: "`r Sys.Date()`"
-output: pdf
-editor_options: 
+output:
+  pdf_document: default
+  html_document: default
+editor_options:
   chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,  message=FALSE, comment = "")
 ```
 
 # Compute PCA
@@ -27,17 +29,23 @@ cor.test(sv_202303.na$z_vocab, sv_202303.na$z_spell)
 ```
 
 
-By default, the function PCA() [in FactoMineR], standardizes the data automatically during the PCA; so you don’t need do this transformation before the PCA.
-- X: a data frame. Rows are individuals and columns are numeric variables
-- scale.unit: a logical value. If TRUE, the data are scaled to unit variance before the analysis. This standardization to the same scale avoids some variables to become dominant just because of their large measurement units. It makes variable comparable.
-- ncp: number of dimensions kept in the final results.
-- graph: a logical value. If TRUE a graph is displayed.
+By default, the function `PCA()` in `FactoMineR`, standardizes the data automatically during the PCA; so you don’t need do this transformation before the PCA.
+
+- `X`: a data frame. Rows are individuals and columns are numeric variables
+
+- `scale.unit`: a logical value. If TRUE, the data are scaled to unit variance before the analysis. This standardization to the same scale avoids some variables to become dominant just because of their large measurement units. It makes variable comparable.
+
+- `ncp`: number of dimensions kept in the final results.
+
+- `graph`: a logical value. If TRUE a graph is displayed.
 
 The plot shows the relationships between all variables. It can be interpreted as follow:
 
-Positively correlated variables are grouped together.
-Negatively correlated variables are positioned on opposite sides of the plot origin (opposed quadrants).
-The distance between variables and the origin measures the quality of the variables on the factor map. Variables that are away from the origin are well represented on the factor map.
+- Positively correlated variables are grouped together.
+
+- Negatively correlated variables are positioned on opposite sides of the plot origin (opposed quadrants).
+
+- The distance between variables and the origin measures the quality of the variables on the factor map. Variables that are away from the origin are well represented on the factor map.
 
 ```{r c2}
 
@@ -106,18 +114,18 @@ Divide participants based on median split of Dim2.  Higher values on this factor
 
 ```{r c9}
 cw.median <- median(cw$Dim.2)
-(cw <- cw |>
+cw <- cw |>
     mutate(lang_type = case_when(
       Dim.2 <= cw.median ~ "Semantic",
       Dim.2 > cw.median ~ "Orthographic"
-    )))
+    ))
 
 nw.median <- median(nw$Dim.2)
-(nw <- nw |>
+nw <- nw |>
     mutate(lang_type = case_when(
       Dim.2 <= nw.median ~ "Semantic",
       Dim.2 > nw.median ~ "Orthographic"
-    )))
+    ))
 
 ```
 
@@ -126,18 +134,18 @@ nw.median <- median(nw$Dim.2)
 cols <- c( "cw_famsize", "lang_type")  # recode ind variable columns as factors
 cw <- cw |> mutate_at(cols, factor)
 cw$cw_famsize <- recode_factor(cw$cw_famsize, S = "Small", L = "Large")
-str(cw)
+
 
 cols <- c( "cw_famsize", "lang_type")
 cw <- cw |> mutate_at(cols, factor)
 cw$cw_famsize <- recode_factor(cw$cw_famsize, S = "Small", L = "Large")
-str(cw)
+
 
 cols <- c( "nw_famsize", "lang_type", "complexity")
 nw <- nw |> mutate_at(cols, factor)
 nw$nw_famsize <- recode_factor(nw$nw_famsize, S = "Small", L = "Large")
 nw$complexity <- recode_factor(nw$complexity, SIMP = "Simple", COMP = "Complex")
-str(nw)
+
 
 rm(CW_rt)  #remove original rt file after joining neuropsych data
 rm(NW_rt)
@@ -177,8 +185,6 @@ nw_na.omit <- filter(nw, !is.na(nw$rt.err))
 ```
 
 
-
-
 With RT as dependent variable
 
 ```{r c13}
@@ -199,14 +205,14 @@ library(car)
 
 Define standard error of the means function
 
-```{r c13}
+```{r c14}
 sem <- function(x) sd(x)/sqrt(length(x))
 ```
 
 
 Get condition means
 
-```{r c14}
+```{r c15}
 (cw.cond.means <- cw |> 
    group_by(cw_famsize, lang_type) |> 
    summarise(mean = mean(rt.err.imp), 
@@ -223,7 +229,7 @@ Get condition means
 
 Barplots
 
-```{r c15}
+```{r c16}
 library(gridExtra)
 p1 <-  cw.cond.means %>% ggplot(aes(x=lang_type, y=mean, fill = cw_famsize, ymin = mean - se, ymax = mean + se)) +
   coord_cartesian(xlim = NULL, ylim = c(500, 750), expand = TRUE, default = FALSE,clip = "on") +
@@ -234,7 +240,6 @@ p1 <-  cw.cond.means %>% ggplot(aes(x=lang_type, y=mean, fill = cw_famsize, ymin
   geom_errorbar(width = .08, position = position_dodge(0.5)) + theme_classic() + 
    geom_text(aes(label = round(mean, digits = 0)),colour = "white", size = 3.5, vjust = 4.5, position = position_dodge(.5))+
   guides(fill=guide_legend(title="Morphological Family Size"))
-p1
 
 p2 <-  nw.cond.means %>% ggplot(aes(x=lang_type, y=mean, fill = nw_famsize, ymin = mean - se, ymax = mean + se)) +
   coord_cartesian(xlim = NULL, ylim = c(500, 750), expand = TRUE, default = FALSE,clip = "on") +
@@ -247,23 +252,53 @@ p2 <-  nw.cond.means %>% ggplot(aes(x=lang_type, y=mean, fill = nw_famsize, ymin
   facet_grid(.~complexity) +
   guides(fill=guide_legend(title="Morphological Family Size"))
 
-p2
-
 grid.arrange(p1, p2)
 ```
 
 
 # LME
 
-### Null Model: Affix Frequency: Inverse RT
+### Models
 
-```{r c16}
+```{r c17}
 library(lme4)
 
-cw_null.model = lmer(inv.rt ~ 1 + (1|SubjID) + (1|cw_target), data= cw, REML=FALSE)
+cw_null.model = lmer(rt.err.imp ~ 1 + (1|SubjID) + (1|cw_target), data= cw, REML=FALSE)
 summary(cw_null.model)
 
-afxfrq_inv_main.model = lmer(inverse.rt ~ afx_frq + relatedness + (1|subject) + (1|stemid), 
-                             data= m15_bhv_frq_words_rmna, REML=FALSE)
-summary(afxfrq_inv_main.model)
+# Main effects models with random intercepts
+cw_main.model = lmer(rt.err.imp ~ lang_type + cw_famsize + (1|SubjID) + (1|cw_target), 
+                             data= cw, REML=FALSE)
+summary(cw_main.model)
+
+# Interaction effects models with random intercepts
+cw_inter.model = lmer(rt.err.imp ~ lang_type * cw_famsize + (1|SubjID) + (1|cw_target), 
+                              data= cw, REML=FALSE)
+summary(cw_inter.model)
+
+
+
+nw_null.model = lmer(rt.err.imp ~ 1 + (1|SubjID) + (1|nw_target), data= nw, REML=FALSE)
+summary(nw_null.model)
+
+# Main effects models with random intercepts
+nw_main.model = lmer(rt.err.imp ~ lang_type + nw_famsize + complexity +(1|SubjID) + (1|nw_target), 
+                             data= nw, REML=FALSE)
+summary(nw_main.model)
+
+# Interaction effects models with random intercepts
+nw_inter.model = lmer(rt.err.imp ~ lang_type * nw_famsize * complexity + (1|SubjID) + (1|nw_target), 
+                              data= nw, REML=FALSE)
+summary(nw_inter.model)
 ```
+
+### Model Comparisons
+
+```{r c18}
+anova(cw_null.model,cw_main.model)
+anova(cw_main.model,cw_inter.model)
+
+anova(nw_null.model,nw_main.model)
+anova(nw_main.model,nw_inter.model)
+```
+
