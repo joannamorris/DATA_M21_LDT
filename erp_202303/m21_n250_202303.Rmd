@@ -1,0 +1,395 @@
+---
+title: "Morph 21"
+author: "Joanna Morris"
+date: "`r Sys.Date()`"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,  message=FALSE, comment = "")
+```
+
+This R script contains the code for analysing the morph 21 erp data for the 200-300 ms time window.
+
+1. First we load the libraries we need
+
+```{r}
+library(readr)
+library(psych)
+library(dplyr)
+library(tidyr)
+```
+
+
+
+# Compute PCA
+
+Following Andrews and Lo (2013) this script computes a PCA for our spelling and vocabulary measures. Because the standardised spelling and vocabulary scores were  correlated, to facilitate interpretation, two orthogonal measures of individual differences were derived from a principal components analysis. Analysis based on [this tutorial](http://www.sthda.com/english/articles/31-principal-component-methods-in-r-practical-guide/112-pca-principal-component-analysis-essentials/)
+
+```{r c1}
+library(readr)
+library(dplyr)
+library(datawizard)
+sv_202303 <- read_csv("m21_spell_vocab_raw.csv")
+sv_202303.na <- na.omit(sv_202303)
+sv_202303.na <- mutate(sv_202303.na, z_ART = standardise(ART_correct), z_vocab = standardise(vocab_correct), z_spell = standardise(spell_correct))
+
+cor.test(sv_202303.na$z_vocab, sv_202303.na$z_spell)
+```
+
+
+By default, the function `PCA()` in `FactoMineR`, standardizes the data automatically during the PCA; so you don’t need do this transformation before the PCA.
+
+- `X`: a data frame. Rows are individuals and columns are numeric variables
+
+- `scale.unit`: a logical value. If TRUE, the data are scaled to unit variance before the analysis. This standardization to the same scale avoids some variables to become dominant just because of their large measurement units. It makes variable comparable.
+
+- `ncp`: number of dimensions kept in the final results.
+
+- `graph`: a logical value. If TRUE a graph is displayed.
+
+The plot shows the relationships between all variables. It can be interpreted as follow:
+
+- Positively correlated variables are grouped together.
+
+- Negatively correlated variables are positioned on opposite sides of the plot origin (opposed quadrants).
+
+- The distance between variables and the origin measures the quality of the variables on the factor map. Variables that are away from the origin are well represented on the factor map.
+
+```{r c2}
+
+library(FactoMineR)
+library(factoextra)
+
+res.pca <- PCA(sv_202303.na[,3:4], scale.unit = TRUE, ncp = 2, graph = FALSE)
+plot(res.pca, choix = "varcor", graph.type = c("ggplot"))
+```
+
+The eigenvalues measure the amount of variation retained by each principal component. Eigenvalues are large for the first PCs and small for the subsequent PCs. That is, the first PCs corresponds to the directions with the maximum amount of variation in the data set.
+
+We examine the eigenvalues to determine the number of principal components to be considered
+
+```{r c3}
+(eig.val <- get_eigenvalue(res.pca))
+```
+
+
+The quality of representation of the variables on factor map is called cos2 (square cosine, squared coordinates). A high cos2 indicates a good representation of the variable on the principal component. In this case the variable is positioned close to the circumference of the correlation circle.  A low cos2 indicates that the variable is not perfectly represented by the PCs. In this case the variable is close to the center of the circle.  For a given variable, the sum of the cos2 on all the principal components is equal to one.  If a variable is perfectly represented by only two principal components (Dim.1 & Dim.2), the sum of the cos2 on these two PCs is equal to one. In this case the variables will be positioned on the circle of correlations.
+
+```{r c4}
+res.pca$var$cos2
+```
+
+The contributions of variables in accounting for the variability in a given principal component are expressed in percentage. Variables that are correlated with PC1 (i.e., Dim.1) and PC2 (i.e., Dim.2) are the most important in explaining the variability in the data set. Variables that do not correlated with any PC or correlated with the last dimensions are variables with low contribution and might be removed to simplify the overall analysis.
+
+```{r c5}
+res.pca$var$contrib
+(res.desc <- dimdesc(res.pca, axes = c(1,2), proba = 0.05))
+```
+
+The fviz_pca_ind() is used to produce the graph of individuals.
+
+```{r c6}
+fviz_pca_ind(res.pca)
+```
+
+```{r c7}
+sv_202303.na<-bind_cols(sv_202303.na,res.pca$ind$coord)
+```
+
+
+
+ We load the N250 erp data file and the word and non-word base frequency data
+
+```{r c8}
+n250 <- read_csv("S101-177_n250.csv")
+
+```
+
+Then we join the demographic and erp data files. We will use the `inner_join` rather than the `full_join` function in order to eliminate rows with missing data.
+
+```{r c9}
+n250 <- inner_join(sv_202303.na,n250, by = "SubjID")  #join subject PCA data
+
+```
+
+Divide participants based on median split of Dim2.  Higher values on this factor indicate that spelling scores were relatively higher than vocabulary, 
+
+```{r c10}
+n250.median <- median(n250$Dim.2)
+n250 <- n250 |>
+    mutate(lang_type = case_when(
+      Dim.2 <= n250.median ~ "Semantic",
+      Dim.2 > n250.median ~ "Orthographic"
+    ))
+```
+
+5. Let's save a `.csv` file with the data from the combined dataset 
+
+```{r c11}
+write_csv(n250, "202303_sv_n250_rmna.csv")
+```
+
+
+6. For each dataset, we will create a subset with only the electrode sites we will be 
+analysing—F3, Fz, F4, C3, Cz, C4, P3, Pz, P4
+
+```{r c12}
+sites = c(3,2, 25, 7, 20, 21, 12, 11, 16)
+n250_9 <- dplyr::filter(n250, chindex %in% sites)
+
+```
+
+
+7. We then create separate columns, one for each independent variable (anteriority, laterality, morphological family size). To do this we have to use the`mutate` function from the dplyr package along with the `case_when` function. The `case_when` function  is a sequence of two-sided formulas. The left hand side determines which values match this case. The right hand side provides the replacement value.
+
+```{r}
+n250_9 <- dplyr::mutate(n250_9,
+                        anteriority = case_when(grepl("F", chlabel) ~ "Frontal",
+                                                grepl("C", chlabel) ~ "Central",
+                                                grepl("P", chlabel) ~ "Parietal"))
+
+n250_9 <- dplyr::mutate(n250_9,
+                        laterality = case_when(grepl("3", chlabel) ~ "Left",
+                                               grepl("z", chlabel) ~ "Midline",
+                                               grepl("Z", chlabel) ~ "Midline",
+                                               grepl("4", chlabel) ~ "Right"))
+
+
+
+n250_9 <- dplyr::mutate(n250_9,
+                        fam_size = case_when(grepl("small", binlabel) ~ "Small",
+                                             grepl("large", binlabel) ~ "Large"))
+```
+
+
+8. We then create a smaller dataset with only the columns we need
+
+```{r}
+n250_9b <- dplyr::select(n250_9, 
+                             SubjID, 
+                             lang_type, 
+                             anteriority, 
+                             laterality, 
+                             fam_size,
+                             value,
+                             chlabel,
+                             binlabel)
+```
+
+9. We then divide dataset into 3 separate ones—for "words", "simple nonwords" and "complex nonwords"
+
+```{r}
+n250_words <- dplyr::filter(n250_9b, grepl("Critical_word",binlabel))
+n250_nwsmpl <- dplyr::filter(n250_9b, grepl("simple",binlabel))
+n250_nwcplx <- dplyr::filter(n250_9b, grepl("complex",binlabel))
+```
+
+10. Now we can compute the ANOVA for each of the three datasets.
+
+We use the `aov` function to calculate the source table and F. But before we do that, we want to tell R to change the way it is comparing the groups. We are going to use `Helmert` contrast, and we only need to set it once for all ANOVAs we run during a single R session. 
+
+
+```{r set_anova_options}
+options(contrasts = c("contr.helmert", "contr.poly")) 
+options("contrasts")
+```
+
+After we tell R we want to use a Helmert contrast (`contr. helmert`) for categorical variables (and polynomial contrasts for ordered variables (`contr.poly`)), we can now run our ANOVA. For more on contrasts see [this explanation](https://stats.libretexts.org/Bookshelves/Applied_Statistics/Book%3A_Learning_Statistics_with_R_-_A_tutorial_for_Psychology_Students_and_other_Beginners_(Navarro)/16%3A_Factorial_ANOVA/16.07%3A_Different_Ways_to_Specify_Contrasts)
+
+
+```{r runAnova}
+m1 <- aov(value ~ lang_type * fam_size * anteriority * laterality, data = n250_words)
+m2 <- aov(value ~ lang_type * fam_size * anteriority * laterality, data = n250_nwsmpl)
+m3 <- aov(value ~ lang_type * fam_size * anteriority * laterality, data = n250_nwcplx)
+summary(m1)
+summary(m2)
+summary(m3)
+```
+
+We can also use the function `Anova()` from the `car` package with the argument `type = III` to get the source table. For our design with no factors with more than 2 levels, both methods should give similar results.  For more on types of sums of square see [this explanation](https://stats.libretexts.org/Bookshelves/Applied_Statistics/Book%3A_Learning_Statistics_with_R_-_A_tutorial_for_Psychology_Students_and_other_Beginners_(Navarro)/16%3A_Factorial_ANOVA/16.10%3A_Factorial_ANOVA_3-_Unbalanced_Designs)
+
+```{r sourceTable}
+library(car)
+Anova(m1, type = "III")
+Anova(m2, type = "III")
+Anova(m3, type = "III")
+```
+
+#Plot Means
+
+Get condition means
+
+```{r get_means}
+
+#Define standard error of the mean function
+
+sem <- function(x) sd(x)/sqrt(length(x))
+
+(cw.cond.means <- n250_words |> 
+   group_by(fam_size, lang_type) |> 
+   summarise(mean = mean(value), 
+             se = sem(value),
+             num_stim = n()))
+
+
+(nw_smp.cond.means <- n250_nwsmpl |> 
+    group_by(fam_size, lang_type) |> 
+    summarise(mean = mean(value), 
+              se = sem(value),
+              num_stim = n()))
+
+(nw_cpx.cond.means <- n250_nwcplx |> 
+    group_by(fam_size, lang_type) |> 
+    summarise(mean = mean(value), 
+              se = sem(value),
+              num_stim = n()))
+```
+
+Barplots
+
+```{r c15, fig.height= 6, fig.width= 6}
+library(gridExtra)
+p1 <-  cw.cond.means |> ggplot(aes(x=lang_type, 
+                                   y=mean, 
+                                   fill = fam_size, 
+                                   ymin = mean - se, 
+                                   ymax = mean + se)) +
+  coord_cartesian(xlim = NULL, 
+                  ylim = c(-2, 2), 
+                  expand = TRUE, 
+                  default = FALSE,
+                  clip = "on") +
+  geom_col(position = "dodge", width = 0.5, color = "black")  +
+  ylab("Voltage (microvolts)")  +  
+  xlab("")  + 
+  ggtitle("Complex Words") +
+  scale_fill_manual(values = c("coral2", "deepskyblue3"))+ 
+  geom_errorbar(width = .08, position = position_dodge(0.5)) + 
+  theme_classic() + 
+   geom_text(aes(label = round(mean, digits = 2)),
+             colour = "black", 
+             size = 2.5, 
+             vjust = -4, 
+             position = position_dodge(.5))+
+  guides(fill=guide_legend(title="Morphological Family Size"))
+
+p2 <-  nw_smp.cond.means |> ggplot(aes(x=lang_type, 
+                                       y=mean, fill = fam_size, 
+                                       ymin = mean - se, 
+                                       ymax = mean + se)) +
+  coord_cartesian(xlim = NULL, 
+                  ylim = c(-2, 2), 
+                  expand = TRUE, 
+                  default = FALSE,
+                  clip = "on") +
+  geom_col(position = "dodge", width = .7, color = "black")  +
+  xlab("")  + 
+  ylab("Voltage (microvolts)")  +  
+  ggtitle("Simple NonWords") +
+  scale_fill_manual(values = c("coral2", "deepskyblue3"))+ 
+  geom_errorbar(width = .08, position = position_dodge(0.5)) + 
+  theme_classic() + 
+   geom_text(aes(label = round(mean, digits = 2)),
+             colour = "black", 
+             size = 2.5, 
+             vjust = -2.5, 
+             position = position_dodge(.7)) +
+  guides(fill=guide_legend(title="Morphological Family Size"))
+
+p3 <-  nw_cpx.cond.means |> ggplot(aes(x=lang_type, 
+                                       y=mean, 
+                                       fill = fam_size, 
+                                       ymin = mean - se, 
+                                       ymax = mean + se)) +
+  coord_cartesian(xlim = NULL, 
+                  ylim = c(-2, 2), 
+                  expand = TRUE, 
+                  default = FALSE,
+                  clip = "on") +
+  geom_col(position = "dodge", width = .7, color = "black")  +
+  xlab("Participant Reading Style")  + 
+  ylab("Voltage (microvolts)")  +  
+  ggtitle("Complex NonWords") +
+  scale_fill_manual(values = c("coral2", "deepskyblue3"))+ 
+  geom_errorbar(width = .08, position = position_dodge(0.5)) + 
+  theme_classic() + 
+   geom_text(aes(label = round(mean, digits = 2)),
+             colour = "black", 
+             size = 2.5, 
+             vjust = -2.75,  
+             position = position_dodge(.7)) +
+  guides(fill=guide_legend(title="Morphological Family Size"))
+
+grid.arrange(p1, p2, p3)
+```
+
+# LME
+
+```{r c16}
+library(lme4)
+
+# COMPLEX WORDS
+
+cw_null.model = lmer(value ~ 1 + (1|SubjID) , 
+                     data= n250_words, REML=FALSE)
+summary(cw_null.model)
+
+# Main effects models with random intercepts
+cw_main.model = lmer(value ~ lang_type + fam_size + (1|SubjID) ,
+                     data= n250_words, REML=FALSE)
+summary(cw_main.model)
+
+# Interaction effects models with random intercepts
+cw_inter.model = lmer(value ~ lang_type * fam_size + (1|SubjID) ,
+                      data= n250_words, REML=FALSE)
+summary(cw_inter.model)
+
+# SIMPLE NONWORDS
+
+nw.smpl_null.model = lmer(value ~ 1 + (1|SubjID) , 
+                          data= n250_nwsmpl, REML=FALSE)
+summary(nw.smpl_null.model)
+
+# Main effects models with random intercepts
+nw.smpl_main.model = lmer(value ~ lang_type + fam_size + (1|SubjID) ,
+                          data= n250_nwsmpl, REML=FALSE)
+summary(nw.smpl_main.model)
+
+# Interaction effects models with random intercepts
+nw.smpl_inter.model = lmer(value ~ lang_type * fam_size + (1|SubjID) ,
+                           data= n250_nwsmpl, REML=FALSE)
+summary(nw.smpl_inter.model)
+
+# COMPLEX NONWORDS
+
+nw.cplx_null.model = lmer(value ~ 1 + (1|SubjID) ,
+                          data= n250_nwcplx, REML=FALSE)
+summary(nw.cplx_null.model)
+
+# Main effects models with random intercepts
+nw.cplx_main.model = lmer(value ~ lang_type + fam_size + (1|SubjID) , 
+                          data= n250_nwcplx, REML=FALSE)
+summary(nw.cplx_main.model)
+
+# Interaction effects models with random intercepts
+nw.cplx_inter.model = lmer(value ~ lang_type * fam_size  + (1|SubjID),
+                           data= n250_nwcplx, REML=FALSE)
+summary(nw.cplx_inter.model)
+
+```
+
+### Model Comparisons
+
+```{r c17}
+anova(cw_null.model,cw_main.model)
+anova(cw_main.model,cw_inter.model)
+
+anova(nw.smpl_null.model,nw.smpl_main.model)
+anova(nw.smpl_main.model,nw.smpl_inter.model)
+
+anova(nw.cplx_null.model,nw.cplx_main.model)
+anova(nw.cplx_main.model,nw.cplx_inter.model)
+```

@@ -15,15 +15,20 @@ knitr::opts_chunk$set(echo = TRUE,  message=FALSE, comment = "")
 
 # Compute PCA
 
+This script computes one ANOVA for all non-words,
+
 Following Andrews and Lo (2013) this script computes a PCA for our spelling and vocabulary measures. Because the standardised spelling and vocabulary scores were  correlated, to facilitate interpretation, two orthogonal measures of individual differences were derived from a principal components analysis. Analysis based on [this tutorial](http://www.sthda.com/english/articles/31-principal-component-methods-in-r-practical-guide/112-pca-principal-component-analysis-essentials/)
 
 ```{r c1}
 library(readr)
 library(dplyr)
 library(datawizard)
-sv_202303 <- read_csv("m21_spell_vocab_202303.csv")
+sv_202303 <- read_csv("m21_spell_vocab_raw.csv")
 sv_202303.na <- na.omit(sv_202303)
-sv_202303.na <- mutate(sv_202303.na, z_ART = standardise(ART_correct), z_vocab = standardise(vocab_correct), z_spell = standardise(spell_correct))
+sv_202303.na <- mutate(sv_202303.na, 
+                       z_ART = standardise(ART_correct), 
+                       z_vocab = standardise(vocab_correct), 
+                       z_spell = standardise(spell_correct))
 
 cor.test(sv_202303.na$z_vocab, sv_202303.na$z_spell)
 ```
@@ -52,7 +57,9 @@ The plot shows the relationships between all variables. It can be interpreted as
 library(FactoMineR)
 library(factoextra)
 
-res.pca <- PCA(sv_202303.na[,3:4], scale.unit = TRUE, ncp = 2, graph = TRUE)
+res.pca <- PCA(sv_202303.na[,3:4], scale.unit = TRUE, ncp = 2, graph = FALSE)
+plot(res.pca, choix = "varcor", graph.type = c("ggplot"))
+
 ```
 
 The eigenvalues measure the amount of variation retained by each principal component. Eigenvalues are large for the first PCs and small for the subsequent PCs. That is, the first PCs corresponds to the directions with the maximum amount of variation in the data set.
@@ -159,14 +166,18 @@ library(tidyr)
 cw <- cw |> mutate(rt.err = response_time * correct)  # convert error rts to 0
 cw <- cw |> mutate(rt.err = na_if(rt.err, 0))         # convert 0 rts to NA
 cw.mean <- mean(cw$rt.err, na.rm = TRUE)  # get mean rt excluding errors
-cw <- cw |> mutate(rt.err.imp = ifelse(is.na(rt.err), cw.mean, rt.err))  # replace missing values with mean
+cw <- cw |> mutate(rt.err.imp = ifelse(is.na(rt.err), 
+                                       cw.mean, 
+                                       rt.err))  # replace missing values with mean
 cw <- cw |> mutate(inv.rt = 1/rt.err.imp)  # creates new column with inverse RTs
 
 
 nw <- nw |> mutate(rt.err = response_time * correct)  # convert error rts to 0
 nw <- nw |> mutate(rt.err = na_if(rt.err, 0))         # convert 0 rts to NA
 nw.mean <- mean(nw$rt.err, na.rm = TRUE)  # get mean rt excluding errors
-nw <- nw |> mutate(rt.err.imp = ifelse(is.na(rt.err), nw.mean, rt.err))  # replace missing values with mean
+nw <- nw |> mutate(rt.err.imp = ifelse(is.na(rt.err), 
+                                       nw.mean, 
+                                       rt.err))  # replace missing values with mean
 nw <- nw |> mutate(inv.rt = 1/rt.err.imp)  # creates new column with inverst RTs
 ```
 
@@ -203,16 +214,17 @@ library(car)
         between = lang_type))
 ```
 
-Define standard error of the means function
 
-```{r c14}
-sem <- function(x) sd(x)/sqrt(length(x))
-```
 
 
 Get condition means
 
-```{r c15}
+```{r c14}
+
+#Define standard error of the mean function
+
+sem <- function(x) sd(x)/sqrt(length(x))
+
 (cw.cond.means <- cw |> 
    group_by(cw_famsize, lang_type) |> 
    summarise(mean = mean(rt.err.imp), 
@@ -229,26 +241,51 @@ Get condition means
 
 Barplots
 
-```{r c16}
+```{r c15}
 library(gridExtra)
-p1 <-  cw.cond.means %>% ggplot(aes(x=lang_type, y=mean, fill = cw_famsize, ymin = mean - se, ymax = mean + se)) +
-  coord_cartesian(xlim = NULL, ylim = c(500, 750), expand = TRUE, default = FALSE,clip = "on") +
-  geom_col(position = "dodge", width = 0.5, color = "black")  +
+p1 <-  cw.cond.means %>% ggplot(aes(x=lang_type, 
+                                    y=mean, 
+                                    fill = cw_famsize, 
+                                    ymin = mean - se, 
+                                    ymax = mean + se)) +
+  coord_cartesian(xlim = NULL, 
+                  ylim = c(500, 750), 
+                  expand = TRUE, 
+                  default = FALSE,
+                  clip = "on") +
+  geom_col(position = "dodge",  width = 0.5,  color = "black")  +
   ylab("RT in milliseconds")  +  
   xlab("Participant Reading Style")  + 
   scale_fill_manual(values = c("coral2", "deepskyblue4"))+ 
-  geom_errorbar(width = .08, position = position_dodge(0.5)) + theme_classic() + 
-   geom_text(aes(label = round(mean, digits = 0)),colour = "white", size = 3.5, vjust = 4.5, position = position_dodge(.5))+
+  geom_errorbar(width = .08,  position = position_dodge(0.5)) + 
+  theme_classic() + 
+   geom_text(aes(label = round(mean, digits = 0)),
+             colour = "white", 
+             size = 3.5, 
+             vjust = 4.5, 
+             position = position_dodge(.5))+
   guides(fill=guide_legend(title="Morphological Family Size"))
 
-p2 <-  nw.cond.means %>% ggplot(aes(x=lang_type, y=mean, fill = nw_famsize, ymin = mean - se, ymax = mean + se)) +
-  coord_cartesian(xlim = NULL, ylim = c(500, 750), expand = TRUE, default = FALSE,clip = "on") +
-  geom_col(position = "dodge", width = .7, color = "black")  +
+p2 <-  nw.cond.means %>% ggplot(aes(x=lang_type, 
+                                    y=mean, 
+                                    fill = nw_famsize, 
+                                    ymin = mean - se, 
+                                    ymax = mean + se)) +
+  coord_cartesian(xlim = NULL, ylim = c(500, 750), 
+                  expand = TRUE, 
+                  default = FALSE,
+                  clip = "on") +
+  geom_col(position = "dodge",  width = .7,  color = "black")  +
   xlab("Participant Reading Style")  + 
   ylab("RT in milliseconds")  +  
   scale_fill_manual(values = c("coral2", "deepskyblue4"))+ 
-  geom_errorbar(width = .08, position = position_dodge(0.5)) + theme_classic() + 
-   geom_text(aes(label = round(mean, digits = 0)),colour = "white", size = 2.5, vjust = 4.5, position = position_dodge(.7)) +
+  geom_errorbar(width = .08, position = position_dodge(0.5)) + 
+  theme_classic() + 
+   geom_text(aes(label = round(mean, digits = 0)),
+             colour = "white", 
+             size = 2.5, 
+             vjust = 4.5, 
+             position = position_dodge(.7)) +
   facet_grid(.~complexity) +
   guides(fill=guide_legend(title="Morphological Family Size"))
 
@@ -260,7 +297,7 @@ grid.arrange(p1, p2)
 
 ### Models
 
-```{r c17}
+```{r c16}
 library(lme4)
 
 cw_null.model = lmer(rt.err.imp ~ 1 + (1|SubjID) + (1|cw_target), data= cw, REML=FALSE)
@@ -282,8 +319,11 @@ nw_null.model = lmer(rt.err.imp ~ 1 + (1|SubjID) + (1|nw_target), data= nw, REML
 summary(nw_null.model)
 
 # Main effects models with random intercepts
-nw_main.model = lmer(rt.err.imp ~ lang_type + nw_famsize + complexity +(1|SubjID) + (1|nw_target), 
-                             data= nw, REML=FALSE)
+nw_main.model = lmer(rt.err.imp ~ lang_type + nw_famsize + complexity +
+                       (1|SubjID) + 
+                       (1|nw_target),
+                     data= nw, 
+                     REML=FALSE)
 summary(nw_main.model)
 
 # Interaction effects models with random intercepts
@@ -294,7 +334,7 @@ summary(nw_inter.model)
 
 ### Model Comparisons
 
-```{r c18}
+```{r c17}
 anova(cw_null.model,cw_main.model)
 anova(cw_main.model,cw_inter.model)
 
