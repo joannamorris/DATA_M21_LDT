@@ -1,5 +1,5 @@
 ---
-title: "m21_202303"
+title: "m21_202303_rt v.2"
 author: "Joanna Morris"
 date: "`r Sys.Date()`"
 output:
@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE,  message=FALSE, comment = "")
 
 # Compute PCA
 
-This script computes one ANOVA for all non-words,
+This script computes separate ANOVAs for simple and complex non-words.
 
 Following Andrews and Lo (2013) this script computes a PCA for our spelling and vocabulary measures. Because the standardised spelling and vocabulary scores were  correlated, to facilitate interpretation, two orthogonal measures of individual differences were derived from a principal components analysis. Analysis based on [this tutorial](http://www.sthda.com/english/articles/31-principal-component-methods-in-r-practical-guide/112-pca-principal-component-analysis-essentials/)
 
@@ -59,7 +59,6 @@ library(factoextra)
 
 res.pca <- PCA(sv_202303.na[,3:4], scale.unit = TRUE, ncp = 2, graph = FALSE)
 plot(res.pca, choix = "varcor", graph.type = c("ggplot"))
-
 ```
 
 The eigenvalues measure the amount of variation retained by each principal component. Eigenvalues are large for the first PCs and small for the subsequent PCs. That is, the first PCs corresponds to the directions with the maximum amount of variation in the data set.
@@ -102,6 +101,7 @@ Loads RT data and join to PCA dataset
 cw_frq <- read_csv("CW_frq.csv")
 nw_frq <- read_csv("NW_frq.csv")
 
+
 CW_rt <- read_csv("CW_rt_2.csv")
 CW_rt$cw_target <- NULL
 CW_rt <- rename(CW_rt, cw_target = target_lower)
@@ -123,17 +123,27 @@ Divide participants based on median split of Dim2.  Higher values on this factor
 cw.median <- median(cw$Dim.2)
 cw <- cw |>
     mutate(lang_type = case_when(
-      Dim.2 <= cw.median ~ "Semantic",
-      Dim.2 > cw.median ~ "Orthographic"
+      Dim.2 < cw.median ~ "Semantic",
+      Dim.2 >= cw.median ~ "Orthographic"
     ))
 
 nw.median <- median(nw$Dim.2)
 nw <- nw |>
     mutate(lang_type = case_when(
-      Dim.2 <= nw.median ~ "Semantic",
-      Dim.2 > nw.median ~ "Orthographic"
+      Dim.2 < nw.median ~ "Semantic",
+      Dim.2 >= nw.median ~ "Orthographic"
     ))
+```
 
+Export list of subjects with Reading type classification
+
+```{r}
+df <- distinct(select(cw, SubjID, lang_type ))
+df_o <- filter(df, lang_type == "Orthographic")
+df_s <- filter(df, lang_type != "Orthographic")
+write_csv(df, "m21_subjlist_reading_type.csv")
+write_csv(df_o, "m21_subjlist_ortho.csv")
+write_csv(df_s, "m21_subjlist_semant.csv")
 ```
 
 
@@ -154,6 +164,12 @@ nw$nw_famsize <- recode_factor(nw$nw_famsize, S = "Small", L = "Large")
 nw$complexity <- recode_factor(nw$complexity, SIMP = "Simple", COMP = "Complex")
 
 
+nw_smpl <- filter(nw, complexity == "Simple")
+nw_smpl$complexity <- NULL
+
+nw_cplx <- filter(nw, complexity == "Complex")
+nw_cplx$complexity <- NULL
+
 rm(CW_rt)  #remove original rt file after joining neuropsych data
 rm(NW_rt)
 
@@ -172,13 +188,21 @@ cw <- cw |> mutate(rt.err.imp = ifelse(is.na(rt.err),
 cw <- cw |> mutate(inv.rt = 1/rt.err.imp)  # creates new column with inverse RTs
 
 
-nw <- nw |> mutate(rt.err = response_time * correct)  # convert error rts to 0
-nw <- nw |> mutate(rt.err = na_if(rt.err, 0))         # convert 0 rts to NA
-nw.mean <- mean(nw$rt.err, na.rm = TRUE)  # get mean rt excluding errors
-nw <- nw |> mutate(rt.err.imp = ifelse(is.na(rt.err), 
-                                       nw.mean, 
-                                       rt.err))  # replace missing values with mean
-nw <- nw |> mutate(inv.rt = 1/rt.err.imp)  # creates new column with inverst RTs
+nw_smpl <- nw_smpl |> mutate(rt.err = response_time * correct)  # convert error rts to 0
+nw_smpl <- nw_smpl |> mutate(rt.err = na_if(rt.err, 0))         # convert 0 rts to NA
+nw_smpl.mean <- mean(nw_smpl$rt.err, na.rm = TRUE)  # get mean rt excluding errors
+nw_smpl <- nw_smpl |> mutate(rt.err.imp = ifelse(is.na(rt.err),
+                                                 nw_smpl.mean,
+                                                 rt.err))  # replace missing values with mean
+nw_smpl <- nw_smpl |> mutate(inv.rt = 1/rt.err.imp)  # creates new column with inverse RTs
+
+nw_cplx <- nw_cplx |> mutate(rt.err = response_time * correct)  # convert error rts to 0
+nw_cplx <- nw_cplx |> mutate(rt.err = na_if(rt.err, 0))         # convert 0 rts to NA
+nw_cplx.mean <- mean(nw_cplx$rt.err, na.rm = TRUE)  # get mean rt excluding errors
+nw_cplx <- nw_cplx |> mutate(rt.err.imp = ifelse(is.na(rt.err), 
+                                                 nw_smpl.mean, 
+                                                 rt.err))  # replace missing values with mean
+nw_cplx <- nw_cplx |> mutate(inv.rt = 1/rt.err.imp)  # creates new column with inverse RTs
 ```
 
 
@@ -187,12 +211,13 @@ Determines how much missing data there is. Creates new dataframe with just the n
 
 ```{r c12}
 cw_missing_data<- filter(cw, is.na(cw$rt.err))
-cw_na.omit <- filter(cw, !is.na(cw$rt.err))
 (xtab.missing.data <- xtabs(~cw_famsize+lang_type, data=cw_missing_data))
 
-nw_missing_data<- filter(nw, is.na(nw$rt.err))
-nw_na.omit <- filter(nw, !is.na(nw$rt.err))
-(xtab.missing.data <- xtabs(~nw_famsize+lang_type+complexity, data=nw_missing_data))
+nw.smpl_missing_data<- filter(nw_smpl, is.na(nw_smpl$rt.err))
+(xtab.missing.data <- xtabs(~nw_famsize+lang_type, data=nw.smpl_missing_data))
+
+nw.cplx_missing_data<- filter(nw_cplx, is.na(nw_cplx$rt.err))
+(xtab.missing.data <- xtabs(~nw_famsize+lang_type, data=nw.cplx_missing_data))
 ```
 
 
@@ -201,20 +226,19 @@ With RT as dependent variable
 ```{r c13}
 library(ez)
 library(car)
-(m.cw <- ezANOVA(cw, 
-        dv = rt.err.imp,
-        wid = SubjID,
-        within = cw_famsize,
-        between = lang_type))
+(m.cw <- ezANOVA(cw,dv = rt.err.imp,wid = SubjID,within = cw_famsize,between = lang_type))
 
-(m.nw <- ezANOVA(nw, 
-        dv = rt.err.imp,
-        wid = SubjID,
-        within = .(nw_famsize, complexity),
-        between = lang_type))
+(m.nw_smpl <- ezANOVA(nw_smpl,dv = rt.err.imp,wid = SubjID,within = .(nw_famsize),between = lang_type))
+
+(m.nw_cplx <- ezANOVA(nw_cplx,dv = rt.err.imp,wid = SubjID,within = .(nw_famsize),between = lang_type))
+
+m1 <- aov(rt.err.imp ~ lang_type * cw_famsize, data = cw)
+m2 <- aov(rt.err.imp ~ lang_type * nw_famsize, data = nw_smpl)
+m3 <- aov(rt.err.imp ~ lang_type * nw_famsize, data = nw_cplx)
+summary(m1)
+summary(m2)
+summary(m3)
 ```
-
-
 
 
 Get condition means
@@ -232,8 +256,14 @@ sem <- function(x) sd(x)/sqrt(length(x))
              num_stim = n()))
 
 
-(nw.cond.means <- nw |> 
-    group_by(nw_famsize, complexity, lang_type) |> 
+(nw_smpl.cond.means <- nw_smpl |> 
+    group_by(nw_famsize, lang_type) |> 
+    summarise(mean = mean(rt.err.imp), 
+              se = sem(rt.err.imp),
+              num_stim = n()))
+
+(nw_cplx.cond.means <- nw_cplx |> 
+    group_by(nw_famsize, lang_type) |> 
     summarise(mean = mean(rt.err.imp), 
               se = sem(rt.err.imp),
               num_stim = n()))
@@ -241,7 +271,7 @@ sem <- function(x) sd(x)/sqrt(length(x))
 
 Barplots
 
-```{r c15}
+```{r c15, fig.height=6, fig.width=6, echo=FALSE}
 library(gridExtra)
 p1 <-  cw.cond.means %>% ggplot(aes(x=lang_type, 
                                     y=mean, 
@@ -249,47 +279,59 @@ p1 <-  cw.cond.means %>% ggplot(aes(x=lang_type,
                                     ymin = mean - se, 
                                     ymax = mean + se)) +
   coord_cartesian(xlim = NULL, 
-                  ylim = c(500, 750), 
+                  ylim = c(525, 750), 
                   expand = TRUE, 
                   default = FALSE,
                   clip = "on") +
-  geom_col(position = "dodge",  width = 0.5,  color = "black")  +
+  geom_col(position = "dodge", width = 0.5, color = "black")  +
   ylab("RT in milliseconds")  +  
-  xlab("Participant Reading Style")  + 
-  scale_fill_manual(values = c("coral2", "deepskyblue4"))+ 
-  geom_errorbar(width = .08,  position = position_dodge(0.5)) + 
-  theme_classic() + 
-   geom_text(aes(label = round(mean, digits = 0)),
-             colour = "white", 
-             size = 3.5, 
-             vjust = 4.5, 
-             position = position_dodge(.5))+
-  guides(fill=guide_legend(title="Morphological Family Size"))
-
-p2 <-  nw.cond.means %>% ggplot(aes(x=lang_type, 
-                                    y=mean, 
-                                    fill = nw_famsize, 
-                                    ymin = mean - se, 
-                                    ymax = mean + se)) +
-  coord_cartesian(xlim = NULL, ylim = c(500, 750), 
-                  expand = TRUE, 
-                  default = FALSE,
-                  clip = "on") +
-  geom_col(position = "dodge",  width = .7,  color = "black")  +
-  xlab("Participant Reading Style")  + 
-  ylab("RT in milliseconds")  +  
+  xlab("")  + 
+  ggtitle("Complex Words") +
   scale_fill_manual(values = c("coral2", "deepskyblue4"))+ 
   geom_errorbar(width = .08, position = position_dodge(0.5)) + 
   theme_classic() + 
    geom_text(aes(label = round(mean, digits = 0)),
              colour = "white", 
-             size = 2.5, 
-             vjust = 4.5, 
-             position = position_dodge(.7)) +
-  facet_grid(.~complexity) +
+             size = 3, 
+             vjust = 3, 
+             position = position_dodge(.5))+
   guides(fill=guide_legend(title="Morphological Family Size"))
 
-grid.arrange(p1, p2)
+p2 <-  nw_smpl.cond.means %>% ggplot(aes(x=lang_type, 
+                                         y=mean, 
+                                         fill = nw_famsize, 
+                                         ymin = mean - se, 
+                                         ymax = mean + se)) +
+  coord_cartesian(xlim = NULL, ylim = c(525, 750), 
+                  expand = TRUE, 
+                  default = FALSE,
+                  clip = "on") +
+  geom_col(position = "dodge", width = .7, color = "black")  +
+  xlab("")  + 
+  ylab("RT in milliseconds")  + 
+  ggtitle("Simple NonWords") +
+  scale_fill_manual(values = c("coral2", "deepskyblue4"))+ 
+  geom_errorbar(width = .08, position = position_dodge(0.5)) + 
+  theme_classic() + 
+  geom_text(aes(label = round(mean, digits = 0)),
+             colour = "white", 
+             size = 3, 
+             vjust = 4.5,
+            position = position_dodge(.7)) +
+  guides(fill=guide_legend(title="Morphological Family Size"))
+
+p3 <-  nw_cplx.cond.means %>% ggplot(aes(x=lang_type, y=mean, fill = nw_famsize, ymin = mean - se, ymax = mean + se)) +
+  coord_cartesian(xlim = NULL, ylim = c(525, 750), expand = TRUE, default = FALSE,clip = "on") +
+  geom_col(position = "dodge", width = .7, color = "black")  +
+  xlab("Participant Reading Style")  + 
+  ylab("RT in milliseconds")  + 
+  ggtitle("Complex NonWords") +
+  scale_fill_manual(values = c("coral2", "deepskyblue4"))+ 
+  geom_errorbar(width = .08, position = position_dodge(0.5)) + theme_classic() + 
+   geom_text(aes(label = round(mean, digits = 0)),colour = "white", size = 3, vjust = 4.5, position = position_dodge(.7)) +
+  guides(fill=guide_legend(title="Morphological Family Size"))
+
+grid.arrange(p1, p2, p3)
 ```
 
 
@@ -300,36 +342,55 @@ grid.arrange(p1, p2)
 ```{r c16}
 library(lme4)
 
-cw_null.model = lmer(rt.err.imp ~ 1 + (1|SubjID) + (1|cw_target), data= cw, REML=FALSE)
+# COMPLEX WORDS
+
+cw_null.model = lmer(rt.err.imp ~ 1 + (1|SubjID) + (1|cw_target), 
+                     data= cw, REML=FALSE)
 summary(cw_null.model)
 
 # Main effects models with random intercepts
-cw_main.model = lmer(rt.err.imp ~ lang_type + cw_famsize + (1|SubjID) + (1|cw_target), 
-                             data= cw, REML=FALSE)
+cw_main.model = lmer(rt.err.imp ~ lang_type + cw_famsize + (1|SubjID) + (1|cw_target),
+                     data= cw, REML=FALSE)
 summary(cw_main.model)
 
 # Interaction effects models with random intercepts
-cw_inter.model = lmer(rt.err.imp ~ lang_type * cw_famsize + (1|SubjID) + (1|cw_target), 
-                              data= cw, REML=FALSE)
+cw_inter.model = lmer(rt.err.imp ~ lang_type * cw_famsize + (1|SubjID) + (1|cw_target),
+                      data= cw, REML=FALSE)
 summary(cw_inter.model)
 
+# SIMPLE NONWORDS
 
-
-nw_null.model = lmer(rt.err.imp ~ 1 + (1|SubjID) + (1|nw_target), data= nw, REML=FALSE)
-summary(nw_null.model)
+nw.smpl_null.model = lmer(rt.err.imp ~ 1 + (1|SubjID) + (1|nw_target), 
+                          data= nw_smpl, 
+                          REML=FALSE)
+summary(nw.smpl_null.model)
 
 # Main effects models with random intercepts
-nw_main.model = lmer(rt.err.imp ~ lang_type + nw_famsize + complexity +
-                       (1|SubjID) + 
-                       (1|nw_target),
-                     data= nw, 
-                     REML=FALSE)
-summary(nw_main.model)
+nw.smpl_main.model = lmer(rt.err.imp ~ lang_type + nw_famsize + (1|SubjID) + (1|nw_target),
+                          data= nw_smpl, REML=FALSE)
+summary(nw.smpl_main.model)
 
 # Interaction effects models with random intercepts
-nw_inter.model = lmer(rt.err.imp ~ lang_type * nw_famsize * complexity + (1|SubjID) + (1|nw_target), 
-                              data= nw, REML=FALSE)
-summary(nw_inter.model)
+nw.smpl_inter.model = lmer(rt.err.imp ~ lang_type * nw_famsize + (1|SubjID) + (1|nw_target),
+                           data= nw_smpl, REML=FALSE)
+summary(nw.smpl_inter.model)
+
+# COMPLEX NONWORDS
+
+nw.cplx_null.model = lmer(rt.err.imp ~ 1 + (1|SubjID) + (1|nw_target),
+                          data= nw_cplx, REML=FALSE)
+summary(nw.cplx_null.model)
+
+# Main effects models with random intercepts
+nw.cplx_main.model = lmer(rt.err.imp ~ lang_type + nw_famsize + (1|SubjID) + (1|nw_target), 
+                          data= nw_cplx, REML=FALSE)
+summary(nw.cplx_main.model)
+
+# Interaction effects models with random intercepts
+nw.cplx_inter.model = lmer(rt.err.imp ~ lang_type * nw_famsize  + (1|SubjID) + (1|nw_target),
+                           data= nw_cplx, REML=FALSE)
+summary(nw.cplx_inter.model)
+
 ```
 
 ### Model Comparisons
@@ -338,7 +399,10 @@ summary(nw_inter.model)
 anova(cw_null.model,cw_main.model)
 anova(cw_main.model,cw_inter.model)
 
-anova(nw_null.model,nw_main.model)
-anova(nw_main.model,nw_inter.model)
+anova(nw.smpl_null.model,nw.smpl_main.model)
+anova(nw.smpl_main.model,nw.smpl_inter.model)
+
+anova(nw.cplx_null.model,nw.cplx_main.model)
+anova(nw.cplx_main.model,nw.cplx_inter.model)
 ```
 

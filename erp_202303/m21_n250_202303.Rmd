@@ -1,5 +1,5 @@
 ---
-title: "Morph 21"
+title: "m21 202303 n250"
 author: "Joanna Morris"
 date: "`r Sys.Date()`"
 output: pdf_document
@@ -121,8 +121,8 @@ Divide participants based on median split of Dim2.  Higher values on this factor
 n250.median <- median(n250$Dim.2)
 n250 <- n250 |>
     mutate(lang_type = case_when(
-      Dim.2 <= n250.median ~ "Semantic",
-      Dim.2 > n250.median ~ "Orthographic"
+      Dim.2 < n250.median ~ "Semantic",
+      Dim.2 >= n250.median ~ "Orthographic"
     ))
 ```
 
@@ -201,6 +201,22 @@ After we tell R we want to use a Helmert contrast (`contr. helmert`) for categor
 
 
 ```{r runAnova}
+library(ez)
+(m.cw <- ezANOVA(n250_words,dv = value,
+                 wid = SubjID,
+                 within = .(fam_size,anteriority, laterality),
+                 between = lang_type))
+
+(m.nw_smpl <- ezANOVA(n250_nwsmpl,dv = value,
+                      wid = SubjID,
+                      within = .(fam_size,anteriority, laterality),
+                      between = lang_type))
+
+(m.nw_cplx <- ezANOVA(n250_nwcplx,dv = value,
+                      wid = SubjID,
+                      within = .(fam_size,anteriority, laterality),
+                      between = lang_type))
+
 m1 <- aov(value ~ lang_type * fam_size * anteriority * laterality, data = n250_words)
 m2 <- aov(value ~ lang_type * fam_size * anteriority * laterality, data = n250_nwsmpl)
 m3 <- aov(value ~ lang_type * fam_size * anteriority * laterality, data = n250_nwcplx)
@@ -250,7 +266,7 @@ sem <- function(x) sd(x)/sqrt(length(x))
 
 Barplots
 
-```{r c15, fig.height= 6, fig.width= 6}
+```{r c15, fig.height= 6, fig.width= 6, echo=FALSE}
 library(gridExtra)
 p1 <-  cw.cond.means |> ggplot(aes(x=lang_type, 
                                    y=mean, 
@@ -258,7 +274,7 @@ p1 <-  cw.cond.means |> ggplot(aes(x=lang_type,
                                    ymin = mean - se, 
                                    ymax = mean + se)) +
   coord_cartesian(xlim = NULL, 
-                  ylim = c(-2, 2), 
+                  ylim = c(-2, 2.2), 
                   expand = TRUE, 
                   default = FALSE,
                   clip = "on") +
@@ -281,7 +297,7 @@ p2 <-  nw_smp.cond.means |> ggplot(aes(x=lang_type,
                                        ymin = mean - se, 
                                        ymax = mean + se)) +
   coord_cartesian(xlim = NULL, 
-                  ylim = c(-2, 2), 
+                  ylim = c(-2, 2.2), 
                   expand = TRUE, 
                   default = FALSE,
                   clip = "on") +
@@ -290,13 +306,13 @@ p2 <-  nw_smp.cond.means |> ggplot(aes(x=lang_type,
   ylab("Voltage (microvolts)")  +  
   ggtitle("Simple NonWords") +
   scale_fill_manual(values = c("coral2", "deepskyblue3"))+ 
-  geom_errorbar(width = .08, position = position_dodge(0.5)) + 
+  geom_errorbar(width = .08, position = position_dodge(0.7)) + 
   theme_classic() + 
    geom_text(aes(label = round(mean, digits = 2)),
              colour = "black", 
              size = 2.5, 
              vjust = -2.5, 
-             position = position_dodge(.7)) +
+             position = position_dodge(.5)) +
   guides(fill=guide_legend(title="Morphological Family Size"))
 
 p3 <-  nw_cpx.cond.means |> ggplot(aes(x=lang_type, 
@@ -305,7 +321,7 @@ p3 <-  nw_cpx.cond.means |> ggplot(aes(x=lang_type,
                                        ymin = mean - se, 
                                        ymax = mean + se)) +
   coord_cartesian(xlim = NULL, 
-                  ylim = c(-2, 2), 
+                  ylim = c(-2, 2.2), 
                   expand = TRUE, 
                   default = FALSE,
                   clip = "on") +
@@ -314,13 +330,13 @@ p3 <-  nw_cpx.cond.means |> ggplot(aes(x=lang_type,
   ylab("Voltage (microvolts)")  +  
   ggtitle("Complex NonWords") +
   scale_fill_manual(values = c("coral2", "deepskyblue3"))+ 
-  geom_errorbar(width = .08, position = position_dodge(0.5)) + 
+  geom_errorbar(width = .08, position = position_dodge(0.7)) + 
   theme_classic() + 
    geom_text(aes(label = round(mean, digits = 2)),
              colour = "black", 
              size = 2.5, 
-             vjust = -2.75,  
-             position = position_dodge(.7)) +
+             vjust = -2.1,  
+             position = position_dodge(.5)) +
   guides(fill=guide_legend(title="Morphological Family Size"))
 
 grid.arrange(p1, p2, p3)
