@@ -329,8 +329,5 @@ ezANOVA(data = n250_nwcplx,
         within_full = .(fam_size, anteriority, laterality, chlabel),
         between = lang_type,
         type = 3)
-
-
-
 ```
 
