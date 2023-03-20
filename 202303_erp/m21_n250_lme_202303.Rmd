@@ -1,5 +1,5 @@
 ---
-title: "m21 202303 n250"
+title: "M21 202303 n250 lme"
 author: "Joanna Morris"
 date: "`r Sys.Date()`"
 output: pdf_document
@@ -122,7 +122,7 @@ n250.median <- median(n250$Dim.2)
 n250 <- n250 |>
     mutate(lang_type = case_when(
       Dim.2 < n250.median ~ "Semantic",
-      Dim.2 >= n250.median ~ "Orthographic"
+      Dim.2 > n250.median ~ "Orthographic"
     ))
 ```
 
@@ -187,52 +187,7 @@ n250_nwsmpl <- dplyr::filter(n250_9b, grepl("simple",binlabel))
 n250_nwcplx <- dplyr::filter(n250_9b, grepl("complex",binlabel))
 ```
 
-10. Now we can compute the ANOVA for each of the three datasets.
 
-We use the `aov` function to calculate the source table and F. But before we do that, we want to tell R to change the way it is comparing the groups. We are going to use `Helmert` contrast, and we only need to set it once for all ANOVAs we run during a single R session. 
-
-
-```{r set_anova_options}
-options(contrasts = c("contr.helmert", "contr.poly")) 
-options("contrasts")
-```
-
-After we tell R we want to use a Helmert contrast (`contr. helmert`) for categorical variables (and polynomial contrasts for ordered variables (`contr.poly`)), we can now run our ANOVA. For more on contrasts see [this explanation](https://stats.libretexts.org/Bookshelves/Applied_Statistics/Book%3A_Learning_Statistics_with_R_-_A_tutorial_for_Psychology_Students_and_other_Beginners_(Navarro)/16%3A_Factorial_ANOVA/16.07%3A_Different_Ways_to_Specify_Contrasts)
-
-
-```{r runAnova}
-library(ez)
-(m.cw <- ezANOVA(n250_words,dv = value,
-                 wid = SubjID,
-                 within = .(fam_size,anteriority, laterality),
-                 between = lang_type))
-
-(m.nw_smpl <- ezANOVA(n250_nwsmpl,dv = value,
-                      wid = SubjID,
-                      within = .(fam_size,anteriority, laterality),
-                      between = lang_type))
-
-(m.nw_cplx <- ezANOVA(n250_nwcplx,dv = value,
-                      wid = SubjID,
-                      within = .(fam_size,anteriority, laterality),
-                      between = lang_type))
-
-m1 <- aov(value ~ lang_type * fam_size * anteriority * laterality, data = n250_words)
-m2 <- aov(value ~ lang_type * fam_size * anteriority * laterality, data = n250_nwsmpl)
-m3 <- aov(value ~ lang_type * fam_size * anteriority * laterality, data = n250_nwcplx)
-summary(m1)
-summary(m2)
-summary(m3)
-```
-
-We can also use the function `Anova()` from the `car` package with the argument `type = III` to get the source table. For our design with no factors with more than 2 levels, both methods should give similar results.  For more on types of sums of square see [this explanation](https://stats.libretexts.org/Bookshelves/Applied_Statistics/Book%3A_Learning_Statistics_with_R_-_A_tutorial_for_Psychology_Students_and_other_Beginners_(Navarro)/16%3A_Factorial_ANOVA/16.10%3A_Factorial_ANOVA_3-_Unbalanced_Designs)
-
-```{r sourceTable}
-library(car)
-Anova(m1, type = "III")
-Anova(m2, type = "III")
-Anova(m3, type = "III")
-```
 
 #Plot Means
 
@@ -343,57 +298,73 @@ grid.arrange(p1, p2, p3)
 ```
 
 # LME
-
-```{r c16}
+```{r}
 library(lme4)
+```
+
 
 # COMPLEX WORDS
-
+```{r }
 cw_null.model = lmer(value ~ 1 + (1|SubjID) , 
                      data= n250_words, REML=FALSE)
 summary(cw_null.model)
 
 # Main effects models with random intercepts
-cw_main.model = lmer(value ~ lang_type + fam_size + (1|SubjID) ,
+cw_main.model = lmer(value ~ lang_type + fam_size + (1 + fam_size|SubjID) ,
                      data= n250_words, REML=FALSE)
 summary(cw_main.model)
 
 # Interaction effects models with random intercepts
-cw_inter.model = lmer(value ~ lang_type * fam_size + (1|SubjID) ,
+cw_inter.model = lmer(value ~ lang_type * fam_size + (1 + fam_size|SubjID) ,
                       data= n250_words, REML=FALSE)
 summary(cw_inter.model)
 
-# SIMPLE NONWORDS
+anova(cw_null.model,cw_main.model)
+anova(cw_main.model,cw_inter.model)
 
+```
+
+
+## SIMPLE NONWORDS
+```{r}
 nw.smpl_null.model = lmer(value ~ 1 + (1|SubjID) , 
                           data= n250_nwsmpl, REML=FALSE)
 summary(nw.smpl_null.model)
 
 # Main effects models with random intercepts
-nw.smpl_main.model = lmer(value ~ lang_type + fam_size + (1|SubjID) ,
+nw.smpl_main.model = lmer(value ~ lang_type + fam_size + (1 + fam_size|SubjID) ,
                           data= n250_nwsmpl, REML=FALSE)
 summary(nw.smpl_main.model)
 
 # Interaction effects models with random intercepts
-nw.smpl_inter.model = lmer(value ~ lang_type * fam_size + (1|SubjID) ,
+nw.smpl_inter.model = lmer(value ~ lang_type * fam_size + (1 + fam_size|SubjID) ,
                            data= n250_nwsmpl, REML=FALSE)
 summary(nw.smpl_inter.model)
 
+anova(nw.smpl_null.model,nw.smpl_main.model)
+anova(nw.smpl_main.model,nw.smpl_inter.model)
+```
+
 # COMPLEX NONWORDS
+
+```{r}
 
 nw.cplx_null.model = lmer(value ~ 1 + (1|SubjID) ,
                           data= n250_nwcplx, REML=FALSE)
 summary(nw.cplx_null.model)
 
 # Main effects models with random intercepts
-nw.cplx_main.model = lmer(value ~ lang_type + fam_size + (1|SubjID) , 
+nw.cplx_main.model = lmer(value ~ lang_type + fam_size + (1 + fam_size|SubjID) , 
                           data= n250_nwcplx, REML=FALSE)
 summary(nw.cplx_main.model)
 
 # Interaction effects models with random intercepts
-nw.cplx_inter.model = lmer(value ~ lang_type * fam_size  + (1|SubjID),
+nw.cplx_inter.model = lmer(value ~ lang_type * fam_size  + (1 + fam_size|SubjID),
                            data= n250_nwcplx, REML=FALSE)
 summary(nw.cplx_inter.model)
+
+anova(nw.cplx_null.model,nw.cplx_main.model)
+anova(nw.cplx_main.model,nw.cplx_inter.model)
 
 ```
 
@@ -408,4 +379,33 @@ anova(nw.smpl_main.model,nw.smpl_inter.model)
 
 anova(nw.cplx_null.model,nw.cplx_main.model)
 anova(nw.cplx_main.model,nw.cplx_inter.model)
+```
+
+
+```{r}
+# COMPLEX WORDS
+
+cw_null.model = lmer(value ~ 1 + (1|SubjID) , 
+                     data= n250_words, REML=FALSE)
+summary(cw_null.model)
+
+# Main effects models with random intercepts
+cw_main.model = lmer(value ~ lang_type + (1 |SubjID) ,
+                     data= n250_words, REML=FALSE)
+summary(cw_main.model)
+anova(cw_null.model,cw_main.model)
+```
+
+```{r}
+# COMPLEX WORDS
+
+cw_null.model = lmer(value ~ 1 + (1|SubjID) , 
+                     data= n250_words, REML=FALSE)
+summary(cw_null.model)
+
+# Main effects models with random intercepts
+cw_main.model = lmer(value ~ fam_size + (1 |SubjID) ,
+                     data= n250_words, REML=FALSE)
+summary(cw_main.model)
+anova(cw_null.model,cw_main.model)
 ```
