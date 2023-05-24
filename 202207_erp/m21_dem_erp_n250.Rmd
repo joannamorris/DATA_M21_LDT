@@ -24,16 +24,16 @@ library(tidyr)
 
 2. Then we read in the demographic data file
 ```{r}
-m21_dem <- read_csv("m21_dem_data.csv")
+m21_dem <- read_csv("csv_files/m21_dem_data.csv")
 ```
 
 
 3. ...and the N250 erp data file
 ```{r}
-m21_n250 <- read_csv("S101-177_n250.csv")
+m21_n250 <- read_csv("csv_files/S101-177_n250.csv")
 ```
 
-4. Then we join the demographic and erp data files. In contrast to what I said earlier, we will use the `inner_join` rather than the `full_join` function in order to eliminate rows with missing data.
+4. Then we join the demographic and erp data files. We will use the `inner_join` rather than the `full_join` function in order to eliminate rows with missing data.
 
 ```{r}
 m21_n250 <- inner_join(m21_dem,m21_n250, by = "SubjID")
@@ -43,7 +43,7 @@ m21_n250 <- inner_join(m21_dem,m21_n250, by = "SubjID")
 5. Let's save a `.csv` file with the data from the combined dataset 
 
 ```{r}
-write_csv(m21_n250, "m21_dem_erp_n250_rmna.csv")
+write_csv(m21_n250, "csv_files/m21_dem_erp_n250_rmna.csv")
 ```
 
 

@@ -86,7 +86,10 @@ res.pca$var$contrib
 The fviz_pca_ind() is used to produce the graph of individuals.
 
 ```{r c6}
-fviz_pca_ind(res.pca)
+fviz_pca_ind(res.pca, pointsize = "cos2", 
+             pointshape = 21, fill = "#00AFBB",
+             repel = TRUE # Avoid text overlapping (slow if many points)
+             )
 ```
 
 ```{r c7}

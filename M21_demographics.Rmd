@@ -1,0 +1,22 @@
+---
+title: "M21-demographics"
+author: "Joanna Morris"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,  message=FALSE, comment = "")
+```
+
+```{r}
+library(readr)
+demo <- read_csv("M21_demographics.csv")
+```
+
+Get number of male and females
+
+```{r}
+(demo_table <- xtabs(~ demo$Sex))
+```
+

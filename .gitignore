@@ -1,6 +1,8 @@
 ## EEGLAB and ERPLAB  files
 *.erp
 *.eeg
+*.fdt
+*.setw
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
