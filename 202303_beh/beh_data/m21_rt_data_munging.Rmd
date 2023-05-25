@@ -9,10 +9,11 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Loads in original Rt file, removes duplicates, puts target in lowercase, and removes rows and columns with only missign values. `duplicated()` is an R base function that takes vector or data.frame as input and selects rows that are duplicates, by negating the result you will remove all duplicate rows in the R data.frame.
+Loads in original Rt file, removes duplicates, puts target in lowercase, and removes rows and columns with only missing values. `duplicated()` is an R base function that takes vector or data.frame as input and selects rows that are duplicates, by negating the result you will remove all duplicate rows in the R data.frame.
 
 ```{r}
-df <- read_csv("ALL_rt_allvar.csv")
+library(readr)
+df <- read_csv("ALL_rt_allvar.csv", show_col_types = FALSE)
 df <- df[!duplicated(df), ]  # removes duplicate rows
 df <- mutate(df, target_lower = tolower(target))  # puts all targets in lowercase
 df$target <- NULL
@@ -21,7 +22,7 @@ df[1] <- NULL
 df <- df[,colSums(is.na(df))<nrow(df)]  # remove columns with all NAs
 df <- df[rowSums(is.na(df)) != ncol(df), ]  # removes rows with all NAs
 
-write_csv(df,"ALL_rt_allvar.csv" )
+write_csv(df,"beh_data/ALL_rt_allvar.csv" )
 ```
 
 ```{r}
