@@ -13,168 +13,32 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE,  message=FALSE, comment = "")
 ```
 
-# Compute PCA
-
-This script computes separate ANOVAs for simple and complex non-words.
-
-Following Andrews and Lo (2013) this script computes a PCA for our spelling and vocabulary measures. Because the standardised spelling and vocabulary scores were  correlated, to facilitate interpretation, two orthogonal measures of individual differences were derived from a principal components analysis. Analysis based on [this tutorial](http://www.sthda.com/english/articles/31-principal-component-methods-in-r-practical-guide/112-pca-principal-component-analysis-essentials/)
-
-```{r c1}
-library(readr)
-library(dplyr)
-library(datawizard)
-sv_202303 <- read_csv("m21_spell_vocab_raw.csv")
-sv_202303.na <- na.omit(sv_202303)
-sv_202303.na <- mutate(sv_202303.na, 
-                       z_ART = standardise(ART_correct), 
-                       z_vocab = standardise(vocab_correct), 
-                       z_spell = standardise(spell_correct))
-
-cor.test(sv_202303.na$z_vocab, sv_202303.na$z_spell)
-```
 
 
-By default, the function `PCA()` in `FactoMineR`, standardizes the data automatically during the PCA; so you don’t need do this transformation before the PCA.
 
-- `X`: a data frame. Rows are individuals and columns are numeric variables
+Loads data files
 
-- `scale.unit`: a logical value. If TRUE, the data are scaled to unit variance before the analysis. This standardization to the same scale avoids some variables to become dominant just because of their large measurement units. It makes variable comparable.
-
-- `ncp`: number of dimensions kept in the final results.
-
-- `graph`: a logical value. If TRUE a graph is displayed.
-
-The plot shows the relationships between all variables. It can be interpreted as follow:
-
-- Positively correlated variables are grouped together.
-
-- Negatively correlated variables are positioned on opposite sides of the plot origin (opposed quadrants).
-
-- The distance between variables and the origin measures the quality of the variables on the factor map. Variables that are away from the origin are well represented on the factor map.
-
-```{r c2}
-
-library(FactoMineR)
-library(factoextra)
-
-res.pca <- PCA(sv_202303.na[,3:4], scale.unit = TRUE, ncp = 2, graph = FALSE)
-plot(res.pca, choix = "varcor", graph.type = c("ggplot"))
-```
-
-The eigenvalues measure the amount of variation retained by each principal component. Eigenvalues are large for the first PCs and small for the subsequent PCs. That is, the first PCs corresponds to the directions with the maximum amount of variation in the data set.
-
-We examine the eigenvalues to determine the number of principal components to be considered
-
-```{r c3}
-(eig.val <- get_eigenvalue(res.pca))
-```
-
-
-The quality of representation of the variables on factor map is called cos2 (square cosine, squared coordinates). A high cos2 indicates a good representation of the variable on the principal component. In this case the variable is positioned close to the circumference of the correlation circle.  A low cos2 indicates that the variable is not perfectly represented by the PCs. In this case the variable is close to the center of the circle.  For a given variable, the sum of the cos2 on all the principal components is equal to one.  If a variable is perfectly represented by only two principal components (Dim.1 & Dim.2), the sum of the cos2 on these two PCs is equal to one. In this case the variables will be positioned on the circle of correlations.
-
-```{r c4}
-res.pca$var$cos2
-```
-
-The contributions of variables in accounting for the variability in a given principal component are expressed in percentage. Variables that are correlated with PC1 (i.e., Dim.1) and PC2 (i.e., Dim.2) are the most important in explaining the variability in the data set. Variables that do not correlated with any PC or correlated with the last dimensions are variables with low contribution and might be removed to simplify the overall analysis.
-
-```{r c5}
-res.pca$var$contrib
-(res.desc <- dimdesc(res.pca, axes = c(1,2), proba = 0.05))
-```
-
-The fviz_pca_ind() is used to produce the graph of individuals.
-
-```{r c6}
-fviz_pca_ind(res.pca, pointsize = "cos2", 
-             pointshape = 21, fill = "#00AFBB",
-             repel = TRUE # Avoid text overlapping (slow if many points)
-             )
-```
-
-```{r c7}
-sv_202303.na<-bind_cols(sv_202303.na,res.pca$ind$coord)
-```
-
-
-Loads RT data and join to PCA dataset
-
-
-```{r c8}
-cw_frq <- read_csv("CW_frq.csv")
-nw_frq <- read_csv("NW_frq.csv")
-
-
-CW_rt <- read_csv("CW_rt_2.csv")
-CW_rt$cw_target <- NULL
-CW_rt <- rename(CW_rt, cw_target = target_lower)
-
-NW_rt <- read_csv("NW_rt_2.csv")
-NW_rt$nw_target <- NULL
-NW_rt <- rename(NW_rt, nw_target = target_lower)
-
-cw_rt_pca <- inner_join(sv_202303.na, CW_rt, by = "SubjID")  #join subject PCA data
-nw_rt_pca <- inner_join(sv_202303.na, NW_rt, by = "SubjID")
-
-cw <- left_join(cw_rt_pca, cw_frq, by = c("cw_target")) #join word frequency data
-nw <- left_join(nw_rt_pca, nw_frq, by = c("nw_target"))
-```
-
-Divide participants based on median split of Dim2.  Higher values on this factor indicate that spelling scores were relatively higher than vocabulary, 
-
-```{r c9}
-cw.median <- median(cw$Dim.2)
-cw <- cw |>
-    mutate(lang_type = case_when(
-      Dim.2 < cw.median ~ "Semantic",
-      Dim.2 >= cw.median ~ "Orthographic"
-    ))
-
-nw.median <- median(nw$Dim.2)
-nw <- nw |>
-    mutate(lang_type = case_when(
-      Dim.2 < nw.median ~ "Semantic",
-      Dim.2 >= nw.median ~ "Orthographic"
-    ))
-```
-
-Export list of subjects with Reading type classification
 
 ```{r}
-df <- distinct(select(cw, SubjID, lang_type ))
-df_o <- filter(df, lang_type == "Orthographic")
-df_s <- filter(df, lang_type != "Orthographic")
-write_csv(df, "m21_subjlist_reading_type.csv")
-write_csv(df_o, "m21_subjlist_ortho.csv")
-write_csv(df_s, "m21_subjlist_semant.csv")
+library(readr)
+library(dplyr)
+cw <- read_csv("words_rt_sv_frq.csv")
+nw <- read_csv("nwords_rt_sv_frq.csv")
 ```
 
 
 ```{r c10}
-cols <- c( "cw_famsize", "lang_type")  # recode ind variable columns as factors
+cols <- c( "famsize", "lang_type")  # recode ind variable columns as factors
 cw <- cw |> mutate_at(cols, factor)
-cw$cw_famsize <- recode_factor(cw$cw_famsize, S = "Small", L = "Large")
 
-
-cols <- c( "cw_famsize", "lang_type")
-cw <- cw |> mutate_at(cols, factor)
-cw$cw_famsize <- recode_factor(cw$cw_famsize, S = "Small", L = "Large")
-
-
-cols <- c( "nw_famsize", "lang_type", "complexity")
+cols <- c( "famsize", "lang_type", "complexity")
 nw <- nw |> mutate_at(cols, factor)
-nw$nw_famsize <- recode_factor(nw$nw_famsize, S = "Small", L = "Large")
-nw$complexity <- recode_factor(nw$complexity, SIMP = "Simple", COMP = "Complex")
-
 
 nw_smpl <- filter(nw, complexity == "Simple")
 nw_smpl$complexity <- NULL
 
 nw_cplx <- filter(nw, complexity == "Complex")
 nw_cplx$complexity <- NULL
-
-rm(CW_rt)  #remove original rt file after joining neuropsych data
-rm(NW_rt)
 
 ```
 
@@ -210,17 +74,17 @@ nw_cplx <- nw_cplx |> mutate(inv.rt = 1/rt.err.imp)  # creates new column with i
 
 
 
-Determines how much missing data there is. Creates new dataframe with just the non-missing data
+Determines how much missing data there is. Creates new dataframe with just the missing data
 
 ```{r c12}
 cw_missing_data<- filter(cw, is.na(cw$rt.err))
-(xtab.missing.data <- xtabs(~cw_famsize+lang_type, data=cw_missing_data))
+(xtab.missing.data <- xtabs(~famsize+lang_type, data=cw_missing_data))
 
 nw.smpl_missing_data<- filter(nw_smpl, is.na(nw_smpl$rt.err))
-(xtab.missing.data <- xtabs(~nw_famsize+lang_type, data=nw.smpl_missing_data))
+(xtab.missing.data <- xtabs(~famsize+lang_type, data=nw.smpl_missing_data))
 
 nw.cplx_missing_data<- filter(nw_cplx, is.na(nw_cplx$rt.err))
-(xtab.missing.data <- xtabs(~nw_famsize+lang_type, data=nw.cplx_missing_data))
+(xtab.missing.data <- xtabs(~famsize+lang_type, data=nw.cplx_missing_data))
 ```
 
 
@@ -234,20 +98,20 @@ Get condition means
 sem <- function(x) sd(x)/sqrt(length(x))
 
 (cw.cond.means <- cw |> 
-   group_by(cw_famsize, lang_type) |> 
+   group_by(famsize, lang_type) |> 
    summarise(mean = mean(rt.err.imp), 
              se = sem(rt.err.imp),
              num_stim = n()))
 
 
 (nw_smpl.cond.means <- nw_smpl |> 
-    group_by(nw_famsize, lang_type) |> 
+    group_by(famsize, lang_type) |> 
     summarise(mean = mean(rt.err.imp), 
               se = sem(rt.err.imp),
               num_stim = n()))
 
 (nw_cplx.cond.means <- nw_cplx |> 
-    group_by(nw_famsize, lang_type) |> 
+    group_by(famsize, lang_type) |> 
     summarise(mean = mean(rt.err.imp), 
               se = sem(rt.err.imp),
               num_stim = n()))
@@ -259,7 +123,7 @@ Barplots
 library(gridExtra)
 p1 <-  cw.cond.means %>% ggplot(aes(x=lang_type, 
                                     y=mean, 
-                                    fill = cw_famsize, 
+                                    fill = famsize, 
                                     ymin = mean - se, 
                                     ymax = mean + se)) +
   coord_cartesian(xlim = NULL, 
@@ -283,7 +147,7 @@ p1 <-  cw.cond.means %>% ggplot(aes(x=lang_type,
 
 p2 <-  nw_smpl.cond.means %>% ggplot(aes(x=lang_type, 
                                          y=mean, 
-                                         fill = nw_famsize, 
+                                         fill = famsize, 
                                          ymin = mean - se, 
                                          ymax = mean + se)) +
   coord_cartesian(xlim = NULL, ylim = c(525, 750), 
@@ -306,7 +170,7 @@ p2 <-  nw_smpl.cond.means %>% ggplot(aes(x=lang_type,
 
 p3 <-  nw_cplx.cond.means %>% ggplot(aes(x=lang_type, 
                                          y=mean, 
-                                         fill = nw_famsize, 
+                                         fill = famsize, 
                                          ymin = mean - se, 
                                          ymax = mean + se)) +
   coord_cartesian(xlim = NULL, ylim = c(525, 750), 
@@ -339,24 +203,24 @@ library(ez)
 ezANOVA(data = cw,
         dv = rt.err.imp,
         wid = SubjID,
-        within = .(cw_famsize),
-        within_full = .(cw_famsize, cw_target),
+        within = .(famsize),
+        within_full = .(famsize, target),
         between = lang_type,
         type = 3)
 
 ezANOVA(data = nw_cplx,
         dv = rt.err.imp,
         wid = SubjID,
-        within = .(nw_famsize),
-        within_full = .(nw_famsize, nw_target),
+        within = .(famsize),
+        within_full = .(famsize, target),
         between = lang_type,
         type = 3)
 
 ezANOVA(data = nw_smpl,
         dv = rt.err.imp,
         wid = SubjID,
-        within = .(nw_famsize),
-        within_full = .(nw_famsize, nw_target),
+        within = .(famsize),
+        within_full = .(famsize, target),
         between = lang_type,
         type = 3)
 

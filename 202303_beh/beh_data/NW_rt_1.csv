@@ -1,4 +1,4 @@
-SubjID,nw_target,nw_response_time,nw_famsize,simp_comp,nw_LogBf
+SubjID,nw_target,nw_response_time,nw_famsize,complexity,nw_LogBf
 S101,pillize,990,S,COMP,6.29
 S101,aidig,996,S,SIMP,7.06
 S101,angelish,737,L,COMP,6.48

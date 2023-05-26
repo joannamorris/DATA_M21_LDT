@@ -22,10 +22,18 @@ library(dplyr)
 library(tidyr)
 ```
 
- Let's  read in the `.csv` file with the data from the combined dataset--ERP and spelling and vocabulary data
+Let's load the N250 erp data file and the spelling and  vocab data, then  we join the files. We will use the `inner_join` rather than the `full_join` function in order to eliminate rows with missing data.
 
-```{r c11}
-n250 <- read_csv("202303_sv_n250_rmna.csv")
+```{r}
+sv_202303.na <- read_csv("m21_spell_vocab_raw_z_pca.csv", show_col_types = FALSE)
+n250 <- read_csv("S101-177_n250.csv", show_col_types = FALSE)
+n250 <- inner_join(sv_202303.na,n250, by = "SubjID")  #join subject PCA data
+```
+
+Let's save a `.csv` file with the data from the combined dataset 
+
+```{r}
+write_csv(n250, "202303_sv_n250_rmna.csv")
 ```
 
 
