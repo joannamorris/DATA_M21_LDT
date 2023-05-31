@@ -20,6 +20,7 @@ library(readr)
 library(psych)
 library(dplyr)
 library(tidyr)
+library(ggplot2)
 ```
 
 Let's load the N250 erp data file and the spelling and  vocab data, then  we join the files. We will use the `inner_join` rather than the `full_join` function in order to eliminate rows with missing data.
