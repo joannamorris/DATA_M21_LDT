@@ -1,0 +1,122 @@
+---
+title: "m21_pca"
+author: "Joanna Morris"
+date: "`r Sys.Date()`"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This script computes the PCA for  Morph21.  
+
+
+1. First we load the libraries we need
+
+```{r}
+library(readr)
+library(psych)
+library(dplyr)
+library(tidyr)
+```
+
+
+
+# Compute PCA
+
+Following Andrews and Lo (2013) this script computes a PCA for our spelling and vocabulary measures. Because the standardised spelling and vocabulary scores were  correlated, to facilitate interpretation, two orthogonal measures of individual differences were derived from a principal components analysis. Analysis based on [this tutorial](http://www.sthda.com/english/articles/31-principal-component-methods-in-r-practical-guide/112-pca-principal-component-analysis-essentials/)
+
+```{r c1}
+library(readr)
+library(dplyr)
+library(datawizard)
+sv_202303 <- read_csv("m21_spell_vocab_raw.csv")
+sv_202303.na <- na.omit(sv_202303)
+sv_202303.na <- mutate(sv_202303.na, 
+                       z_ART = standardise(ART_correct), 
+                       z_vocab = standardise(vocab_correct), 
+                       z_spell = standardise(spell_correct))
+
+cor.test(sv_202303.na$z_vocab, sv_202303.na$z_spell)
+```
+
+
+By default, the function `PCA()` in `FactoMineR`, standardizes the data automatically during the PCA; so you don’t need do this transformation before the PCA.
+
+- `X`: a data frame. Rows are individuals and columns are numeric variables
+
+- `scale.unit`: a logical value. If TRUE, the data are scaled to unit variance before the analysis. This standardization to the same scale avoids some variables to become dominant just because of their large measurement units. It makes variable comparable.
+
+- `ncp`: number of dimensions kept in the final results.
+
+- `graph`: a logical value. If TRUE a graph is displayed.
+
+The plot shows the relationships between all variables. It can be interpreted as follow:
+
+- Positively correlated variables are grouped together.
+
+- Negatively correlated variables are positioned on opposite sides of the plot origin (opposed quadrants).
+
+- The distance between variables and the origin measures the quality of the variables on the factor map. Variables that are away from the origin are well represented on the factor map.
+
+```{r c2}
+
+library(FactoMineR)
+library(factoextra)
+
+res.pca <- PCA(sv_202303.na[,3:4], scale.unit = TRUE, ncp = 2, graph = FALSE)
+plot(res.pca, choix = "varcor", graph.type = c("ggplot"))
+```
+
+The eigenvalues measure the amount of variation retained by each principal component. Eigenvalues are large for the first PCs and small for the subsequent PCs. That is, the first PCs corresponds to the directions with the maximum amount of variation in the data set.
+
+We examine the eigenvalues to determine the number of principal components to be considered
+
+```{r c3}
+(eig.val <- get_eigenvalue(res.pca))
+```
+
+
+The quality of representation of the variables on factor map is called cos2 (square cosine, squared coordinates). A high cos2 indicates a good representation of the variable on the principal component. In this case the variable is positioned close to the circumference of the correlation circle.  A low cos2 indicates that the variable is not perfectly represented by the PCs. In this case the variable is close to the center of the circle.  For a given variable, the sum of the cos2 on all the principal components is equal to one.  If a variable is perfectly represented by only two principal components (Dim.1 & Dim.2), the sum of the cos2 on these two PCs is equal to one. In this case the variables will be positioned on the circle of correlations.
+
+```{r c4}
+res.pca$var$cos2
+```
+
+The contributions of variables in accounting for the variability in a given principal component are expressed in percentage. Variables that are correlated with PC1 (i.e., Dim.1) and PC2 (i.e., Dim.2) are the most important in explaining the variability in the data set. Variables that do not correlated with any PC or correlated with the last dimensions are variables with low contribution and might be removed to simplify the overall analysis.
+
+```{r c5}
+res.pca$var$contrib
+(res.desc <- dimdesc(res.pca, axes = c(1,2), proba = 0.05))
+```
+
+The fviz_pca_ind() is used to produce the graph of individuals.
+
+```{r c6}
+fviz_pca_ind(res.pca)
+```
+
+```{r c7}
+sv_202303.na<-bind_cols(sv_202303.na,res.pca$ind$coord)
+
+#Divide participants based on median split of Dim2.  Higher values on this factor indicate that spelling scores were relatively higher than vocabulary, 
+
+sv_202303.na.median <- median(sv_202303.na$Dim.2)
+sv_202303.na <- sv_202303.na |>
+  mutate(lang_type = case_when(
+    Dim.2 < sv_202303.na.median ~ "Semantic",
+    Dim.2 >= sv_202303.na.median ~ "Orthographic"
+  ))
+```
+
+
+We can then write the indivdiual pca values to a file
+
+```{r}
+write_csv(sv_202303.na, "m21_spell_vocab_raw_z_pca.csv")
+```
+
+
