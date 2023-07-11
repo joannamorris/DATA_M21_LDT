@@ -46,5 +46,5 @@ words_rt <- dplyr::mutate(words_rt,
 
 
 # Write files to disk
-words_rt <- write_csv(words_rt, "words_rt_sv_frq.csv")
-nwords_rt <- write_csv(nwords_rt, "nwords_rt_sv_frq.csv")
+words_rt <- write_csv(words_rt, "cw_rt_sv_frq.csv")
+nwords_rt <- write_csv(nwords_rt, "nw_rt_sv_frq.csv")

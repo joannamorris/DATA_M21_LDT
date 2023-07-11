@@ -1,4 +1,6 @@
 # This R script contains the code for 'munging' the morph 21 data
+# It joins the N250 and survey datafiles, creates columns for the Anteriority, Laterality 
+# and Morphological Family Size factors, and divides dataset into 3, words, simple # non-words and complex non-words
 
 library(dplyr)
 
