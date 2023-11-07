@@ -35,11 +35,10 @@ for subject = 1:nsubj
     subject_DIR = [DIR filesep subjID];
     fname       = [subjID '_' task f_string];    
     fname_set   = [fname '.set'];
-    fname_fdt   = [fname '.fdt'];
+   % fname_fdt   = [fname '.fdt'];
     
     %% Check to make sure the dataset file exists
-    if (exist([subject_DIR filesep fname_set ], 'file')<=0||...
-            exist([subject_DIR filesep fname_fdt ], 'file')<=0);
+    if (exist([subject_DIR filesep fname_set ], 'file')<=0);
         fprintf('\n *** WARNING: %s does not exist *** \n', fname);
         fprintf('\n *** Skip all processing for this subject *** \n\n');
     else 
@@ -47,7 +46,7 @@ for subject = 1:nsubj
         fprintf('\n\n\n**** %s: Loading set file ****\n\n\n', fname_set);
         EEG = pop_loadset(fname_set, subject_DIR);
         EEG.setname = fname;
-        EEG.datfile = fname_fdt; 
+     %   EEG.datfile = fname_fdt; 
         [ALLEEG, EEG, CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET,...
                                                'setname',EEG.setname,...
                                                'gui','off');
