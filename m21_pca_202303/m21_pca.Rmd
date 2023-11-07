@@ -41,6 +41,7 @@ sv_202303.na <- mutate(sv_202303.na,
                        z_spell = standardise(spell_correct))
 
 cor.test(sv_202303.na$z_vocab, sv_202303.na$z_spell)
+cor.test(sv_202303.na$z_vocab, sv_202303.na$z_spell)
 ```
 
 
