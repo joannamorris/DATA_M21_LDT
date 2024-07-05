@@ -4,7 +4,7 @@ author: "Joanna Morris"
 date: "`r Sys.Date()`"
 output: pdf_document
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 ```{r setup, include=FALSE}
@@ -52,7 +52,7 @@ art_vcb_spl_z <- select(sv_202303.na, z_vocab, z_spell, z_ART)
 
 cov(art_vcb_spl_raw, use = "everything",method = "pearson") 
 cov(art_vcb_spl_z, use = "everything", method = "pearson") 
-cor(art_vcb_spl_z, use = "everything", method = "pearson") 
+cor(art_vcb_spl_raw, use = "everything", method = "pearson") 
 ```
 
 Once we have generated the correlation coefficients we can test them for statistical significance.  You can only test one correlation at a time using the `cor.test()` function, but the `corr.test()` function in the `psych` package will test a matrix of correlation coefficients.
