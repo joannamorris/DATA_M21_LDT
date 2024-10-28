@@ -35,24 +35,30 @@ First we import the data, remove missing values adn standardize the scores.
 library(readr)
 library(dplyr)
 library(datawizard)
-sv_202303 <- read_csv("m21_spell_vocab_raw.csv")
-sv_202303.na <- na.omit(sv_202303) # na.omit() removes all missing data from the dataframe
-sv_202303.na <- mutate(sv_202303.na, 
-                       z_ART = standardise(ART_correct), 
-                       z_vocab = standardise(vocab_correct), 
-                       z_spell = standardise(spell_correct))
+langdat_1_202410 <- read_csv("m21_langdat_1.csv")
+langdat_2_202410 <- read_csv("m21_langdat_2.csv")
+
+langdat_1_202410 <- mutate(langdat_1_202410, 
+                       z_ART = standardise(ART), 
+                       z_Vocabulary = standardise(Vocabulary), 
+                       z_Spelling = standardise(Spelling))
+
+langdat_2_202410 <- mutate(langdat_2_202410, 
+                       z_ART = standardise(ART), 
+                       z_Vocabulary = standardise(Vocabulary), 
+                       z_Spelling = standardise(Spelling))
 ```
 
 Now we can put the three standardized measures into a separate data frame and compute the correlations, using the `cor()` function.  NB.  A correlation coefficient is a standardized covariance statistic.  The chunk below demonstrates that we get the same correlations if we run the `cov()` function on the standardized values or the `cor()` function on the unstandardized ones.
 
 ```{r}
 
-art_vcb_spl_raw <- select(sv_202303.na, vocab_correct, spell_correct, ART_correct)
-art_vcb_spl_z <- select(sv_202303.na, z_vocab, z_spell, z_ART) 
+art_vcb_spl_raw_1 <- na.omit(langdat_1_202410) |> select(Vocabulary, Spelling, ART)
+art_vcb_spl_z_1 <- na.omit(langdat_1_202410) |> select( z_Vocabulary, z_Spelling, z_ART) 
 
-cov(art_vcb_spl_raw, use = "everything",method = "pearson") 
-cov(art_vcb_spl_z, use = "everything", method = "pearson") 
-cor(art_vcb_spl_raw, use = "everything", method = "pearson") 
+cor(art_vcb_spl_raw_1, use = "everything", method = "pearson") 
+cov(art_vcb_spl_z_1, use = "everything", method = "pearson") 
+
 ```
 
 Once we have generated the correlation coefficients we can test them for statistical significance.  You can only test one correlation at a time using the `cor.test()` function, but the `corr.test()` function in the `psych` package will test a matrix of correlation coefficients.
@@ -68,7 +74,7 @@ Here are the arguments to the `PCA()` function:
 
 - `X`: a data frame. Rows are individuals and columns are numeric variables
 
-- `scale.unit`: a logical value. If TRUE, the data are scaled to unit variance before the analysis. This standardization to the same scale avoids some variables to become dominant just because of their large measurement units. It makes variable comparable.
+- `scale.unit`: a logical value. If TRUE, the data are scaled to unit variance before the analysis. This standardization to the same scale avoids some variables to become dominant just because of their large measurement units. It makes variables comparable.
 
 - `ncp`: number of dimensions kept in the final results.
 
