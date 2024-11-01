@@ -1,0 +1,761 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+]{article}
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={m21\_pca},
+  pdfauthor={Joanna Morris},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{m21\_pca}
+\author{Joanna Morris}
+\date{2024-10-28}
+
+\begin{document}
+\maketitle
+
+This script computes the PCA for Morph21.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  First we load the libraries we need
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(readr)}
+\FunctionTok{library}\NormalTok{(psych)}
+\FunctionTok{library}\NormalTok{(dplyr)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'dplyr'
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tidyr)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Compute PCA}\label{compute-pca}
+
+Following Andrews and Lo (2013) this script computes a PCA for our
+spelling and vocabulary measures. Because the standardised spelling and
+vocabulary scores were correlated, to facilitate interpretation, two
+orthogonal measures of individual differences were derived from a
+principal components analysis. Analysis based on
+\href{http://www.sthda.com/english/articles/31-principal-component-methods-in-r-practical-guide/112-pca-principal-component-analysis-essentials/}{this
+tutorial}
+
+First we import the data, remove missing values adn standardize the
+scores.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(readr)}
+\FunctionTok{library}\NormalTok{(dplyr)}
+\FunctionTok{library}\NormalTok{(datawizard)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'datawizard'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:psych':
+## 
+##     rescale
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{langdat\_1\_202410 }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(}\StringTok{"m21\_langdat\_1.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Rows: 70 Columns: 5
+\end{verbatim}
+
+\begin{verbatim}
+## -- Column specification --------------------------------------------------------
+## Delimiter: ","
+## chr (1): Sex
+## dbl (4): SubjID, ART, Spelling, Vocabulary
+## 
+## i Use `spec()` to retrieve the full column specification for this data.
+## i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{langdat\_2\_202410 }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(}\StringTok{"m21\_langdat\_2.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Rows: 45 Columns: 5
+## -- Column specification --------------------------------------------------------
+## Delimiter: ","
+## chr (1): Sex
+## dbl (4): SubjID, ART, Spelling, Vocabulary
+## 
+## i Use `spec()` to retrieve the full column specification for this data.
+## i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{langdat\_1.na }\OtherTok{\textless{}{-}} \FunctionTok{na.omit}\NormalTok{(langdat\_1\_202410)}
+\NormalTok{langdat\_2.na }\OtherTok{\textless{}{-}} \FunctionTok{na.omit}\NormalTok{(langdat\_2\_202410)}
+
+\FunctionTok{describe}\NormalTok{(langdat\_1.na)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##            vars  n   mean    sd median trimmed   mad min max range  skew
+## SubjID        1 61 137.49 23.13    137  137.02 29.65 101 177    76  0.16
+## ART           2 61  10.20  4.80     10   10.04  4.45  -3  23    26  0.20
+## Spelling      3 61  63.89  6.17     63   63.84  7.41  51  77    26  0.04
+## Vocabulary    4 61  40.89  5.60     42   41.20  5.93  29  49    20 -0.46
+## Sex*          5 61   1.23  0.42      1    1.16  0.00   1   2     1  1.25
+##            kurtosis   se
+## SubjID        -1.28 2.96
+## ART            0.13 0.61
+## Spelling      -0.66 0.79
+## Vocabulary    -0.96 0.72
+## Sex*          -0.43 0.05
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{describe}\NormalTok{(langdat\_2.na)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##            vars  n   mean    sd median trimmed   mad min max range  skew
+## SubjID        1 45 223.00 13.13    223  223.00 16.31 201 245    44  0.00
+## ART           2 45   5.40  4.10      5    5.51  4.45  -7  15    22 -0.33
+## Spelling      3 45  61.00  5.90     61   61.03  5.93  47  73    26 -0.09
+## Vocabulary    4 45  31.64  6.49     32   31.70  7.41  17  44    27 -0.04
+## Sex*          5 45   1.40  0.50      1    1.38  0.00   1   2     1  0.39
+##            kurtosis   se
+## SubjID        -1.28 1.96
+## ART            0.56 0.61
+## Spelling      -0.46 0.88
+## Vocabulary    -0.65 0.97
+## Sex*          -1.88 0.07
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{langdat\_1.na }\OtherTok{\textless{}{-}} \FunctionTok{mutate}\NormalTok{(langdat\_1.na, }
+                       \AttributeTok{z\_ART =} \FunctionTok{standardise}\NormalTok{(ART), }
+                       \AttributeTok{z\_Vocabulary =} \FunctionTok{standardise}\NormalTok{(Vocabulary), }
+                       \AttributeTok{z\_Spelling =} \FunctionTok{standardise}\NormalTok{(Spelling))}
+
+\NormalTok{langdat\_2.na }\OtherTok{\textless{}{-}} \FunctionTok{mutate}\NormalTok{(langdat\_2.na, }
+                       \AttributeTok{z\_ART =} \FunctionTok{standardise}\NormalTok{(ART), }
+                       \AttributeTok{z\_Vocabulary =} \FunctionTok{standardise}\NormalTok{(Vocabulary), }
+                       \AttributeTok{z\_Spelling =} \FunctionTok{standardise}\NormalTok{(Spelling))}
+\end{Highlighting}
+\end{Shaded}
+
+Now we can put the three standardized measures into a separate data
+frame and compute the correlations, using the \texttt{cor()} function.
+NB. A correlation coefficient is a standardized covariance statistic. We
+can run the \texttt{cov()} function on the standardized values or the
+\texttt{cor()} function on the unstandardized ones. Both methods will
+give the same results.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{art\_vcb\_spl\_raw\_1 }\OtherTok{\textless{}{-}}\NormalTok{ langdat\_1.na }\SpecialCharTok{|\textgreater{}} \FunctionTok{select}\NormalTok{(Vocabulary, Spelling, ART)}
+\NormalTok{art\_vcb\_spl\_z\_1 }\OtherTok{\textless{}{-}}\NormalTok{ langdat\_1.na }\SpecialCharTok{|\textgreater{}} \FunctionTok{select}\NormalTok{( z\_Vocabulary, z\_Spelling, z\_ART) }
+
+\FunctionTok{cor}\NormalTok{(art\_vcb\_spl\_raw\_1, }\AttributeTok{use =} \StringTok{"everything"}\NormalTok{, }\AttributeTok{method =} \StringTok{"pearson"}\NormalTok{) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##            Vocabulary  Spelling       ART
+## Vocabulary  1.0000000 0.2171216 0.5136866
+## Spelling    0.2171216 1.0000000 0.2349441
+## ART         0.5136866 0.2349441 1.0000000
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cov}\NormalTok{(art\_vcb\_spl\_z\_1, }\AttributeTok{use =} \StringTok{"everything"}\NormalTok{, }\AttributeTok{method =} \StringTok{"pearson"}\NormalTok{) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##              z_Vocabulary z_Spelling     z_ART
+## z_Vocabulary    1.0000000  0.2171216 0.5136866
+## z_Spelling      0.2171216  1.0000000 0.2349441
+## z_ART           0.5136866  0.2349441 1.0000000
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{art\_vcb\_spl\_raw\_2 }\OtherTok{\textless{}{-}}\NormalTok{ langdat\_2.na }\SpecialCharTok{|\textgreater{}} \FunctionTok{select}\NormalTok{(Vocabulary, Spelling, ART)}
+\NormalTok{art\_vcb\_spl\_z\_2 }\OtherTok{\textless{}{-}}\NormalTok{ langdat\_2.na }\SpecialCharTok{|\textgreater{}} \FunctionTok{select}\NormalTok{( z\_Vocabulary, z\_Spelling, z\_ART) }
+
+\FunctionTok{cor}\NormalTok{(art\_vcb\_spl\_raw\_2, }\AttributeTok{use =} \StringTok{"everything"}\NormalTok{, }\AttributeTok{method =} \StringTok{"pearson"}\NormalTok{) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##            Vocabulary  Spelling       ART
+## Vocabulary  1.0000000 0.4933601 0.6163415
+## Spelling    0.4933601 1.0000000 0.5351840
+## ART         0.6163415 0.5351840 1.0000000
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cov}\NormalTok{(art\_vcb\_spl\_z\_2, }\AttributeTok{use =} \StringTok{"everything"}\NormalTok{, }\AttributeTok{method =} \StringTok{"pearson"}\NormalTok{) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##              z_Vocabulary z_Spelling     z_ART
+## z_Vocabulary    1.0000000  0.4933601 0.6163415
+## z_Spelling      0.4933601  1.0000000 0.5351840
+## z_ART           0.6163415  0.5351840 1.0000000
+\end{verbatim}
+
+Once we have generated the correlation coefficients we can test them for
+statistical significance. You can only test one correlation at a time
+using the \texttt{cor.test()} function, but the \texttt{corr.test()}
+function in the \texttt{psych} package will test a matrix of correlation
+coefficients.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(psych)}
+\FunctionTok{corr.test}\NormalTok{(art\_vcb\_spl\_z\_1) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Call:corr.test(x = art_vcb_spl_z_1)
+## Correlation matrix 
+##              z_Vocabulary z_Spelling z_ART
+## z_Vocabulary         1.00       0.22  0.51
+## z_Spelling           0.22       1.00  0.23
+## z_ART                0.51       0.23  1.00
+## Sample Size 
+## [1] 61
+## Probability values (Entries above the diagonal are adjusted for multiple tests.) 
+##              z_Vocabulary z_Spelling z_ART
+## z_Vocabulary         0.00       0.14  0.00
+## z_Spelling           0.09       0.00  0.14
+## z_ART                0.00       0.07  0.00
+## 
+##  To see confidence intervals of the correlations, print with the short=FALSE option
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{corr.test}\NormalTok{(art\_vcb\_spl\_z\_2) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Call:corr.test(x = art_vcb_spl_z_2)
+## Correlation matrix 
+##              z_Vocabulary z_Spelling z_ART
+## z_Vocabulary         1.00       0.49  0.62
+## z_Spelling           0.49       1.00  0.54
+## z_ART                0.62       0.54  1.00
+## Sample Size 
+## [1] 45
+## Probability values (Entries above the diagonal are adjusted for multiple tests.) 
+##              z_Vocabulary z_Spelling z_ART
+## z_Vocabulary            0          0     0
+## z_Spelling              0          0     0
+## z_ART                   0          0     0
+## 
+##  To see confidence intervals of the correlations, print with the short=FALSE option
+\end{verbatim}
+
+Now we can do the PCA. It turns out that by default, the function
+\texttt{PCA()} in \texttt{FactoMineR}, standardizes the data
+automatically, so we didn't actually need do the standardization. Oh
+well. ¯\textbackslash\_(ツ)\_/¯
+
+Here are the arguments to the \texttt{PCA()} function:
+
+\begin{itemize}
+\item
+  \texttt{X}: a data frame. Rows are individuals and columns are numeric
+  variables
+\item
+  \texttt{scale.unit}: a logical value. If TRUE, the data are scaled to
+  unit variance before the analysis. This standardization to the same
+  scale avoids some variables to become dominant just because of their
+  large measurement units. It makes variables comparable.
+\item
+  \texttt{ncp}: number of dimensions kept in the final results.
+\item
+  \texttt{graph}: a logical value. If TRUE a graph is displayed.
+\end{itemize}
+
+The plot shows the relationships between all variables. It can be
+interpreted as follow:
+
+\begin{itemize}
+\item
+  Positively correlated variables are grouped together.
+\item
+  Negatively correlated variables are positioned on opposite sides of
+  the plot origin (opposed quadrants).
+\item
+  The distance between variables and the origin measures the quality of
+  the variables on the factor map. Variables that are away from the
+  origin are well represented on the factor map.
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(FactoMineR)}
+\FunctionTok{library}\NormalTok{(factoextra)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Loading required package: ggplot2
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'ggplot2'
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:psych':
+## 
+##     %+%, alpha
+\end{verbatim}
+
+\begin{verbatim}
+## Welcome! Want to learn more? See two factoextra-related books at https://goo.gl/ve3WBa
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{res.pca\_1 }\OtherTok{\textless{}{-}} \FunctionTok{PCA}\NormalTok{(langdat\_1.na[,}\DecValTok{2}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }\AttributeTok{scale.unit =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{ncp =} \DecValTok{2}\NormalTok{, }\AttributeTok{graph =} \ConstantTok{FALSE}\NormalTok{)}
+\FunctionTok{plot}\NormalTok{(res.pca\_1, }\AttributeTok{choix =} \StringTok{"varcor"}\NormalTok{, }\AttributeTok{graph.type =} \FunctionTok{c}\NormalTok{(}\StringTok{"ggplot"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{m21_pca_files/figure-latex/unnamed-chunk-5-1.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{res.pca\_2 }\OtherTok{\textless{}{-}} \FunctionTok{PCA}\NormalTok{(langdat\_2.na[,}\DecValTok{2}\SpecialCharTok{:}\DecValTok{4}\NormalTok{], }\AttributeTok{scale.unit =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{ncp =} \DecValTok{2}\NormalTok{, }\AttributeTok{graph =} \ConstantTok{FALSE}\NormalTok{)}
+\FunctionTok{plot}\NormalTok{(res.pca\_2, }\AttributeTok{choix =} \StringTok{"varcor"}\NormalTok{, }\AttributeTok{graph.type =} \FunctionTok{c}\NormalTok{(}\StringTok{"ggplot"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{m21_pca_files/figure-latex/unnamed-chunk-5-2.pdf}}
+
+The eigenvalues measure the amount of variation retained by each
+principal component. Eigenvalues are large for the first PCs and small
+for the subsequent PCs. That is, the first PCs corresponds to the
+directions with the maximum amount of variation in the data set.
+
+We examine the eigenvalues to determine the number of principal
+components to be considered. The sum of all the eigenvalues give a total
+variance of 3, the number of variables. An eigenvalue \textgreater{} 1
+indicates that PCs account for more variance than accounted by one of
+the original variables in standardized data. This is commonly used as a
+cutoff point for which PCs are retained. This holds true only when the
+data are standardized.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(eig.val\_1 }\OtherTok{\textless{}{-}} \FunctionTok{get\_eigenvalue}\NormalTok{(res.pca\_1))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       eigenvalue variance.percent cumulative.variance.percent
+## Dim.1  1.6669296         55.56432                    55.56432
+## Dim.2  0.8471400         28.23800                    83.80232
+## Dim.3  0.4859304         16.19768                   100.00000
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(eig.val\_2 }\OtherTok{\textless{}{-}} \FunctionTok{get\_eigenvalue}\NormalTok{(res.pca\_2))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       eigenvalue variance.percent cumulative.variance.percent
+## Dim.1  2.0982128         69.94043                    69.94043
+## Dim.2  0.5226527         17.42176                    87.36218
+## Dim.3  0.3791345         12.63782                   100.00000
+\end{verbatim}
+
+The quality of representation of the variables on factor map is called
+cos2 (square cosine, squared coordinates). \emph{A high cos2 indicates a
+good representation of the variable on the principal component}. In this
+case the variable is positioned close to the circumference of the
+correlation circle. \emph{A low cos2 indicates that the variable is not
+perfectly represented by the PCs.} In this case the variable is close to
+the center of the circle. If a variable is perfectly represented by only
+two principal components (Dim.1 \& Dim.2), the sum of the cos2 on these
+two PCs is equal to one. In this case the variables will be positioned
+on the circle of correlations.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{res.pca\_1}\SpecialCharTok{$}\NormalTok{var}\SpecialCharTok{$}\NormalTok{cos2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                Dim.1      Dim.2
+## ART        0.6846519 0.06801824
+## Spelling   0.3114976 0.68805400
+## Vocabulary 0.6707801 0.09106777
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{res.pca\_2}\SpecialCharTok{$}\NormalTok{var}\SpecialCharTok{$}\NormalTok{cos2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                Dim.1      Dim.2
+## ART        0.7457531 0.03592741
+## Spelling   0.6400313 0.35136755
+## Vocabulary 0.7124284 0.13535772
+\end{verbatim}
+
+The contributions of variables in accounting for the variability in a
+given principal component are expressed in percentages. Variables that
+are correlated with PC1 (i.e., Dim.1) and PC2 (i.e., Dim.2) are the most
+important in explaining the variability in the data set. The larger the
+value of the contribution, the more the variable contributes to the
+component. It's possible to use the function corrplot() {[}corrplot
+package{]} to highlight the most contributing variables for each
+dimension.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(}\StringTok{\textquotesingle{}corrplot\textquotesingle{}}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## corrplot 0.95 loaded
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{res.pca\_1}\SpecialCharTok{$}\NormalTok{var}\SpecialCharTok{$}\NormalTok{contrib}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##               Dim.1     Dim.2
+## ART        41.07264  8.029161
+## Spelling   18.68691 81.220813
+## Vocabulary 40.24046 10.750026
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{res.pca\_2}\SpecialCharTok{$}\NormalTok{var}\SpecialCharTok{$}\NormalTok{contrib}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##               Dim.1    Dim.2
+## ART        35.54230  6.87405
+## Spelling   30.50364 67.22773
+## Vocabulary 33.95406 25.89822
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{corrplot}\NormalTok{(res.pca\_1}\SpecialCharTok{$}\NormalTok{var}\SpecialCharTok{$}\NormalTok{contrib, }\AttributeTok{is.corr=}\ConstantTok{FALSE}\NormalTok{) }
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{m21_pca_files/figure-latex/unnamed-chunk-7-1.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{corrplot}\NormalTok{(res.pca\_2}\SpecialCharTok{$}\NormalTok{var}\SpecialCharTok{$}\NormalTok{contrib, }\AttributeTok{is.corr=}\ConstantTok{FALSE}\NormalTok{) }
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{m21_pca_files/figure-latex/unnamed-chunk-7-2.pdf}}
+
+The correlation between a variable and a principal component (PC) is
+used as the coordinates of the variable on the PC.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(res.pca\_1}\SpecialCharTok{$}\NormalTok{var}\SpecialCharTok{$}\NormalTok{coord)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                Dim.1      Dim.2
+## ART        0.8274370 -0.2608031
+## Spelling   0.5581197  0.8294902
+## Vocabulary 0.8190116 -0.3017744
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(res.desc }\OtherTok{\textless{}{-}} \FunctionTok{dimdesc}\NormalTok{(res.pca\_1, }\AttributeTok{axes =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{), }\AttributeTok{proba =} \FloatTok{0.05}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## $Dim.1
+## 
+## Link between the variable and the continuous variables (R-square)
+## =================================================================================
+##            correlation      p.value
+## ART          0.8274370 2.032489e-16
+## Vocabulary   0.8190116 7.307938e-16
+## Spelling     0.5581197 2.962142e-06
+## 
+## $Dim.2
+## 
+## Link between the variable and the continuous variables (R-square)
+## =================================================================================
+##            correlation      p.value
+## Spelling     0.8294902 1.472427e-16
+## ART         -0.2608031 4.234863e-02
+## Vocabulary  -0.3017744 1.810003e-02
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(res.pca\_2}\SpecialCharTok{$}\NormalTok{var}\SpecialCharTok{$}\NormalTok{coord)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                Dim.1      Dim.2
+## ART        0.8635700 -0.1895453
+## Spelling   0.8000196  0.5927626
+## Vocabulary 0.8440547 -0.3679099
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(res.desc }\OtherTok{\textless{}{-}} \FunctionTok{dimdesc}\NormalTok{(res.pca\_2, }\AttributeTok{axes =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{), }\AttributeTok{proba =} \FloatTok{0.05}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## $Dim.1
+## 
+## Link between the variable and the continuous variables (R-square)
+## =================================================================================
+##            correlation      p.value
+## ART          0.8635700 2.270635e-14
+## Vocabulary   0.8440547 3.277432e-13
+## Spelling     0.8000196 4.305234e-11
+## 
+## $Dim.2
+## 
+## Link between the variable and the continuous variables (R-square)
+## =================================================================================
+##            correlation      p.value
+## Spelling     0.5927626 1.784157e-05
+## Vocabulary  -0.3679099 1.290211e-02
+\end{verbatim}
+
+The fviz\_pca\_ind() is used to produce the graph of individuals.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ind}\FloatTok{.1} \OtherTok{\textless{}{-}} \FunctionTok{get\_pca\_ind}\NormalTok{(res.pca\_1)}
+\FunctionTok{fviz\_pca\_ind}\NormalTok{(res.pca\_1)}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{m21_pca_files/figure-latex/c6-1.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ind}\FloatTok{.2} \OtherTok{\textless{}{-}} \FunctionTok{get\_pca\_ind}\NormalTok{(res.pca\_2)}
+\FunctionTok{fviz\_pca\_ind}\NormalTok{(res.pca\_2)}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{m21_pca_files/figure-latex/c6-2.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{langdat\_1.na}\OtherTok{\textless{}{-}}\FunctionTok{bind\_cols}\NormalTok{(langdat\_1.na,res.pca\_1}\SpecialCharTok{$}\NormalTok{ind}\SpecialCharTok{$}\NormalTok{coord)}
+\NormalTok{langdat\_2.na}\OtherTok{\textless{}{-}}\FunctionTok{bind\_cols}\NormalTok{(langdat\_2.na,res.pca\_2}\SpecialCharTok{$}\NormalTok{ind}\SpecialCharTok{$}\NormalTok{coord)}
+
+\CommentTok{\#Divide participants based on median split of Dim2.  Higher values on this factor indicate that spelling scores were relatively higher than vocabulary, }
+
+\NormalTok{langdat\_1.na }\OtherTok{\textless{}{-}}\NormalTok{ langdat\_1.na }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{lang\_type\_ortho =} \FunctionTok{case\_when}\NormalTok{(}
+\NormalTok{    Dim}\FloatTok{.2} \SpecialCharTok{\textless{}=} \DecValTok{0} \SpecialCharTok{\textasciitilde{}} \StringTok{"Low Orthographic"}\NormalTok{,}
+\NormalTok{    Dim}\FloatTok{.2} \SpecialCharTok{\textgreater{}} \DecValTok{0} \SpecialCharTok{\textasciitilde{}} \StringTok{"High Orthographic"}
+\NormalTok{  ))}
+\NormalTok{langdat\_1.na }\OtherTok{\textless{}{-}}\NormalTok{ langdat\_1.na }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{lang\_type\_semantic =} \FunctionTok{case\_when}\NormalTok{(}
+\NormalTok{    Dim}\FloatTok{.1} \SpecialCharTok{\textless{}=} \DecValTok{0} \SpecialCharTok{\textasciitilde{}} \StringTok{"Low Semantic"}\NormalTok{,}
+\NormalTok{    Dim}\FloatTok{.1} \SpecialCharTok{\textgreater{}} \DecValTok{0} \SpecialCharTok{\textasciitilde{}} \StringTok{"High Semantic"}
+\NormalTok{  ))}
+
+\NormalTok{langdat\_2.na }\OtherTok{\textless{}{-}}\NormalTok{ langdat\_2.na }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{lang\_type\_ortho =} \FunctionTok{case\_when}\NormalTok{(}
+\NormalTok{    Dim}\FloatTok{.2} \SpecialCharTok{\textless{}=} \DecValTok{0} \SpecialCharTok{\textasciitilde{}} \StringTok{"Low Orthographic"}\NormalTok{,}
+\NormalTok{    Dim}\FloatTok{.2} \SpecialCharTok{\textgreater{}} \DecValTok{0} \SpecialCharTok{\textasciitilde{}} \StringTok{"High Orthographic"}
+\NormalTok{  ))}
+\NormalTok{langdat\_2.na }\OtherTok{\textless{}{-}}\NormalTok{ langdat\_2.na }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{lang\_type\_semantic =} \FunctionTok{case\_when}\NormalTok{(}
+\NormalTok{    Dim}\FloatTok{.1} \SpecialCharTok{\textless{}=} \DecValTok{0} \SpecialCharTok{\textasciitilde{}} \StringTok{"Low Semantic"}\NormalTok{,}
+\NormalTok{    Dim}\FloatTok{.1} \SpecialCharTok{\textgreater{}} \DecValTok{0} \SpecialCharTok{\textasciitilde{}} \StringTok{"High Semantic"}
+\NormalTok{  ))}
+\end{Highlighting}
+\end{Shaded}
+
+We can then write the indivdiual pca values to a file
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{write\_csv}\NormalTok{(langdat\_1.na, }\StringTok{"m21\_langdat\_1\_pca.csv"}\NormalTok{)}
+\FunctionTok{write\_csv}\NormalTok{(langdat\_2.na, }\StringTok{"m21\_langdat\_2\_pca.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+
+\end{document}
