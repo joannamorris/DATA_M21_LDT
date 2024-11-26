@@ -1,9 +1,11 @@
 ---
-title: "m21 LDT ERP analysis"
+title: "m21 LDT ERP analysis N400"
 author: "Joanna Morris"
 date: "`r Sys.Date()`"
 output:
-  bookdown::pdf_document2
+  bookdown::pdf_document2:
+    toc: true
+    toc_depth: 4
 editor_options: 
   chunk_output_type: console
 ---
@@ -126,7 +128,6 @@ n400_2_words <- n400_2_words %>%
 
 Now we need to  extract just the bins and channels that we intend to analyse. For this analysis we will use 9 channels:  F3, Fz, F4, C3, Cz, C4, P3, Pz, P4 . We will use the`mutate` function from the `dplyr` package along with the `case_when` function. The `case_when` function  is a sequence of two-sided formulas. The left hand side determines which values match this case. The right hand side provides the replacement value.
 
-
 ```{r, echo=FALSE}
 
 channels_1 <-  c(3, 2, 25, 7, 20, 21, 12, 11, 16)
@@ -173,13 +174,6 @@ n400_2_nonwords$laterality <- factor(n400_2_nonwords$laterality, levels = c("Lef
 
 ```
 
-
-# Trim data to 2SD of each subject's mean
-```{r}
-n400_1_nw_trm <- n400_1_nonwords %>%
-  group_by(SubjID) %>%
-  filter(abs(value - mean(value)) <= 3.5 * sd(value)) 
-```
 
 # Now we can compute the ANOVA using `ezANOVA` and `aov_ez`
 
@@ -230,17 +224,17 @@ anova_results.2b
 ```
 
 # Examine and plot interactions
-## Group 1 
+## Group 2 
 ### `Language Type Orthographic` by `Anteriority` Interaction
 
-Pairwise Comparisons `lang_type_ortho | anteriority`
+#### Pairwise Comparisons `lang_type_ortho | anteriority`
 ```{r}
 emms <- emmeans(anova_results.1b, ~ lang_type_ortho | anteriority )
 pairwise_results <- pairs(emms, by = c("anteriority"))
 summary(pairwise_results)
 ```
 
-Condition Means `lang_type_ortho | anteriority`
+#### Condition Means `lang_type_ortho | anteriority`
 ```{r}
 (nw_ltortho_ant_1 <- n400_1_nonwords |> 
     na.omit()|>
@@ -250,7 +244,7 @@ Condition Means `lang_type_ortho | anteriority`
              num_stim = n()))
 ```
 
-Diff Scores `lang_type_ortho | anteriority`
+#### Diff Scores `lang_type_ortho | anteriority`
 ```{r}
 (difference_scores_1.1 <- nw_ltortho_ant_1 %>%
   pivot_wider(names_from = lang_type_ortho, values_from = c(mean, se, num_stim)) %>%
@@ -259,7 +253,9 @@ Diff Scores `lang_type_ortho | anteriority`
          total_num_stim = sum(`num_stim_Low Orthographic`, `num_stim_High Orthographic`)))
 ```
 
-Plot interaction `lang_type_ortho | anteriority`
+
+#### Plots`lang_type_ortho | anteriority` 
+First we plot the raw scores then the difference scores
 ```{r, fig.width=5, fig.height=3}
 # plot raw scores
 p1.a <-  nw_ltortho_ant_1 |> ggplot(aes(x=anteriority, 
@@ -306,7 +302,7 @@ p1.b
 
 
 ### `Language Type Semantic` by `Complexity` by `Anteriority`  Interaction
-Simple Effects `complexity | lang_type_semantic * anteriority`
+#### Simple Effects `complexity | lang_type_semantic * anteriority`
 ```{r}
 # Examine the 2-way interaction between ` lang_type_semantics` and `complexity` 
 # at each level of `Anteriority`
@@ -341,14 +337,14 @@ Simple Effects `complexity | lang_type_semantic * anteriority`
 
 We found a marginally significant effect of complexity for low semantic readers at frontal sites $F(1,29)=3.554641,  p=0.069434$.
 
-Pairwise Comparisons `complexity | lang_type_semantic * anteriority`
+#### Pairwise Comparisons `complexity | lang_type_semantic * anteriority`
 ```{r}
 emms <- emmeans(anova_results.1b, ~ complexity| lang_type_semantic * anteriority )
 pairwise_results <- pairs(emms, by = c("lang_type_semantic", "anteriority"))
 summary(pairwise_results)
 ```
 
-Condition Means  `complexity | lang_type_semantic * anteriority`
+#### Condition Means  `complexity | lang_type_semantic * anteriority`
 ```{r}
 (nw_ltseman_cmplx_ant_1 <- n400_1_nonwords |> 
     na.omit()|>
@@ -358,7 +354,7 @@ Condition Means  `complexity | lang_type_semantic * anteriority`
              num_stim = n()))
 ```
 
-Diff Scores `complexity | lang_type_semantic * anteriority`
+#### Diff Scores `complexity | lang_type_semantic * anteriority`
 ```{r}
 (difference_scores_1.2 <- nw_ltseman_cmplx_ant_1 %>%
   pivot_wider(names_from = complexity, values_from = c(mean, se, num_stim)) %>%
@@ -367,7 +363,9 @@ Diff Scores `complexity | lang_type_semantic * anteriority`
          total_num_stim = sum(`num_stim_complex`, `num_stim_simple`)))
 ```
 
-Plot interaction `complexity | lang_type_semantic * anteriority`
+#### Plots `complexity | lang_type_semantic * anteriority`
+First we plot the raw scores then the difference scores
+
 ```{r, fig.width=5, fig.height=3}
 # plot raw scores
 # facet_wrap() wraps a 1d sequence of panels into 2d. Use vars() to supply faceting variables; 
@@ -416,7 +414,7 @@ p2.b + scale_fill_brewer(palette = "Paired")+
 ```
 
 ### `Language Type Semantic` by `Complexity` by `Family Size` by `Anteriority` x` Laterality` Interaction
-Simple Effects `complexity | lang_type_semantic * family_size * laterality * anteriority `
+#### Simple Effects `complexity | lang_type_semantic * family_size * laterality * anteriority `
 ```{r}
 # Examine the 4-way interaction between `anteriority`, `laterality`, ` complexity`, 
 # and `lang_type_semantics` at each level of `family_size`
@@ -526,14 +524,14 @@ se_large_hisem_left_parietal_1.2$ANOVA
 
 We found a marginally significant effect of complexity for high semantic readers for large morphological families at left frontal sites $F(1,29) =3.014575, p=0.09313352$
 
-Pairwise Comparisons  `complexity | lang_type_semantic * family_size * laterality * anteriority`
+#### Pairwise Comparisons  `complexity | lang_type_semantic * family_size * laterality * anteriority`
 ```{r}
 emms <- emmeans(anova_results.1b,~complexity|lang_type_semantic*family_size*laterality*anteriority)
 pairwise_results <- pairs(emms,by = c("laterality","anteriority","lang_type_semantic","family_size"))
 summary(pairwise_results)
 ```
 
-Condition Means `complexity | lang_type_semantic * family_size * laterality * anteriority`
+#### Condition Means `complexity | lang_type_semantic * family_size * laterality * anteriority`
 ```{r}
 (nw_sem_famsize_lat_ant_cmplx_1 <- n400_1_nonwords |> 
     na.omit()|>
@@ -543,6 +541,8 @@ Condition Means `complexity | lang_type_semantic * family_size * laterality * an
              num_stim = n()))
 ```
 
+#### Plots `complexity | lang_type_semantic * family_size * laterality * anteriority`
+First we plot the raw scores then the difference scores
 Diff Scores `complexity | lang_type_semantic * family_size * laterality * anteriority`
 ```{r}
 (difference_scores_1.3 <- nw_sem_famsize_lat_ant_cmplx_1 %>%
@@ -556,7 +556,7 @@ Diff Scores `complexity | lang_type_semantic * family_size * laterality * anteri
 **Plot interaction `complexity | lang_type_semantic * family_size * laterality * anteriority ` Raw Scores**
 `facet_wrap()` wraps a 1d sequence of panels into 2d. Use `vars()` to supply faceting variables;  Control the number of rows and columns with `nrow` and `ncol.` `labeller` options are "label_value" and "label_both".  The latter prints the name of the variable & its value.
 
-Plot raw scores
+ Plot raw scores
 ```{r, fig.width=7, fig.height=10}
 
 p3.a <-  nw_sem_famsize_lat_ant_cmplx_1 |> ggplot(aes(x= lang_type_semantic, y=mean,
@@ -602,3 +602,77 @@ p3.b <- difference_scores_1.3 |> ggplot(aes(x = family_size, y = mean_diff,
 p3.b + scale_fill_brewer(palette = "Paired")+
       scale_colour_brewer(palette = "Paired")
 ```
+
+
+## Group 2 
+### `Family Size` by `Complexity` Interaction
+#### Pairwise Comparisons `complexity | family_size`
+```{r}
+emms <- emmeans(anova_results.2b, ~ complexity | family_size )
+pairwise_results <- pairs(emms, by = c("family_size"))
+summary(pairwise_results)
+```
+
+#### Condition Means `complexity | family_size`
+```{r}
+(nw_cmplx_famsize_2 <- n400_2_nonwords |> 
+    na.omit()|>
+   group_by(family_size, complexity) |> 
+   summarise(mean = mean(value), 
+             se = sem(value),
+             num_stim = n()))
+```
+
+#### Diff Scores `complexity | family_size`
+```{r}
+(difference_scores_2.1 <- nw_cmplx_famsize_2 %>%
+  pivot_wider(names_from = complexity, values_from = c(mean, se, num_stim)) %>%
+  mutate(mean_diff = `mean_simple` - `mean_complex`, 
+         avg_se = mean(`se_simple`,`se_complex`),
+         total_num_stim = sum(`num_stim_simple`, `num_stim_complex`)))
+```
+
+#### Plots`complexity | family_size`
+First we plot the raw scores then the difference scores
+```{r, fig.width=5, fig.height=3}
+# plot raw scores
+p2.a <-  nw_cmplx_famsize_2 |> ggplot(aes(x=family_size, 
+                                   y=mean, 
+                                   fill = complexity, 
+                                   colour = complexity,
+                                   ymin = mean - se, 
+                                   ymax = mean + se)) +
+  coord_cartesian(xlim = NULL,ylim = c(-1, 2.5), expand = TRUE,default = FALSE,clip = "on") +
+  geom_col(position = "dodge", width = .75,  alpha = .7)  +
+  labs(y = "Voltage (microvolts)", x = "Family Size")  +  
+  geom_errorbar(width = .1, position = position_dodge(0.75)) + 
+  theme_classic(base_size = 8) + 
+   geom_text(aes(label = round(mean, digits = 2)),colour = "black",size = 2.5, vjust = -6, 
+             position = position_dodge(.75))+
+  guides(fill=guide_legend(title="Complexity"),
+         colour= "none") +  
+  theme(legend.position = "bottom")
+p2.a + scale_fill_brewer(palette = "Set1")+
+      scale_colour_brewer(palette = "Set1")
+
+# plot diff scores
+p2.b <- difference_scores_2.1 |> ggplot(aes(x = family_size,
+                                        y = mean_diff,
+                                        ymin = mean_diff - avg_se,
+                                        ymax = mean_diff + avg_se)) +
+  coord_cartesian(xlim = NULL,ylim = c(-2, 2), expand = TRUE,default = FALSE,clip = "on") +
+  geom_col(position = "dodge", width = 0.75, alpha = 0.7, 
+           colour = "deepskyblue3", fill= "deepskyblue3") +
+  labs(y = "N400 for Simple Minus Comlex Non-words", x = "Family Size") + 
+  geom_errorbar(width = .08, position = position_dodge(0.75), colour = "deepskyblue3") + 
+  theme_classic(base_size = 8) + 
+  geom_text(aes(label = round(mean_diff, digits = 2)),colour = "black",size = 2.5, vjust = -6, 
+             position = position_dodge(.75))+  
+    guides(fill=guide_legend(title="Complexity Effect"),
+           colour= "none") +  
+  theme(legend.position = "bottom")
+p2.b 
+ 
+# grid.arrange(p1.a, p1.b, nrow = 1)
+```
+

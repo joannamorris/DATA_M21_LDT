@@ -1,0 +1,60 @@
+---
+title: "m21 LDT ERP analysis"
+author: "Joanna Morris"
+date: "`r Sys.Date()`"
+output:
+  bookdown::pdf_document2
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      error = FALSE,
+                      comment = "||")
+```
+
+# Load libraries
+
+Load libraries
+```{r}
+library(ez)
+library(pander)
+library(kableExtra)
+library(afex)
+library(gridExtra)
+library(ggplot2)
+library(emmeans)
+library(tidyverse)
+library(dplyr)
+library(RColorBrewer)
+library(wesanderson)
+library(ggsci)
+```
+
+
+
+# Set `ggplot2` parameters
+Before we begin, let's set some general parameters for `ggplot2`. We will set a general theme using the `theme_set()` function. We will use the 'classic' theme which gives us clean white background rather than the default grey with white grid lines. And we will position the legend at the top of the graph rather than at the right side which is the default.
+
+```{r theme}
+theme_set(theme_minimal() +  theme(legend.position = "bottom"))
+```
+
+#Define standard error of the mean function
+```{r}
+sem <- function(x) sd(x)/sqrt(length(x))
+```
+
+
+# Load and format data files
+First we load the data files
+```{r, echo = FALSE}
+erpdat_1 <- read_csv("m21_ldt_mea_300500_200000_1.csv")
+langdat_1 <- read_csv("m21_langdat_1_pca.csv")
+
+erpdat_2 <- read_csv("m21_ldt_mea_300500_200000_2.csv")
+langdat_2 <- read_csv("m21_langdat_2_pca.csv")
+```
