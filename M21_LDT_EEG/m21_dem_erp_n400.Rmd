@@ -226,6 +226,28 @@ anova_results.2b
 # Examine and plot interactions
 ## Group 1 
 ### `Language Type Orthographic` by `Anteriority` Interaction
+#### Simple Effects `lang_type_ortho| anteriority`
+```{r}
+# Examine the diffence between `lang_type_ortho` at each level of `anteriority` 
+
+se_frontal_1.1 <-n400_1_nonwords |> filter(anteriority == "Frontal")|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          between = lang_type_ortho)
+se_frontal_1.1$ANOVA
+
+se_central_1.1 <-n400_1_nonwords |> filter(anteriority == "Central")|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          between = lang_type_ortho)
+se_central_1.1$ANOVA
+
+se_parietal_1.1 <-n400_1_nonwords |> filter(anteriority == "Parietal")|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          between = lang_type_ortho)
+se_parietal_1.1$ANOVA
+```
 
 #### Pairwise Comparisons `lang_type_ortho | anteriority`
 ```{r}
@@ -265,7 +287,7 @@ p1.a <-  nw_ltortho_ant_1 |> ggplot(aes(x=anteriority,
                                    ymin = mean - se, 
                                    ymax = mean + se)) +
   coord_cartesian(xlim = NULL,ylim = c(-2, 4), expand = TRUE,default = FALSE,clip = "on") +
-  geom_col(position = "dodge", width = .75,  alpha = .7)  +
+  geom_col(position = "dodge", width = .75,  alpha = .5)  +
   labs(y = "Voltage (microvolts)", x = "Anteriority")  +  
   geom_errorbar(width = .1, position = position_dodge(0.75)) + 
   theme_classic(base_size = 8) + 
@@ -283,7 +305,7 @@ p1.b <- difference_scores_1.1 |> ggplot(aes(x = anteriority,
                                         ymin = mean_diff - avg_se,
                                         ymax = mean_diff + avg_se)) +
   coord_cartesian(xlim = NULL,ylim = c(-2, 4), expand = TRUE,default = FALSE,clip = "on") +
-  geom_col(position = "dodge", width = 0.75, alpha = 0.7, 
+  geom_col(position = "dodge", width = 0.75, alpha = 0.5, 
            colour = "deepskyblue3", fill= "deepskyblue3") +
   labs(y = "N400 for Low Orthographic Minus High Orthographic", x = "Family Size") + 
   geom_errorbar(width = .08, position = position_dodge(0.75), colour = "deepskyblue3") + 
@@ -374,7 +396,7 @@ p2.a <-  nw_ltseman_cmplx_ant_1 |> ggplot(aes(x= lang_type_semantic, y=mean,
                                              ymin = mean - se, ymax = mean + se)) +
   facet_wrap(vars(anteriority), ncol = 3, labeller = "label_value") +  
   coord_cartesian(xlim = NULL, ylim = c(-2, 4), expand = TRUE, default = FALSE,clip = "on") +
-  geom_col(position = "dodge", width = 0.75, alpha = .7)  +
+  geom_col(position = "dodge", width = 0.75, alpha = .5)  +
   labs(y = "Voltage (microvolts)", x = "Participant Reading Style")  + 
   geom_errorbar(width = .08, position = position_dodge(0.75)) + 
   theme_classic(base_size = 8) + 
@@ -395,7 +417,7 @@ p2.b <- difference_scores_1.2 |> ggplot(aes(x = anteriority,
                                             ymin = mean_diff - avg_se, 
                                             ymax = mean_diff + avg_se)) +
   coord_cartesian(xlim = NULL,ylim = c(-2, 4), expand = TRUE,default = FALSE,clip = "on") +
-  geom_col(position = "dodge", width = 0.75, alpha = 0.7) +
+  geom_col(position = "dodge", width = 0.75, alpha = 0.5) +
   labs(y = "N400 amplitude for Simple Minus Complex", x = "Anteriority") + 
   geom_errorbar(width = .08, position = position_dodge(0.75)) + 
   theme_classic(base_size = 8) + 
@@ -559,7 +581,7 @@ p3.a <-  nw_sem_famsize_lat_ant_cmplx_1 |> ggplot(aes(x= lang_type_semantic, y=m
   facet_wrap(vars(family_size, anteriority, laterality),
              labeller = "label_value", ncol = 3) +  
   coord_cartesian(xlim = NULL, ylim = c(-3.5, 3.5), expand=TRUE, default=FALSE, clip="on") +
-  geom_col(position = "dodge", width = 0.75, alpha = 0.7)  +
+  geom_col(position = "dodge", width = 0.75, alpha = 0.5)  +
   labs(y = "Voltage (microvolts)", x = "Participant Reading Style")  +  
   geom_errorbar(width = .08, position = position_dodge(0.75)) + 
   theme_classic(base_size = 8) + 
@@ -584,7 +606,7 @@ p3.b <- difference_scores_1.3 |> ggplot(aes(x = family_size, y = mean_diff,
       facet_wrap(vars(anteriority, laterality),
              labeller = "label_value", ncol = 3) + 
   coord_cartesian(xlim = NULL,ylim = c(-4, 4), expand = TRUE,default = FALSE,clip = "on") +
-  geom_col(position = "dodge", width = 0.75, alpha = 0.7) +
+  geom_col(position = "dodge", width = 0.75, alpha = 0.5) +
   labs(y = "N400 amplitude for Simple Minus Complex", x = "Family Size") + 
   geom_errorbar(width = .08, position = position_dodge(0.75)) + 
   theme_classic(base_size = 8) + 
@@ -600,6 +622,22 @@ p3.b + scale_fill_brewer(palette = "Paired")+
 
 ## Group 2 
 ### `Family Size` by `Complexity` Interaction
+```{r}
+# Examine the diffence between `complexity` at each level of `family_size` 
+
+se_smlfam_2.1 <-n400_2_nonwords |> filter(family_size == "small")|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          within = complexity)
+se_smlfam_2.1$ANOVA
+
+se_lrgfam_2.1 <-n400_2_nonwords |> filter(family_size == "large")|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          within = complexity)
+se_lrgfam_2.1$ANOVA
+```
+
 #### Pairwise Comparisons `complexity | family_size`
 ```{r}
 emms <- emmeans(anova_results.2b, ~ complexity | family_size )
@@ -619,7 +657,7 @@ summary(pairwise_results)
 
 #### Diff Scores `complexity | family_size`
 ```{r}
-(difference_scores_2.1 <- nw_cmplx_famsize_2 %>%
+(difference_scores_2.2 <- nw_cmplx_famsize_2 %>%
   pivot_wider(names_from = complexity, values_from = c(mean, se, num_stim)) %>%
   mutate(mean_diff = `mean_simple` - `mean_complex`, 
          avg_se = mean(`se_simple`,`se_complex`),
@@ -637,7 +675,7 @@ p2.a <-  nw_cmplx_famsize_2 |> ggplot(aes(x=family_size,
                                    ymin = mean - se, 
                                    ymax = mean + se)) +
   coord_cartesian(xlim = NULL,ylim = c(-1, 2.5), expand = TRUE,default = FALSE,clip = "on") +
-  geom_col(position = "dodge", width = .75,  alpha = .7)  +
+  geom_col(position = "dodge", width = .75,  alpha = .5)  +
   labs(y = "Voltage (microvolts)", x = "Family Size")  +  
   geom_errorbar(width = .1, position = position_dodge(0.75)) + 
   theme_classic(base_size = 8) + 
@@ -655,7 +693,7 @@ p2.b <- difference_scores_2.1 |> ggplot(aes(x = family_size,
                                         ymin = mean_diff - avg_se,
                                         ymax = mean_diff + avg_se)) +
   coord_cartesian(xlim = NULL,ylim = c(-2, 2), expand = TRUE,default = FALSE,clip = "on") +
-  geom_col(position = "dodge", width = 0.75, alpha = 0.7, 
+  geom_col(position = "dodge", width = 0.75, alpha = 0.5, 
            colour = "deepskyblue3", fill= "deepskyblue3") +
   labs(y = "N400 for Simple Minus Comlex Non-words", x = "Family Size") + 
   geom_errorbar(width = .08, position = position_dodge(0.75), colour = "deepskyblue3") + 

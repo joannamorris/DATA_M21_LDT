@@ -285,7 +285,7 @@ summary(pairwise_results)
 
 #### Plots
 First we plot the raw scores then the difference scores
-```{r, fig.width=5, fig.height=3}
+```{r, fig.width=5, fig.height=4}
 # plot raw scores
 # facet_wrap() wraps a 1d sequence of panels into 2d. Use vars() to supply faceting variables; 
 # Control the number of rows and columns with nrow and ncol.
@@ -296,7 +296,7 @@ p1.a <-  nw_famsize_cmplx_ant_1 |> ggplot(aes(x= family_size, y=mean,
                                              ymin = mean - se, ymax = mean + se)) +
   facet_wrap(vars(anteriority), ncol = 3, labeller = "label_value") +  
   coord_cartesian(xlim = NULL, ylim = c(-2, 1), expand = TRUE, default = FALSE,clip = "on") +
-  geom_col(position = "dodge", width = 0.75, alpha = .5)  +
+  geom_col(position = "dodge", width = 0.75, alpha = .4)  +
   labs(y = "Voltage (microvolts)", x = "Family Size")  + 
   geom_errorbar(width = .08, position = position_dodge(0.75)) + 
   theme_classic(base_size = 8) + 
@@ -317,11 +317,11 @@ p1.b <- difference_scores_1.1 |> ggplot(aes(x = anteriority,
                                             ymin = mean_diff - avg_se, 
                                             ymax = mean_diff + avg_se)) +
   coord_cartesian(xlim = NULL,ylim = c(-1, 1), expand = TRUE,default = FALSE,clip = "on") +
-  geom_col(position = "dodge", width = 0.75, alpha = 0.5) +
+  geom_col(position = "dodge", width = 0.75, alpha = 0.4) +
   labs(y = "n250 amplitude for Simple minus Complex Non-words", x = "Anteriority") + 
   geom_errorbar(width = .08, position = position_dodge(0.75)) + 
   theme_classic(base_size = 8) + 
-  geom_text(aes(label = round(mean_diff, digits = 2)),colour = "black",size = 2.5, vjust = -10, 
+  geom_text(aes(label = round(mean_diff, digits = 2)),colour = "black",size = 2.5, vjust = -6, 
              position = position_dodge(.75))+  
   guides(fill=guide_legend(title="Family Size"),
          colour= "none") +  
@@ -480,9 +480,9 @@ p2.a <-  nw_sem_famsize_lat_ant_cmplx_1 |> ggplot(aes(x= lang_type_semantic, y=m
                                           fill = complexity, colour = complexity,
                                           ymin = mean - se, ymax = mean + se)) +
   facet_wrap(vars(family_size, anteriority, laterality),
-             labeller = "label_value", ncol = 9) +  
+             labeller = "label_value", ncol = 3) +  
   coord_cartesian(xlim = NULL, ylim = c(-3.5, 3.5), expand=TRUE, default=FALSE, clip="on") +
-  geom_col(position = "dodge", width = 0.75, alpha = 0.7)  +
+  geom_col(position = "dodge", width = 0.75, alpha = 0.4)  +
   labs(y = "Voltage (microvolts)", x = "Participant Reading Style")  +  
   geom_errorbar(width = .08, position = position_dodge(0.75)) + 
   theme_classic(base_size = 8) + 
@@ -506,12 +506,12 @@ p2.b <- difference_scores_1.2 |> ggplot(aes(x = family_size, y = mean_diff,
                                         ymin = mean_diff - avg_se, ymax = mean_diff + avg_se)) +
       facet_wrap(vars(anteriority, laterality),
              labeller = "label_value", ncol = 3) + 
-  coord_cartesian(xlim = NULL,ylim = c(-4, 4), expand = TRUE,default = FALSE,clip = "on") +
-  geom_col(position = "dodge", width = 0.75, alpha = 0.7) +
+  coord_cartesian(xlim = NULL,ylim = c(-2, 3), expand = TRUE,default = FALSE,clip = "on") +
+  geom_col(position = "dodge", width = 0.75, alpha = 0.4) +
   labs(y = "n250 amplitude for Simple Minus Complex", x = "Family Size") + 
   geom_errorbar(width = .08, position = position_dodge(0.75)) + 
   theme_classic(base_size = 8) + 
-  geom_text(aes(label = round(mean_diff, digits = 2)),colour = "black",size = 2.5, vjust = -5.5, 
+  geom_text(aes(label = round(mean_diff, digits = 2)),colour = "black",size = 2.5, vjust = -3, 
              position = position_dodge(.75))+  
   guides(fill=guide_legend(title="Participant Reading Style"),
          colour= "none") +  
@@ -523,40 +523,190 @@ p2.b + scale_fill_brewer(palette = "Paired")+
 
 
 ## Group 2
-### `Language Type Semantic` by `Laterality`
+### `Language Type Semantic` by `Laterality` Interaction 
 #### Simple Effects `lang_type_semantic| laterality`
 ```{r}
-# Examine the 2-way interaction between `lang_type_semantic` at each level of `laterality` 
+# Examine the diffence between `lang_type_semantic` at each level of `laterality` 
 
-(se_left_2.1 <-n250_2_nonwords |> filter(anteriority == "Left")|>
+se_left_2.1 <-n250_2_nonwords |> filter(laterality == "Left")|>
   ezANOVA(dv = value,
           wid = SubjID,
-          within = NULL,
-          between = lang_type_semantic))
+          between = lang_type_semantic)
+se_left_2.1$ANOVA
 
-(se_midline_2.1 <-n250_1_nonwords |> filter(anteriority == "Midline")|>
+se_mid_2.1 <-n250_2_nonwords |> filter(laterality == "Midline")|>
   ezANOVA(dv = value,
           wid = SubjID,
-          between = .(lang_type_semantic)))
-(se_right_2.1 <-n250_1_nonwords |> filter(anteriority == "Right")|>
-  ezANOVA(dv = value,
-          wid = SubjID,
-          between = .(lang_type_semantic)))
+          between = lang_type_semantic)
+se_mid_2.1$ANOVA
 
-# Examine `complexity` at each level of ` family_size` at parietal sites.
-(se_parietal_small_1.1 <-n250_1_nonwords |> filter(anteriority == "Parietal" & 
-                                                    family_size == "small")|>
+se_right_2.1 <-n250_2_nonwords |> filter(laterality == "Right")|>
   ezANOVA(dv = value,
           wid = SubjID,
-          within = complexity))
-
-(se_parietal_large_1.1 <-n250_1_nonwords |> filter(anteriority == "Parietal" & 
-                                                    family_size == "large")|>
-  ezANOVA(dv = value,
-          wid = SubjID,
-          within = complexity))
+          between = lang_type_semantic)
+se_right_2.1$ANOVA
 ```
 
-There is a significant `complexity` by `family size` interaction only at parietal sites $F(1,66)=3.97705105, p=0.05025801$, where the complexity effect is a slightly more probable for small families $F(1,66)=2.621483, p=0.1101951$ than for large $F(1,66)=1.127293, p=0.2922231$. 
+No significant effect of `lang_type_semantic` at any laterality, but the effect is less probable at midline sites ($F(1,37) =  0.02925513, p=0.8651233$)  than at   left ($F(1,37)= 0.2837876, p=0.5974145$) or right ($F(1,37)=0.6945411, p=0.4099719$) sites
 
-### Family Size by Complexity
+#### Pairwise Comparisons `lang_type_semantic | laterality`
+```{r}
+emms <- emmeans(anova_results.2b, ~ lang_type_semantic | laterality )
+pairwise_results <- pairs(emms, by = c("laterality"))
+summary(pairwise_results)
+```
+
+#### Condition Means
+```{r}
+(nw_langsem_lat_2 <- n250_2_nonwords |> 
+    na.omit()|>
+   group_by(laterality, lang_type_semantic) |> 
+   summarise(mean = mean(value), 
+             se = sem(value),
+             num = n()))
+```
+
+#### Diff Scores
+```{r}
+(difference_scores_2.1 <- nw_langsem_lat_2 %>%
+  pivot_wider(names_from = lang_type_semantic, values_from = c(mean, se, num)) %>%
+  mutate(mean_diff = `mean_Low Semantic` - `mean_High Semantic`, 
+         avg_se = mean(`se_Low Semantic`,`se_High Semantic`),
+         total_num_stim = sum(`num_Low Semantic`, `num_High Semantic`)))
+```
+
+#### Plots`lang_type_ortho | anteriority` 
+First we plot the raw scores then the difference scores
+```{r, fig.width=5, fig.height=3}
+# plot raw scores
+p3.a <-  nw_langsem_lat_2 |> ggplot(aes(x=laterality, 
+                                   y=mean, 
+                                   fill = lang_type_semantic, 
+                                   colour = lang_type_semantic,
+                                   ymin = mean - se, 
+                                   ymax = mean + se)) +
+  coord_cartesian(xlim = NULL,ylim = c(0, 5), expand = TRUE,default = FALSE,clip = "on") +
+  geom_col(position = "dodge", width = .75,  alpha = 0.4)  +
+  labs(y = "Voltage (microvolts)", x = "Laterality")  +  
+  geom_errorbar(width = .1, position = position_dodge(0.75)) + 
+  theme_classic(base_size = 8) + 
+   geom_text(aes(label = round(mean, digits = 2)),colour = "black",size = 2.5, vjust = -5, 
+             position = position_dodge(.75))+
+  guides(fill=guide_legend(title="Participant Reading Style"),
+         colour= "none") +  
+  theme(legend.position = "bottom")
+p3.a + scale_fill_brewer(palette = "Paired")+
+      scale_colour_brewer(palette = "Paired")
+
+# plot diff scores
+p3.b <- difference_scores_2.1 |> ggplot(aes(x = laterality,
+                                        y = mean_diff,
+                                        ymin = mean_diff - avg_se,
+                                        ymax = mean_diff + avg_se)) +
+  coord_cartesian(xlim = NULL,ylim = c(-1.5, 2), expand = TRUE,default = FALSE,clip = "on") +
+  geom_col(position = "dodge", width = 0.75, alpha = 0.4, 
+           colour = "deepskyblue3", fill= "deepskyblue3") +
+  labs(y = "N250 for Low Semantic Minus High Semantic", x = "Laterality") + 
+  geom_errorbar(width = .08, position = position_dodge(0.75), colour = "deepskyblue3") + 
+  theme_classic(base_size = 8) + 
+  geom_text(aes(label = round(mean_diff, digits = 2)),colour = "black",size = 2.5, vjust = -5.5, 
+             position = position_dodge(.75))+  
+    guides(fill=guide_legend(title="Laterality"),
+           colour= "none") +  
+  theme(legend.position = "bottom")
+p3.b 
+ 
+# grid.arrange(p1.a, p1.b, nrow = 1)
+```
+
+### `Family Size` by `Complexity` Interaction
+#### Simple Effects `complexity | family_size`
+```{r}
+# Examine the diffence between `complexity` at each level of `family_size` 
+
+se_smlfam_2.2 <-n250_2_nonwords |> filter(family_size == "small")|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          within = complexity)
+se_smlfam_2.2$ANOVA
+
+se_lrgfam_2.2 <-n250_2_nonwords |> filter(family_size == "large")|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          within = complexity)
+se_lrgfam_2.2$ANOVA
+```
+
+No significant effect of `lang_type_semantic` at any laterality, but the effect is less probable at midline sites ($F(1,37) =  0.02925513, p=0.8651233$)  than at   left ($F(1,37)= 0.2837876, p=0.5974145$) or right ($F(1,37)=0.6945411, p=0.4099719$) sites
+
+#### Pairwise Comparisons `complexity | family_size`
+```{r}
+emms <- emmeans(anova_results.2b, ~ complexity | family_size )
+pairwise_results <- pairs(emms, by = c("family_size"))
+summary(pairwise_results)
+```
+
+#### Condition Means `complexity | family_size`
+```{r}
+(nw_cmplx_famsize_2 <- n250_2_nonwords |> 
+    na.omit()|>
+   group_by(family_size, complexity) |> 
+   summarise(mean = mean(value), 
+             se = sem(value),
+             num_stim = n()))
+```
+
+#### Diff Scores `complexity | family_size`
+```{r}
+(difference_scores_2.2 <- nw_cmplx_famsize_2 %>%
+  pivot_wider(names_from = complexity, values_from = c(mean, se, num_stim)) %>%
+  mutate(mean_diff = `mean_simple` - `mean_complex`, 
+         avg_se = mean(`se_simple`,`se_complex`),
+         total_num_stim = sum(`num_stim_simple`, `num_stim_complex`)))
+```
+
+#### Plots`complexity | family_size`
+First we plot the raw scores then the difference scores
+```{r, fig.width=5, fig.height=3}
+# plot raw scores
+p4.a <-  nw_cmplx_famsize_2 |> ggplot(aes(x=family_size, 
+                                   y=mean, 
+                                   fill = complexity, 
+                                   colour = complexity,
+                                   ymin = mean - se, 
+                                   ymax = mean + se)) +
+  coord_cartesian(xlim = NULL,ylim = c(0, 4), expand = TRUE,default = FALSE,clip = "on") +
+  geom_col(position = "dodge", width = .75,  alpha = .4)  +
+  labs(y = "Voltage (microvolts)", x = "Family Size")  +  
+  geom_errorbar(width = .1, position = position_dodge(0.75)) + 
+  theme_classic(base_size = 8) + 
+   geom_text(aes(label = round(mean, digits = 2)),colour = "black",size = 2.5, vjust = -2.5, 
+             position = position_dodge(.75))+
+  guides(fill=guide_legend(title="Complexity"),
+         colour= "none") +  
+  theme(legend.position = "bottom")
+p4.a + scale_fill_brewer(palette = "Set1")+
+      scale_colour_brewer(palette = "Set1")
+
+# plot diff scores
+p4.b <- difference_scores_2.2 |> ggplot(aes(x = family_size,
+                                        y = mean_diff,
+                                        ymin = mean_diff - avg_se,
+                                        ymax = mean_diff + avg_se)) +
+  coord_cartesian(xlim = NULL,ylim = c(-1.5, 2), expand = TRUE,default = FALSE,clip = "on") +
+  geom_col(position = "dodge", width = 0.75, alpha = 0.4, 
+           colour = "deepskyblue3", fill= "deepskyblue3") +
+  labs(y = "N250 for Simple Minus Comlex Non-words", x = "Family Size") + 
+  geom_errorbar(width = .08, position = position_dodge(0.75), colour = "deepskyblue3") + 
+  theme_classic(base_size = 8) + 
+  geom_text(aes(label = round(mean_diff, digits = 2)),colour = "black",size = 2.5, vjust = -6, 
+             position = position_dodge(.75))+  
+    guides(fill=guide_legend(title="Complexity Effect"),
+           colour= "none") +  
+  theme(legend.position = "bottom")
+p4.b 
+ 
+# grid.arrange(p1.a, p1.b, nrow = 1)
+```
+
+
