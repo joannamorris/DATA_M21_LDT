@@ -1,9 +1,11 @@
 ---
-title: "m21 LDT ERP analysis"
+title: "m21 LDT ERP analysis N250"
 author: "Joanna Morris"
 date: "`r Sys.Date()`"
 output:
-  bookdown::pdf_document2
+  bookdown::pdf_document2:
+    toc: true
+    toc_depth: 4
 editor_options: 
   chunk_output_type: console
 ---
@@ -52,9 +54,509 @@ sem <- function(x) sd(x)/sqrt(length(x))
 # Load and format data files
 First we load the data files
 ```{r, echo = FALSE}
-erpdat_1 <- read_csv("m21_ldt_mea_300500_200000_1.csv")
+erpdat_1 <- read_csv("m21_ldt_mea_200300_200000_1.csv")
 langdat_1 <- read_csv("m21_langdat_1_pca.csv")
 
-erpdat_2 <- read_csv("m21_ldt_mea_300500_200000_2.csv")
+erpdat_2 <- read_csv("m21_ldt_mea_200300_200000_2.csv")
 langdat_2 <- read_csv("m21_langdat_2_pca.csv")
 ```
+
+Now we extract `SubjID` from the `ERPset` column
+```{r, echo = FALSE}
+
+# Remove '_LDT_diff_waves' from each string in the ERPset column
+# This code first renames the column and then applies the `str_replace` function 
+# to the newly renamed column.
+erpdat_1 <- erpdat_1 %>%
+  rename(SubjID = ERPset) %>%
+  mutate(SubjID = str_replace(SubjID, "_LDT_diff_waves", "")) |>
+  mutate(binlabel = str_replace(binlabel, "Critical_", "")) |>
+  mutate(binlabel = str_replace(binlabel, "_family", "")) |>
+  select(-mlabel)
+
+erpdat_2 <- erpdat_2 %>%
+  rename(SubjID = ERPset) %>%
+  mutate(SubjID = str_replace(SubjID, "_LDT_diff_waves", "")) |>
+  mutate(binlabel = str_replace(binlabel, "Critical_", "")) |>
+  mutate(binlabel = str_replace(binlabel, "_family", ""))|>
+  select(-mlabel)
+```
+
+We then join the ERP data, and language into a single data frame
+```{r, echo = FALSE}
+# Join the three data frames, specifying different join columns for the third join
+n250_1 <- erpdat_1 %>%
+  full_join(langdat_1, by = "SubjID")
+
+n250_2 <- erpdat_2 %>%
+  full_join(langdat_2, by = "SubjID") 
+```
+
+Divide into word, non-word and difference wave dataframes
+```{r}
+n250_1_words <- n250_1 |> filter(bini %in% c(1:2))
+n250_1_nonwords <- n250_1 |> filter(bini %in% c(3:6))
+n250_1_diff <- n250_1 |> filter(bini %in% c(9:11))
+
+n250_2_words <- n250_2 |> filter(bini %in% c(1:2))
+n250_2_nonwords <- n250_2 |> filter(bini %in% c(3:6))
+n250_2_diff <- n250_2 |> filter(bini %in% c(9:11))
+```
+
+Then we do some more formatting and cleanup of the dataframes.We  create separate columns, one for each independent variable (anteriority, laterality, morphological family size). To do this we have to use `seperate` function from the `stringr` package. Run `vignette("programming", package = "dplyr")` to see more about `tidy-selection` and `tidy-evaluation`.
+
+```{r, echo = FALSE}
+library(stringr)
+library(tidyr)
+
+n250_1_nonwords <- n250_1_nonwords %>%
+  separate(binlabel, into = c("trial_type", "family_size", "complexity"), sep = "_", remove = TRUE) |>
+  select(-trial_type)
+n250_1_words <- n250_1_words %>%
+  separate(binlabel, into = c("trial_type", "family_size"), sep = "_", remove = TRUE) |>
+  select(-trial_type)
+
+n250_2_nonwords <- n250_2_nonwords %>%
+  separate(binlabel, into = c("trial_type", "family_size", "complexity"), sep = "_", remove = TRUE) |>
+  select(-trial_type)
+n250_2_words <- n250_2_words %>%
+  separate(binlabel, into = c("trial_type", "family_size"), sep = "_", remove = TRUE) |>
+  select(-trial_type)
+```
+
+Now we need to  extract just the bins and channels that we intend to analyse. For this analysis we will use 9 channels:  F3, Fz, F4, C3, Cz, C4, P3, Pz, P4 . We will use the`mutate` function from the `dplyr` package along with the `case_when` function. The `case_when` function  is a sequence of two-sided formulas. The left hand side determines which values match this case. The right hand side provides the replacement value.
+
+```{r, echo=FALSE}
+
+channels_1 <-  c(3, 2, 25, 7, 20, 21, 12, 11, 16)
+channels_2 <-  c(3, 2, 29, 8, 23, 24, 14, 13, 19)
+
+n250_1_nonwords <- n250_1_nonwords %>%
+  filter(chindex %in% channels_1) %>% 
+  mutate(anteriority = case_when(grepl("F", chlabel) ~ "Frontal",
+                                 grepl("C", chlabel) ~ "Central",
+                                 grepl("P", chlabel) ~ "Parietal"),
+         laterality = case_when(grepl("3", chlabel) ~ "Left",
+                                grepl("z", chlabel) ~ "Midline",
+                                grepl("Z", chlabel) ~ "Midline",
+                                grepl("4", chlabel) ~ "Right"))
+n250_1_nonwords$anteriority <- factor(n250_1_nonwords$anteriority, levels = c("Frontal", 
+                                                                              "Central", 
+                                                                              "Parietal"))
+n250_1_nonwords$laterality <- factor(n250_1_nonwords$laterality, levels = c("Left", 
+                                                                            "Midline", 
+                                                                            "Right"))
+
+
+n250_2_nonwords <- n250_2_nonwords %>%
+  filter(chindex %in% channels_2) %>% 
+  mutate(anteriority = case_when(grepl("F", chlabel) ~ "Frontal",
+                                 grepl("C", chlabel) ~ "Central",
+                                 grepl("P", chlabel) ~ "Parietal"),
+         laterality = case_when(grepl("3", chlabel) ~ "Left",
+                                grepl("z", chlabel) ~ "Midline",
+                                grepl("Z", chlabel) ~ "Midline",
+                                grepl("4", chlabel) ~ "Right"))
+n250_2_nonwords$anteriority <- factor(n250_2_nonwords$anteriority, levels = c("Frontal", 
+                                                                              "Central", 
+                                                                              "Parietal"))
+n250_2_nonwords$laterality <- factor(n250_2_nonwords$laterality, levels = c("Left", 
+                                                                            "Midline", 
+                                                                            "Right"))
+n250_2_nonwords$anteriority <- factor(n250_2_nonwords$anteriority, levels = c("Frontal", 
+                                                                              "Central", 
+                                                                              "Parietal"))
+n250_2_nonwords$laterality <- factor(n250_2_nonwords$laterality, levels = c("Left", 
+                                                                            "Midline", 
+                                                                            "Right"))
+
+```
+
+# Now we can compute the ANOVA using `ezANOVA` and `aov_ez`
+
+## Group 1
+```{r}
+anova_results.1a <- ezANOVA(n250_1_nonwords,
+        dv = value,
+        wid = SubjID,
+        within = .(family_size, complexity, anteriority, laterality),
+        between = .(lang_type_semantic, lang_type_ortho),
+        type = 3) 
+anova_results.1a$ANOVA
+anova_results.1a$`Sphericity Corrections`
+
+anova_results.1b <- aov_ez(id = "SubjID",
+                          dv = "value",
+                          data = n250_1_nonwords,
+                          within = c("family_size",
+                                     "complexity",
+                                     "anteriority",
+                                     "laterality"),
+                          between = c("lang_type_semantic","lang_type_ortho"), 
+                          type = 3)
+anova_results.1b
+```
+
+## Group 2
+```{r}
+anova_results.2a <- ezANOVA(n250_2_nonwords,
+        dv = value,
+        wid = SubjID,
+        within = .(family_size, complexity,anteriority, laterality),
+        between = .(lang_type_semantic, lang_type_ortho),
+        type = 3) 
+anova_results.2a$ANOVA
+anova_results.2a$`Sphericity Corrections`
+
+anova_results.2b <- aov_ez(id = "SubjID",
+                          dv = "value",
+                          data = n250_2_nonwords,
+                          within = c("family_size", 
+                                     "complexity", 
+                                     "anteriority", 
+                                     "laterality"),
+                          between = c("lang_type_semantic","lang_type_ortho"), 
+                          type = 3)
+anova_results.2b
+```
+
+
+# Examine and plot interactions
+## Group 1 
+### `Family Size` by `Complexity` by `Anteriority` Interaction
+#### Simple Effects `complexity| family_size * anteriority`
+```{r}
+# Examine the 2-way interaction between ` family_size` and `complexity` 
+# at each level of `Anteriority`
+(se_frontal_1.1 <-n250_1_nonwords |> filter(anteriority == "Frontal")|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          within = .(complexity, family_size)))
+(se_central_1.1 <-n250_1_nonwords |> filter(anteriority == "Central")|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          within = .(complexity, family_size)))
+(se_parietal_1.1 <-n250_1_nonwords |> filter(anteriority == "Parietal")|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          within = .(complexity, family_size)))
+
+# Examine `complexity` at each level of ` family_size` at parietal sites.
+(se_parietal_small_1.1 <-n250_1_nonwords |> filter(anteriority == "Parietal" & 
+                                                    family_size == "small")|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          within = complexity))
+
+(se_parietal_large_1.1 <-n250_1_nonwords |> filter(anteriority == "Parietal" & 
+                                                    family_size == "large")|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          within = complexity))
+```
+
+There is a significant `complexity` by `family size` interaction only at parietal sites $F(1,66)=3.97705105, p=0.05025801$, where the complexity effect is a slightly more probable for small families $F(1,66)=2.621483, p=0.1101951$ than for large $F(1,66)=1.127293, p=0.2922231$. 
+
+#### Pairwise Comparisons `complexity| family_size * anteriority`
+```{r}
+emms <- emmeans(anova_results.1b, ~ complexity| family_size * anteriority )
+pairwise_results <- pairs(emms, by = c("anteriority", "family_size"))
+summary(pairwise_results)
+```
+
+#### Condition Means
+```{r}
+(nw_famsize_cmplx_ant_1 <- n250_1_nonwords |> 
+    na.omit()|>
+   group_by(family_size, anteriority, complexity) |> 
+   summarise(mean = mean(value), 
+             se = sem(value),
+             num_stim = n()))
+```
+
+#### Diff Scores
+```{r}
+(difference_scores_1.1 <- nw_famsize_cmplx_ant_1 %>%
+  pivot_wider(names_from = complexity, values_from = c(mean, se, num_stim)) %>%
+  mutate(mean_diff = `mean_simple` - `mean_complex`, 
+         avg_se = mean(`se_complex`,`se_simple`),
+         total_num_stim = sum(`num_stim_complex`, `num_stim_simple`)))
+```
+
+#### Plots
+First we plot the raw scores then the difference scores
+```{r, fig.width=5, fig.height=3}
+# plot raw scores
+# facet_wrap() wraps a 1d sequence of panels into 2d. Use vars() to supply faceting variables; 
+# Control the number of rows and columns with nrow and ncol.
+
+
+p1.a <-  nw_famsize_cmplx_ant_1 |> ggplot(aes(x= family_size, y=mean, 
+                                             fill = complexity, colour = complexity,
+                                             ymin = mean - se, ymax = mean + se)) +
+  facet_wrap(vars(anteriority), ncol = 3, labeller = "label_value") +  
+  coord_cartesian(xlim = NULL, ylim = c(-2, 1), expand = TRUE, default = FALSE,clip = "on") +
+  geom_col(position = "dodge", width = 0.75, alpha = .5)  +
+  labs(y = "Voltage (microvolts)", x = "Family Size")  + 
+  geom_errorbar(width = .08, position = position_dodge(0.75)) + 
+  theme_classic(base_size = 8) + 
+   geom_text(aes(label = round(mean, digits = 1)), colour = "black",  
+             size = 2.5,  vjust = -7, 
+             position = position_dodge(.75))+
+  guides(fill=guide_legend(title="Non-Word Complexity"),
+         colour= "none") +  
+  theme(legend.position = "bottom")
+p1.a + scale_fill_brewer(palette = "Set1")+
+      scale_colour_brewer(palette = "Set1")
+
+# plot diff scores
+p1.b <- difference_scores_1.1 |> ggplot(aes(x = anteriority, 
+                                            y = mean_diff,
+                                            fill = family_size,
+                                            colour = family_size,
+                                            ymin = mean_diff - avg_se, 
+                                            ymax = mean_diff + avg_se)) +
+  coord_cartesian(xlim = NULL,ylim = c(-1, 1), expand = TRUE,default = FALSE,clip = "on") +
+  geom_col(position = "dodge", width = 0.75, alpha = 0.5) +
+  labs(y = "n250 amplitude for Simple minus Complex Non-words", x = "Anteriority") + 
+  geom_errorbar(width = .08, position = position_dodge(0.75)) + 
+  theme_classic(base_size = 8) + 
+  geom_text(aes(label = round(mean_diff, digits = 2)),colour = "black",size = 2.5, vjust = -10, 
+             position = position_dodge(.75))+  
+  guides(fill=guide_legend(title="Family Size"),
+         colour= "none") +  
+  theme(legend.position = "bottom")
+p1.b + scale_fill_brewer(palette = "Set2")+
+      scale_colour_brewer(palette = "Set2")
+```
+
+
+### `Language Type Semantic` by `Complexity` by `Family Size` by `Anteriority` x` Laterality` Interaction
+#### Simple Effects `complexity | lang_type_semantic * family_size * laterality * anteriority `
+```{r}
+# Examine the 4-way interaction between `anteriority`, `laterality`, ` complexity`, 
+# and `lang_type_semantics` at each level of `family_size`
+se_large_1.2 <-n250_1_nonwords |> filter(family_size == "small")|>
+  ezANOVA(dv = value,
+         wid = SubjID,
+         within = .(complexity, anteriority, laterality),
+         between = .(lang_type_semantic),
+         type = 3)
+se_large_1.2$`Sphericity Corrections`
+
+se_small_1.2 <-n250_1_nonwords |> filter(family_size == "large")|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          within = .(complexity, anteriority, laterality),
+          between = lang_type_semantic)
+se_small_1.2$`Sphericity Corrections`
+
+# Examine the 3-way interaction between ` complexity`, `anteriority` and `laterality` 
+# at each level of `lang_type_semantics` for non-words from large families
+
+se_large_hisem_1.2 <-n250_1_nonwords |> filter(family_size == "large" & 
+                                                 lang_type_semantic == "High Semantic")|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          within = .(anteriority, laterality, complexity))
+se_large_hisem_1.2$`Sphericity Corrections`
+
+se_large_losem_1.2 <-n250_1_nonwords |> filter(family_size == "large" & 
+                                                 lang_type_semantic == "Low Semantic")|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          within = .(complexity, anteriority, laterality))
+se_large_losem_1.2$`Sphericity Corrections`
+
+
+# Examine the 2-way interaction between complexity and anteriority 
+# at each level of laterality for non-words from large families for high semantic readers
+
+# left
+se_large_hisem_left_1.2 <-n250_1_nonwords |> 
+  filter(family_size == "large" & 
+           lang_type_semantic == "High Semantic" & 
+           laterality == "Left")|>
+    ezANOVA(dv = value,
+          wid = SubjID,
+          within = .(complexity, anteriority))
+se_large_hisem_left_1.2$`Sphericity Corrections`
+
+# midline
+se_large_hisem_mid_1.2 <-n250_1_nonwords |> 
+    filter(family_size == "large" & 
+             lang_type_semantic == "High Semantic" & 
+             laterality == "Midline")|>
+    ezANOVA(dv = value,
+          wid = SubjID,
+          within = .(complexity, anteriority))
+se_large_hisem_mid_1.2$`Sphericity Corrections`
+
+# right
+se_large_hisem_right_1.2 <-n250_1_nonwords |> 
+    filter(family_size == "large" & 
+             lang_type_semantic == "High Semantic" & 
+             laterality == "Right")|>
+    ezANOVA(dv = value,
+          wid = SubjID,
+          within = .(complexity, anteriority))
+se_large_hisem_right_1.2$`Sphericity Corrections`
+
+# Finally we examine the simple effect of complexity at each level of anteriority 
+# for non-words from large families for high semantic readers at left sites
+# Frontal
+se_large_hisem_left_frontal_1.2 <- n250_1_nonwords |>
+      filter(family_size == "large" & 
+               lang_type_semantic == "High Semantic" & 
+               laterality == "Left" & 
+               anteriority == "Frontal" )|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          within = .(complexity))
+se_large_hisem_left_frontal_1.2$ANOVA
+
+# Central
+se_large_hisem_left_central_1.2 <- n250_1_nonwords |>
+      filter(family_size == "large" & 
+               lang_type_semantic == "High Semantic" & 
+               laterality == "Left" & 
+               anteriority == "Central" )|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          within = .(complexity))
+se_large_hisem_left_central_1.2$ANOVA  
+
+
+# Parietal
+se_large_hisem_left_parietal_1.2 <- n250_1_nonwords |>
+      filter(family_size == "large" & 
+               lang_type_semantic == "High Semantic" & 
+               laterality == "Left" & 
+               anteriority == "Parietal" )|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          within = .(complexity))
+se_large_hisem_left_parietal_1.2$ANOVA  
+
+```
+
+
+#### Pairwise Comparisons  `complexity | lang_type_semantic * family_size * laterality * anteriority`
+```{r}
+emms <- emmeans(anova_results.1b,~complexity|lang_type_semantic*family_size*laterality*anteriority)
+pairwise_results <- pairs(emms,by = c("laterality","anteriority","lang_type_semantic","family_size"))
+summary(pairwise_results)
+```
+
+#### Condition Means `complexity | lang_type_semantic * family_size * laterality * anteriority`
+```{r}
+(nw_sem_famsize_lat_ant_cmplx_1 <- n250_1_nonwords |> 
+    na.omit()|>
+   group_by( lang_type_semantic, family_size, laterality, anteriority, complexity  ) |> 
+   summarise(mean = mean(value), 
+             se = sem(value),
+             num_stim = n()))
+```
+
+#### Diff Scores `complexity | lang_type_semantic * family_size * laterality * anteriority`
+```{r}
+(difference_scores_1.2 <- nw_sem_famsize_lat_ant_cmplx_1 %>%
+  pivot_wider(names_from = complexity, values_from = c(mean, se, num_stim)) %>%
+  mutate(mean_diff = `mean_simple` - `mean_complex`, 
+         avg_se = mean(`se_complex`,`se_simple`),
+         total_num_stim = sum(`num_stim_complex`, `num_stim_simple`)))
+```
+
+#### Plots `complexity | lang_type_semantic * family_size * laterality * anteriority`
+First we plot the raw scores then the difference scores
+
+**Plot interaction `complexity | lang_type_semantic * family_size * laterality * anteriority ` Raw Scores**
+`facet_wrap()` wraps a 1d sequence of panels into 2d. Use `vars()` to supply faceting variables;  Control the number of rows and columns with `nrow` and `ncol.` `labeller` options are "label_value" and "label_both".  The latter prints the name of the variable & its value.
+
+ Plot raw scores
+```{r, fig.width=7, fig.height=10}
+
+p2.a <-  nw_sem_famsize_lat_ant_cmplx_1 |> ggplot(aes(x= lang_type_semantic, y=mean,
+                                          fill = complexity, colour = complexity,
+                                          ymin = mean - se, ymax = mean + se)) +
+  facet_wrap(vars(family_size, anteriority, laterality),
+             labeller = "label_value", ncol = 9) +  
+  coord_cartesian(xlim = NULL, ylim = c(-3.5, 3.5), expand=TRUE, default=FALSE, clip="on") +
+  geom_col(position = "dodge", width = 0.75, alpha = 0.7)  +
+  labs(y = "Voltage (microvolts)", x = "Participant Reading Style")  +  
+  geom_errorbar(width = .08, position = position_dodge(0.75)) + 
+  theme_classic(base_size = 8) + 
+   geom_text(aes(label = round(mean, digits = 1)),
+             colour = "black", 
+             size = 2.5, 
+             vjust = -2, 
+             position = position_dodge(.75))+
+  guides(fill=guide_legend(title="Complexity"),
+         colour= "none") +  
+  theme(legend.position = "bottom")
+p2.a + scale_fill_brewer(palette = "Set1")+
+      scale_colour_brewer(palette = "Set1")
+```
+
+Plot diff scores
+```{r, fig.width=7, fig.height=6}
+
+p2.b <- difference_scores_1.2 |> ggplot(aes(x = family_size, y = mean_diff,
+                                        fill = lang_type_semantic, colour = lang_type_semantic,
+                                        ymin = mean_diff - avg_se, ymax = mean_diff + avg_se)) +
+      facet_wrap(vars(anteriority, laterality),
+             labeller = "label_value", ncol = 3) + 
+  coord_cartesian(xlim = NULL,ylim = c(-4, 4), expand = TRUE,default = FALSE,clip = "on") +
+  geom_col(position = "dodge", width = 0.75, alpha = 0.7) +
+  labs(y = "n250 amplitude for Simple Minus Complex", x = "Family Size") + 
+  geom_errorbar(width = .08, position = position_dodge(0.75)) + 
+  theme_classic(base_size = 8) + 
+  geom_text(aes(label = round(mean_diff, digits = 2)),colour = "black",size = 2.5, vjust = -5.5, 
+             position = position_dodge(.75))+  
+  guides(fill=guide_legend(title="Participant Reading Style"),
+         colour= "none") +  
+  theme(legend.position = "bottom")
+p2.b + scale_fill_brewer(palette = "Paired")+
+      scale_colour_brewer(palette = "Paired")
+```
+
+
+
+## Group 2
+### `Language Type Semantic` by `Laterality`
+#### Simple Effects `lang_type_semantic| laterality`
+```{r}
+# Examine the 2-way interaction between `lang_type_semantic` at each level of `laterality` 
+
+(se_left_2.1 <-n250_2_nonwords |> filter(anteriority == "Left")|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          within = NULL,
+          between = lang_type_semantic))
+
+(se_midline_2.1 <-n250_1_nonwords |> filter(anteriority == "Midline")|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          between = .(lang_type_semantic)))
+(se_right_2.1 <-n250_1_nonwords |> filter(anteriority == "Right")|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          between = .(lang_type_semantic)))
+
+# Examine `complexity` at each level of ` family_size` at parietal sites.
+(se_parietal_small_1.1 <-n250_1_nonwords |> filter(anteriority == "Parietal" & 
+                                                    family_size == "small")|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          within = complexity))
+
+(se_parietal_large_1.1 <-n250_1_nonwords |> filter(anteriority == "Parietal" & 
+                                                    family_size == "large")|>
+  ezANOVA(dv = value,
+          wid = SubjID,
+          within = complexity))
+```
+
+There is a significant `complexity` by `family size` interaction only at parietal sites $F(1,66)=3.97705105, p=0.05025801$, where the complexity effect is a slightly more probable for small families $F(1,66)=2.621483, p=0.1101951$ than for large $F(1,66)=1.127293, p=0.2922231$. 
+
+### Family Size by Complexity

@@ -224,7 +224,7 @@ anova_results.2b
 ```
 
 # Examine and plot interactions
-## Group 2 
+## Group 1 
 ### `Language Type Orthographic` by `Anteriority` Interaction
 
 #### Pairwise Comparisons `lang_type_ortho | anteriority`
@@ -297,9 +297,6 @@ p1.b
  
 # grid.arrange(p1.a, p1.b, nrow = 1)
 ```
-
-
-
 
 ### `Language Type Semantic` by `Complexity` by `Anteriority`  Interaction
 #### Simple Effects `complexity | lang_type_semantic * anteriority`
@@ -540,10 +537,7 @@ summary(pairwise_results)
              se = sem(value),
              num_stim = n()))
 ```
-
-#### Plots `complexity | lang_type_semantic * family_size * laterality * anteriority`
-First we plot the raw scores then the difference scores
-Diff Scores `complexity | lang_type_semantic * family_size * laterality * anteriority`
+#### Diff Scores `complexity | lang_type_semantic * family_size * laterality * anteriority`
 ```{r}
 (difference_scores_1.3 <- nw_sem_famsize_lat_ant_cmplx_1 %>%
   pivot_wider(names_from = complexity, values_from = c(mean, se, num_stim)) %>%
@@ -551,9 +545,9 @@ Diff Scores `complexity | lang_type_semantic * family_size * laterality * anteri
          avg_se = mean(`se_complex`,`se_simple`),
          total_num_stim = sum(`num_stim_complex`, `num_stim_simple`)))
 ```
+#### Plots `complexity | lang_type_semantic * family_size * laterality * anteriority`
+First we plot the raw scores then the difference scores
 
-
-**Plot interaction `complexity | lang_type_semantic * family_size * laterality * anteriority ` Raw Scores**
 `facet_wrap()` wraps a 1d sequence of panels into 2d. Use `vars()` to supply faceting variables;  Control the number of rows and columns with `nrow` and `ncol.` `labeller` options are "label_value" and "label_both".  The latter prints the name of the variable & its value.
 
  Plot raw scores
