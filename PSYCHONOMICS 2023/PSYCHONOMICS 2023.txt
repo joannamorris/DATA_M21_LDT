@@ -1,0 +1,62 @@
+ERP responses reflect  individual differences in visual statistical learning
+
+ABSTRACT
+	
+Do individual differences in mechanisms of implicit learning play a role in learning to read words? In order to determine the time course and neural processes involved in online statistical learning of visual sequence, and their relationship to visual word recognition we recorded event-related potentials (ERPs) while participants were exposed to continuous sequences with elements organized into shape-words and then correlated the data with reading profiles derived from tests of spelling and vocabulary. Our data suggest that the ERP responses, in particular the N400, may be correlated with  statistical learning and reflect individual differences in the extent to which word reading relies on orthographic versus semantic representations.
+
+INTRODUCTION
+Statistical learning refers to the the mechanism by which we extract regular patterns from our sensory environment.  
+
+Recognising visual patterns is a key component of many cognitive activities, and individuals differ in their sensitivity to these pattens (Misyak et al., 2010).
+
+Reading words requires statistical learning in that readers must recognize letter patterns that frequently co-occur within words, such as affixes like  ‘pre-‘,  ’-ing’, and ‘-er’. 
+
+Andrews & Lo (2013) found that skilled readers differ in terms of the extent to which they are sensitive to these sub-lexical orthographic patterns, (i.e. multi-character graphemes and affixes), and that this sensitivity influences the early stages of lexical retrieval.
+
+Statistical learning has been show to facilitate reading ability in children (Arciuli & Simpson, 2012). But, do individual differences in statistical learning play a role in skilled reading? 
+
+If so, to what extent are individual differences in sensitivity to sub-lexical orthographic patterns reflected in individual differences in brain responses to the statistical patterns in non-linguistic visual sequences?
+
+METHODS
+Following Andrews & Lo (2013, we used standardized scores on vocabulary and spelling tests as measures of semantic coherence and  orthographic precision respectively. 
+
+Readers with better spelling than vocabulary were characterized as having an 'orthographic' reading profile.
+
+Those with better vocabulary than spelling were characterized as having a 'semantic' profile.
+
+Participants (n = 45) completed a visual statistical learning task consisting of an initial training phase and a subsequent test phase. 
+
+In the training phase, participants viewed a series of unfamiliar shapes organized into triplets. Each triplet was presented 24 times during training. 
+
+In a subsequent testing phase, on each trial participants saw two triplets—one that had been presented in the training phase and one unfamiliar triplet.
+
+On each trial, they pressed a button to indicate whether the familiar triplet was presented first or second.  
+
+As they completed the task we measured we measured the amplitude of the N400 component, a reflection of statistical learning (Abla et al., 2008; Abla & Okanoya, 2009). 
+
+RESULTS
+ERP Figure Caption: This figure shows the ERP waveforms and scalp voltage maps to the first shape of ‘old’ triplets versus ‘new’. For the waveforms, the x-axis shows time in milliseconds; the y-axis shows voltage in microvolts. The responses to ‘old’ triplets are plotted in a solid blue line; the responses to ‘new’ triplets are plotted in a dashed red line. The topographical scalp maps show the ‘old’ - ‘new’ contrast. Negative voltages are shown in blue, and positive voltages in red.
+
+All participants showed a sustained negativity beginning at ~200 milliseconds and continuing throughout the recorded time window to ‘old’ triplets vs ‘new’.
+
+This negativity was greatest for the first element in the triplet sequence (Abla et al., 2008).
+
+The ‘old’-‘new’ difference was greater for readers with an orthographic versus a semantic profile.
+
+DISCUSSION
+There were clear differences in the ERPs to ‘old’ versus ‘new’ sequences, even when participants did not recognize the sequences as old; ERP responses to ‘misses’ resembled those of ‘hits’, while ERP responses to ‘false alarms’ resembled those of ‘correct rejections’.
+
+Although orthographic and semantic readers did not differ in ability to discriminate old from new sequences based on their behavioral data, the ERP data showed clear differences—orthographic readers were more sensitive to statistical patterns.
+
+These data suggest that ERP responses reflects differences in sensitivity to visual statistical learning, and these differences are related to readers’ sensitivity to sub-lexical orthographic structure.
+
+REFERENCES
+Abla, D., Katahira, K., & Okanoya, K. (2008). On-line Assessment of Statistical Learning by Event-related Potentials. Journal of Cognitive Neuroscience, 20(6), 952–964. https://doi.org/10.1162/jocn.2008.20058
+
+Abla, D., & Okanoya, K. (2009). Visual statistical learning of shape sequences: An ERP study. Neuroscience Research, 64(2), 185–190. https://doi.org/10.1016/j.neures.2009.02.013
+
+Andrews, S., & Lo, S. (2013). Is morphological priming stronger for transparent than opaque words? It depends on individual differences in spelling and vocabulary. Journal of Memory and Language, 68(3), 279–296. https://doi.org/10.1016/j.jml.2012.12.001
+
+Arciuli, J., & Simpson, I. C. (2012). Statistical learning is related to reading ability in children and adults. Cognitive Science, 36(2), 286–304. https://doi.org/10.1111/j.1551-6709.2011.01200.x
+
+Misyak, J. B., Christiansen, M. H., & Tomblin, J. B. (2010). On-Line Individual Differences in Statistical Learning Predict Language Processing. Frontiers in Psychology, 1. https://doi.org/10.3389/fpsyg.2010.00031
