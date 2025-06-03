@@ -1,0 +1,76 @@
+﻿Q2,SC2,SC0,SC0,Q9,Q27,,Q14,Q15,Q48,Q49,Q43,Q50,Q51,NF1,NF2,NF3
+SID,ART_total_score,spell_correct,vocab_correct,Sex assigned at birth: - Selected Choice,Age,handed_score,How many hours per week do you read for pleasure (not for school or work)?,born_us,medication,head_inj,lang_imp,vision,hearing,romance,germanic,num_non_english
+12,12,71,34,Female,20,11,1-3 hours,Yes,No,No,No,Yes,Yes,yes,no,2
+13,18,62,43,Female,18,10,4-6 hours,Yes,No,No,No,Yes,Yes,yes,no,1
+101,14,55,33,Male,21,10,1-3 hours,Yes,No,No,No,Yes,Yes,no,no,0
+103,30,69,41,Female,20,10,1-3 hours,Yes,Yes (please list):,No,No,Yes,Yes,yes,no,3
+104,16,62,42,Female,21,11,1-3 hours,Yes,Yes (please list):,No,No,Yes,Yes,yes,no,1
+105,24,64,32,Female,18,11,1-3 hours,Yes,No,No,No,Yes,Yes,yes,yes,3
+106,18,77,44,Female,20,10,1-3 hours,Yes,Yes (please list):,No,No,Yes,Yes,yes,yes,3
+107,12,68,38,Female,18,10,1-3 hours,Yes,Yes (please list):,No,No,Yes,Yes,yes,no,2
+108,22,69,42,Female,18,11,1-3 hours,Yes,No,No,No,Yes,Yes,yes,no,3
+109,22,70,44,Female,18,11,1-3 hours,Yes,Yes (please list):,No,No,Yes,Yes,no,no,3
+110,18,68,29,Female,18,10,4-6 hours,Yes,No,No,No,Yes,Yes,yes,no,2
+111,16,66,37,Female,21,11,1-3 hours,Yes,No,No,No,Yes,Yes,yes,no,1
+112,10,69,37,Female,18,10,1-3 hours,Yes,No,No,No,Yes,Yes,yes,no,3
+113,40,63,48,Female,19,11,1-3 hours,Yes,Yes (please list):,No,No,Yes,Yes,yes,no,1
+114,10,51,32,Male,18,7,4-6 hours,Yes,No,No,No,Yes,Yes,yes,no,2
+115,12,64,45,Female,19,11,1-3 hours,Yes,No,No,No,Yes,Yes,yes,no,1
+116,20,64,46,Female,18,8,4-6 hours,Yes,Yes (please list):,No,No,Yes,Yes,yes,no,3
+117,-6,63,35,Male,23,10,4-6 hours,Yes,Yes (please list):,No,No,Yes,Yes,no,no,2
+118,22,67,46,Female,18,8,1-3 hours,Yes,Yes (please list):,Yes (please elaborate):,No,Yes,Yes,yes,no,1
+119,32,61,43,Male,19,10,4-6 hours,Yes,No,No,No,Yes,Yes,yes,no,3
+120,18,55,42,Female,18,11,1-3 hours,Yes,No,No,No,Yes,Yes,yes,no,1
+122,6,61,31,Female,18,10,Not at all (I only read for school),Yes,No,No,No,Yes,Yes,yes,no,2
+123,22,68,48,Female,18,7,4-6 hours,Yes,Yes (please list):,No,No,Yes,Yes,no,no,1
+124,34,64,48,Female,20,11,4-6 hours,Yes,No,No,No,Yes,Yes,yes,no,2
+125,30,71,48,Female,18,9,1-3 hours,Yes,No,No,No,Yes,Yes,yes,no,2
+127,34,66,32,Female,23,10,Not at all (I only read for school),Yes,No,Yes (please elaborate):,No,Yes,Yes,yes,yes,4
+128,32,70,43,Male,18,10,1-3 hours,Yes,No,No,No,Yes,Yes,yes,no,4
+129,16,52,48,Female,18,10,1-3 hours,Yes,No,No,No,Yes,Yes,yes,no,3
+130,32,69,49,Female,39,7,1-3 hours,Yes,No,No,No,Yes,Yes,no,no,2
+131,6,61,31,Female,21,11,1-3 hours,Yes,Yes (please list):,No,No,Yes,Yes,yes,no,1
+132,20,66,33,Female,31,10,1-3 hours,Yes,No,No,No,Yes,Yes,yes,no,2
+133,58,78,49,Female,48,11,6+ hours,Yes,Yes (please list):,No,No,Yes,Yes,yes,no,3
+134,32,71,46,Female,19,11,4-6 hours,Yes,No,No,No,Yes,Yes,yes,no,1
+135,16,76,41,Female,20,11,1-3 hours,Yes,No,Yes (please elaborate):,No,Yes,Yes,yes,no,2
+136,20,67,34,Female,19,6,1-3 hours,Yes,Yes (please list):,No,No,Yes,Yes,yes,no,3
+137,28,58,44,Male,18,11,4-6 hours,No,No,No,No,Yes,No (please elaborate):,no,no,3
+138,24,61,44,Male,21,7,1-3 hours,Yes,Yes (please list):,No,No,Yes,Yes,no,no,1
+139,28,70,40,Female,21,10,1-3 hours,Yes,Yes (please list):,No,No,Yes,Yes,yes,no,1
+140,20,71,44,Female,18,11,1-3 hours,Yes,Yes (please list):,No,No,Yes,Yes,yes,no,2
+141,16,59,40,Female,19,10,1-3 hours,Yes,No,No,No,Yes,Yes,no,no,0
+142,22,60,49,Male,25,9,6+ hours,Yes,No,No,No,Yes,Yes,yes,no,2
+143,12,55,30,Male,23,11,1-3 hours,Yes,No,No,No,Yes,Yes,yes,no,0
+144,26,62,45,Female,19,11,1-3 hours,Yes,Yes (please list):,Yes (please elaborate):,No,Yes,Yes,no,no,1
+145,10,61,36,Female,18,8,1-3 hours,Yes,No,No,No,Yes,Yes,no,no,1
+146,16,74,39,Female,18,11,1-3 hours,Yes,Yes (please list):,No,No,Yes,Yes,yes,no,2
+147,14,75,37,Female,18,6,1-3 hours,No,Yes (please list):,No,Yes (please elaborate):,Yes,Yes,no,no,2
+148,0,0,n/a,Female,21,11,1-3 hours,Yes,No,No,No,No (please elaborate):,Yes,yes,no,2
+150,18,61,46,Female,18,11,,Yes,Yes (please list):,No,No,Yes,Yes,yes,no,1
+151,12,57,0,Female,18,10,1-3 hours,Yes,Yes (please list):,No,No,Yes,Yes,no,no,1
+152,,62,43,Female,18,10,1-3 hours,Yes,No,No,No,Yes,Yes,yes,no,2
+153,46,74,49,Female,20,10,4-6 hours,Yes,No,No,No,Yes,Yes,yes,no,1
+154,12,76,44,Prefer not to say,19,11,Not at all (I only read for school),Yes,Yes (please list):,No,No,Yes,Yes,yes,no,1
+155,24,58,41,Female,21,11,1-3 hours,Yes,Yes (please list):,No,No,Yes,Yes,yes,no,2
+156,10,63,34,Male,20,10,Not at all (I only read for school),Yes,Yes (please list):,Yes (please elaborate):,No,Yes,Yes,yes,no,1
+157,16,60,37,Female,21,10,1-3 hours,Yes,Yes (please list):,No,Yes (please elaborate):,Yes,Yes,no,no,2
+158,10,54,33,Female,22,10,1-3 hours,Yes,Yes (please list):,Yes (please elaborate):,No,Yes,Yes,no,no,4
+159,38,64,47,Female,20,7,6+ hours,Yes,No,No,No,No (please elaborate):,Yes,yes,no,1
+160,22,61,40,Female,19,11,1-3 hours,Yes,No,No,No,Yes,Yes,no,no,0
+161,0,0,27,Female,20,8,4-6 hours,Yes,No,No,No,Yes,Yes,yes,no,1
+162,0,64,0,Male,19,11,4-6 hours,Yes,Yes (please list):,No,No,Yes,Yes,yes,no,1
+163,32,58,44,Male,22,6,1-3 hours,Yes,Yes (please list):,No,No,Yes,Yes,yes,no,1
+164,18,58,0,Female,21,11,1-3 hours,Yes,Yes (please list):,No,No,Yes,Yes,yes,no,1
+165,14,0,33,Male,19,9,6+ hours,Yes,No,No,No,Yes,Yes,yes,no,2
+167,16,54,33,Female,19,10,1-3 hours,Yes,No,No,No,Yes,Yes,no,no,0
+168,22,57,41,Female,21,5,1-3 hours,Yes,No,No,No,Yes,Yes,yes,no,4
+169,20,66,44,Female,20,5,1-3 hours,Yes,Yes (please list):,No,No,Yes,Yes,yes,no,3
+170,20,66,42,Female,19,11,Not at all (I only read for school),Yes,Yes (please list):,No,No,Yes,Yes,yes,no,1
+171,8,63,48,Female,22,11,1-3 hours,Yes,No,No,No,Yes,Yes,yes,no,1
+172,22,62,40,Male,19,10,Not at all (I only read for school),Yes,No,No,No,Yes,Yes,yes,no,1
+173,22,55,46,Female,20,9,1-3 hours,Yes,No,No,No,Yes,Yes,yes,no,1
+174,30,60,42,Female,20,11,4-6 hours,Yes,No,No,No,Yes,Yes,yes,no,2
+175,10,69,41,Male,19,11,Not at all (I only read for school),Yes,No,No,No,Yes,Yes,no,no,0
+176,8,62,45,Female,21,10,1-3 hours,Yes,Yes (please list):,Yes (please elaborate):,No,Yes,Yes,yes,no,2
+177,36,72,47,Male,21,9,4-6 hours,Yes,Yes (please list):,No,No,Yes,Yes,yes,no,1

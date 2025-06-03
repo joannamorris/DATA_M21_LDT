@@ -1,0 +1,80 @@
+SubjID,Sex,Age,handed_score,read_for_pleasure,born_in_us,first_language,language_disability,spl_cor,spl_inc,spl_cor-inc,vcb_cor,vcb_inc,vcb_all,art_cor,art_inc,art_cor-inc
+11,Male,NA,NA,NA,NA,NA,NA,64,16,48,46,4,50,40,26,14
+12,Female,20,11,1-3 hours,Yes,English,No,71,9,62,34,16,50,39,27,12
+13,Female,18,10,4-6 hours,Yes,english,No,62,18,44,43,7,50,42,24,18
+101,Male,21,10,1-3 hours,Yes,English,No,55,25,30,33,17,50,40,26,14
+103,Female,20,10,1-3 hours,Yes,English,No,69,11,58,41,9,50,48,18,30
+104,Female,21,11,1-3 hours,Yes,english,No,62,18,44,42,8,50,41,25,16
+105,Female,18,11,1-3 hours,Yes,english,No,64,16,48,32,18,50,45,21,24
+106,Female,20,10,1-3 hours,Yes,English,No,77,3,74,44,6,50,42,24,18
+107,Female,18,10,1-3 hours,Yes,English,No,68,12,56,38,12,50,39,27,12
+108,Female,18,11,1-3 hours,Yes,English,No,69,11,58,42,8,50,44,22,22
+109,Female,18,11,1-3 hours,Yes,English,No,70,10,60,44,6,50,44,22,22
+110,Female,18,10,4-6 hours,Yes,English,No,68,12,56,29,21,50,42,24,18
+111,Female,21,11,1-3 hours,Yes,English,No,66,14,52,37,13,50,41,25,16
+112,Female,18,10,1-3 hours,Yes,English,No,69,11,58,37,13,50,38,28,10
+113,Female,19,11,1-3 hours,Yes,English,No,63,17,46,48,2,50,53,13,40
+114,Male,18,7,4-6 hours,Yes,Enlgish,No,51,29,22,32,18,50,38,28,10
+115,Female,19,11,1-3 hours,Yes,English,No,64,16,48,45,5,50,39,27,12
+116,Female,18,8,4-6 hours,Yes,English,NA,64,16,48,46,4,50,43,23,20
+117,Male,23,10,4-6 hours,Yes,English,No,63,17,46,35,15,50,30,36,-6
+118,Female,18,8,1-3 hours,Yes,English,No,67,13,54,46,4,50,44,22,22
+119,Male,19,10,4-6 hours,Yes,English,No,61,19,42,43,7,50,49,17,32
+120,Female,18,11,1-3 hours,Yes,English,No,55,25,30,42,8,50,42,24,18
+121,Male,21,NA,NA,NA,NA,NA,68,12,56,40,10,50,40,26,14
+122,Female,18,10,Not at all (I only read for school),Yes,english,No,61,19,42,31,19,50,36,30,6
+123,Female,18,7,4-6 hours,Yes,English,No,68,12,56,48,2,50,44,22,22
+124,Female,20,11,4-6 hours,Yes,English,No,64,16,48,48,2,50,50,16,34
+126,Female,18,9,1-3 hours,Yes,English,No,67,13,54,48,2,50,39,27,12
+125,Male,21,11,1-3 hours,Yes,English,No,71,9,62,48,2,50,48,18,30
+127,Female,23,10,Not at all (I only read for school),Yes,English,No,66,14,52,32,18,50,50,16,34
+128,Male,18,10,1-3 hours,Yes,English,No,70,10,60,43,7,50,49,17,32
+129,Female,18,10,1-3 hours,Yes,English,No,52,28,24,48,2,50,41,25,16
+130,Female,39,7,1-3 hours,Yes,English,No,69,11,58,49,1,50,49,17,32
+131,Female,21,11,1-3 hours,Yes,English,No,61,19,42,31,19,50,36,30,6
+132,Female,31,10,1-3 hours,Yes,English,No,66,14,52,33,17,50,43,23,20
+133,Female,48,11,6+ hours,Yes,English,No,78,2,76,49,1,50,62,4,58
+134,Female,19,11,4-6 hours,Yes,english,No,71,9,62,46,4,50,49,17,32
+135,Female,20,11,1-3 hours,Yes,English,No,76,4,72,41,9,50,41,25,16
+136,Female,19,6,1-3 hours,Yes,English,No,67,13,54,34,16,50,43,23,20
+137,Male,18,11,4-6 hours,No,Burmese,No,58,22,36,44,6,50,47,19,28
+138,Male,21,7,1-3 hours,Yes,English,No,61,19,42,44,6,50,45,21,24
+139,Female,21,10,1-3 hours,Yes,english,No,70,10,60,40,10,50,47,19,28
+140,Female,18,11,1-3 hours,Yes,English,No,71,9,62,44,6,50,43,23,20
+141,Female,19,10,1-3 hours,Yes,English,No,59,21,38,40,10,50,41,25,16
+142,Male,25,9,6+ hours,Yes,English,No,60,20,40,49,1,50,44,22,22
+143,Male,23,11,1-3 hours,Yes,English,No,55,25,30,30,20,50,39,27,12
+144,Female,19,11,1-3 hours,Yes,English,No,62,18,44,45,5,50,46,20,26
+145,Female,18,8,1-3 hours,Yes,English,No,61,19,42,36,14,50,38,28,10
+146,Female,18,11,1-3 hours,Yes,English,No,74,6,68,39,11,50,41,25,16
+147,Female,18,6,1-3 hours,No,English,Yes (please elaborate):,75,5,70,37,13,50,40,26,14
+148,Female,21,11,1-3 hours,Yes,English,No,0,0,0,NA,NA,NA,0,0,0
+149,Female,19,11,1-3 hours,Yes,English,No,NA,NA,NA,NA,NA,NA,NA,NA,NA
+150,Female,18,11,NA,Yes,English,No,61,19,42,46,4,50,42,24,18
+151,Female,18,10,1-3 hours,Yes,english,No,57,23,34,0,0,0,39,27,12
+152,Female,18,10,1-3 hours,Yes,English,No,62,18,44,43,7,50,NA,NA,NA
+153,Female,20,10,4-6 hours,Yes,English,No,74,6,68,49,1,50,56,10,46
+154,Prefer not to say,19,11,Not at all (I only read for school),Yes,English,No,76,4,72,44,6,50,39,27,12
+155,Female,21,11,1-3 hours,Yes,English,No,58,22,36,41,9,50,45,21,24
+156,Male,20,10,Not at all (I only read for school),Yes,English,No,63,17,46,34,16,50,38,28,10
+157,Female,21,10,1-3 hours,Yes,Ukrainian,Yes (please elaborate):,60,20,40,37,13,50,41,25,16
+158,Female,22,10,1-3 hours,Yes,English,No,54,26,28,33,17,50,38,28,10
+159,Female,20,8,6+ hours,Yes,English,No,64,16,48,47,3,50,52,14,38
+160,Female,19,11,1-3 hours,Yes,english,No,61,19,42,40,10,50,44,22,22
+161,Female,20,8,4-6 hours,Yes,English,No,0,0,0,27,23,50,0,0,0
+162,Male,19,11,4-6 hours,Yes,english,No,64,16,48,0,0,0,0,0,0
+163,Male,22,6,1-3 hours,Yes,english,No,58,22,36,44,6,50,49,17,32
+164,Female,21,11,1-3 hours,Yes,English,No,58,22,36,0,0,0,42,24,18
+164,Female,21,11,1-3 hours,Yes,English,No,0,0,0,0,0,0,42,24,18
+165,Male,19,9,6+ hours,Yes,English,No,54,26,28,33,17,50,40,26,14
+167,Female,19,10,1-3 hours,Yes,English,No,57,23,34,33,17,50,41,25,16
+168,Female,21,5,1-3 hours,Yes,English,No,66,14,52,41,9,50,44,22,22
+169,Female,20,5,1-3 hours,Yes,English,No,66,14,52,44,6,50,43,23,20
+170,Female,19,11,Not at all (I only read for school),Yes,English,No,63,17,46,42,8,50,43,23,20
+171,Female,22,11,1-3 hours,Yes,English,No,62,18,44,48,2,50,37,29,8
+172,Male,19,10,Not at all (I only read for school),Yes,english,No,55,25,30,40,10,50,44,22,22
+173,Female,20,9,1-3 hours,Yes,English,No,60,20,40,46,4,50,44,22,22
+174,Female,20,11,4-6 hours,Yes,English,No,69,11,58,42,8,50,48,18,30
+175,Male,19,11,Not at all (I only read for school),Yes,English,No,62,18,44,41,9,50,38,28,10
+176,Female,21,10,1-3 hours,Yes,English,No,72,8,64,45,5,50,37,29,8
+177,Male,21,9,4-6 hours,Yes,English,No,66,14,52,47,3,50,51,15,36
