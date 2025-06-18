@@ -18,12 +18,12 @@ prompt   = {'Enter StudyID:',...
             'Enter the part of the file names that comes after the subject and task IDs, including the underscores. If there are no filename extensions, leave the box empty:'};
 dlgtitle =  'Input';
 dims     = [1 70];
-definput = {'M21','LDT','subjlist2_non_interp.txt','_FLT_RSP_REF_ELS_BIN_ICA'};
+definput = {'M21','LDT','temp_non_interp.txt','_FLT_RSP_REF_ELS_BIN_ICA'};
 my_input   = inputdlg(prompt,dlgtitle,dims,definput);
 
 DIR            = pwd;                         % Current folder (where the script should be located)
 studyID        = my_input{1};                 % which study
-taskID           = my_input{2};                 % which task
+taskID         = my_input{2};                 % which task
 subj_list      = importdata(my_input{3});     % list of subject ids
 f_string       = my_input{4};                 % this string allows you to specify which .set file to load
 nsubj          = length(subj_list);           % number of subjects

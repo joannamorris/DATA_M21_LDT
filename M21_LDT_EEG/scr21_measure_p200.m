@@ -19,7 +19,7 @@ prompt         = {'Enter StudyID:',...
                   'Enter the name of the output file containing the measured values:'};  
 dlgtitle       = 'Input';                         
 dims           = [1 70];                          
-definput       = {'M21','LDT','hampshire','subjlist1_all.txt', 'diff_waves','1:11', 'm21_ldt_mea_150250_200000_1.csv'};  
+definput       = {'M21','LDT','hc','subjlist1_all.txt', 'diff_waves','1:11', 'm21_ldt_mea_150250_200000_1.csv'};  
 my_input       = inputdlg(prompt,dlgtitle,dims,definput);  
 
 study          = my_input{1};
@@ -37,7 +37,7 @@ else
     f_string  = ['_' my_input{5}];
 end
 
-if strcmp(location, 'hampshire')
+if strcmp(location, 'hc')
     chan_num = 27;
 else
     chan_num = 31;

@@ -1,0 +1,472 @@
+---
+title: "m21 LDT WORD analysis N250"
+author: "Joanna Morris"
+date: "`r Sys.Date()`"
+output:
+  bookdown::pdf_document2:
+    toc: true
+    toc_depth: 4
+editor_options: 
+  chunk_output_type: inline
+---
+
+\scriptsize
+
+# Set parameters
+Set chunk parameters
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      error = FALSE,
+                      comment = "||")
+```
+
+Load libraries
+```{r}
+library(performance)
+library(effectsize)
+library(afex)
+library(emmeans)
+library(gridExtra)
+library(kableExtra)
+library(pander)
+library(tidyverse)
+```
+
+
+Set ggplot parameters
+```{r}
+theme_set(theme_classic() +  
+            theme(legend.position = "bottom", 
+                  axis.text=element_text(size=10),
+                  axis.title=element_text(size=9)))
+
+# Define a custom color palette
+my_palette <- c("#A6CEE3",  "#FB9A99")
+my_palette_2 <- c( "#1F78B4","#E31A1C" )
+my_palette_3 <- c("#A6CEE3","#1F78B4","#FB9A99","#E31A1C")
+
+
+# Create a function to apply this palette
+scale_color_custom <- function() {
+  scale_color_manual(values = my_palette_2)
+}
+
+scale_fill_custom <- function() {
+  scale_fill_manual(values = my_palette_2)
+}
+```
+
+
+Define standard error of the mean function
+```{r}
+sem <- function(x) sd(x)/sqrt(length(x))
+```
+
+
+# Load and format data files
+
+```{r, echo = FALSE}
+erpdat_1a <- read_csv("m21_ldt_mea_200300_050050_1.csv")
+erpdat_1b <- read_csv("m21_ldt_mea_300500_050050_1.csv")
+erpdat_2a <- read_csv("m21_ldt_mea_200300_050050_2.csv")
+erpdat_2b <- read_csv("m21_ldt_mea_300500_050050_2.csv")
+dmg_lng_vsl <- read_csv("demo_lang_vsl_pca.csv")
+
+```
+
+Now we extract `SubjID` from the `ERPset` column
+```{r, echo = FALSE}
+
+# Remove '_LDT_diff_waves' from each string in the ERPset column
+# This code first renames the column and then applies the `str_replace` function 
+# to the newly renamed column.
+erpdat_1a <- erpdat_1a %>%
+  rename(SubjID = ERPset) %>%
+  mutate(SubjID = str_replace(SubjID, "_LDT_diff_waves", "")) |>
+  mutate(binlabel = str_replace(binlabel, "Critical_", "")) |>
+  mutate(binlabel = str_replace(binlabel, "_family", "")) |>
+  select(-mlabel)
+
+erpdat_1b <- erpdat_1b %>%
+  rename(SubjID = ERPset) %>%
+  mutate(SubjID = str_replace(SubjID, "_LDT_diff_waves", "")) |>
+  mutate(binlabel = str_replace(binlabel, "Critical_", "")) |>
+  mutate(binlabel = str_replace(binlabel, "_family", "")) |>
+  select(-mlabel)
+
+erpdat_2a <- erpdat_2a %>%
+  rename(SubjID = ERPset) %>%
+  mutate(SubjID = str_replace(SubjID, "_LDT_diff_waves", "")) |>
+  mutate(binlabel = str_replace(binlabel, "Critical_", "")) |>
+  mutate(binlabel = str_replace(binlabel, "_family", ""))|>
+  select(-mlabel)
+
+erpdat_2b <- erpdat_2b %>%
+  rename(SubjID = ERPset) %>%
+  mutate(SubjID = str_replace(SubjID, "_LDT_diff_waves", "")) |>
+  mutate(binlabel = str_replace(binlabel, "Critical_", "")) |>
+  mutate(binlabel = str_replace(binlabel, "_family", ""))|>
+  select(-mlabel)
+```
+
+We then join the ERP data, and language into a single data frame
+```{r, echo = FALSE}
+
+n250_1 <- erpdat_1a |>
+  left_join(dmg_lng_vsl, by = "SubjID") |>
+  select(SubjID, everything())
+n400_1 <- erpdat_1b |>
+  left_join(dmg_lng_vsl, by = "SubjID") |>
+  select(SubjID, everything())
+
+n250_2 <- erpdat_2a %>%
+  full_join(dmg_lng_vsl, by = "SubjID") |>
+  select(SubjID, everything())
+n400_2 <- erpdat_2b %>%
+  full_join(dmg_lng_vsl, by = "SubjID") |>
+  select(SubjID, everything())
+
+```
+
+Divide into word, non-word and difference wave dataframes
+```{r}
+n250_1_words <- n250_1 |> filter(bini %in% c(1:2))
+n250_1_nonwords <- n250_1 |> filter(bini %in% c(3:6))
+n250_1_diff <- n250_1 |> filter(bini %in% c(9:11))
+n400_1_words <- n400_1 |> filter(bini %in% c(1:2))
+n400_1_nonwords <- n400_1 |> filter(bini %in% c(3:6))
+n400_1_diff <- n400_1 |> filter(bini %in% c(9:11))
+
+n250_2_words <- n250_2 |> filter(bini %in% c(1:2))
+n250_2_nonwords <- n250_2 |> filter(bini %in% c(3:6))
+n250_2_diff <- n250_2 |> filter(bini %in% c(9:11))
+n400_2_words <- n400_2 |> filter(bini %in% c(1:2))
+n400_2_nonwords <- n400_2 |> filter(bini %in% c(3:6))
+n400_2_diff <- n400_2 |> filter(bini %in% c(9:11))
+
+rm(n250_1, n250_1_diff, n250_1_nonwords, n250_2, n250_2_diff, n250_2_nonwords)
+rm(n400_1, n400_1_diff, n400_1_nonwords, n400_2, n400_2_diff, n400_2_nonwords)
+
+```
+
+Then we do some more formatting and cleanup of the dataframes.We  create separate columns, one for each independent variable (anteriority, laterality, morphological family size). To do this we have to use `seperate` function from the `stringr` package. Run `vignette("programming", package = "dplyr")` to see more about `tidy-selection` and `tidy-evaluation`.
+
+```{r, echo = FALSE}
+n250_1_words <- n250_1_words %>%
+  separate(binlabel, into = c("trial_type", "family_size"), sep = "_", remove = TRUE) |>
+  select(-trial_type)
+n400_1_words <- n400_1_words %>%
+  separate(binlabel, into = c("trial_type", "family_size"), sep = "_", remove = TRUE) |>
+  select(-trial_type)
+
+n250_2_words <- n250_2_words %>%
+  separate(binlabel, into = c("trial_type", "family_size"), sep = "_", remove = TRUE) |>
+  select(-trial_type)
+n400_2_words <- n400_2_words %>%
+  separate(binlabel, into = c("trial_type", "family_size"), sep = "_", remove = TRUE) |>
+  select(-trial_type)
+```
+
+Now we need to  extract just the bins and channels that we intend to analyse. For this analysis we will use 9 channels:  F3, Fz, F4, C3, Cz, C4, P3, Pz, P4 . We will use the`mutate` function from the `dplyr` package along with the `case_when` function. The `case_when` function  is a sequence of two-sided formulas. The left hand side determines which values match this case. The right hand side provides the replacement value.
+
+```{r, echo=FALSE}
+
+channels_1 <-  c(3, 2, 25, 7, 20, 21, 12, 11, 16)
+channels_2 <-  c(3, 2, 29, 8, 23, 24, 14, 13, 19)
+
+n250_1_words <- n250_1_words %>%
+  filter(chindex %in% channels_1) %>% 
+  mutate(anteriority = case_when(grepl("F", chlabel) ~ "Frontal",grepl("C", chlabel) ~ "Central",grepl("P", chlabel) ~ "Parietal"),
+         laterality = case_when(grepl("3", chlabel) ~ "Left", grepl("z", chlabel) ~ "Midline",
+                                grepl("Z", chlabel) ~ "Midline", grepl("4", chlabel) ~ "Right"))
+n250_1_words$anteriority <- factor(n250_1_words$anteriority, levels = c("Frontal", "Central", "Parietal"))
+n250_1_words$laterality <- factor(n250_1_words$laterality, levels = c("Left", "Midline", "Right"))
+
+n250_2_words <- n250_2_words %>%
+  filter(chindex %in% channels_2) %>% 
+  mutate(anteriority = case_when(grepl("F", chlabel) ~ "Frontal", grepl("C", chlabel) ~ "Central",grepl("P", chlabel) ~ "Parietal"),
+         laterality = case_when(grepl("3", chlabel) ~ "Left", grepl("z", chlabel) ~ "Midline",
+                                grepl("Z", chlabel) ~ "Midline", grepl("4", chlabel) ~ "Right"))
+n250_2_words$anteriority <- factor(n250_2_words$anteriority, levels = c("Frontal", "Central", "Parietal"))
+n250_2_words$laterality <- factor(n250_2_words$laterality, levels = c("Left", "Midline","Right"))
+
+n400_1_words <- n400_1_words %>%
+  filter(chindex %in% channels_1) %>% 
+  mutate(anteriority = case_when(grepl("F", chlabel) ~ "Frontal", grepl("C", chlabel) ~ "Central", grepl("P", chlabel) ~ "Parietal"),
+         laterality = case_when(grepl("3", chlabel) ~ "Left", grepl("z", chlabel) ~ "Midline",  
+                                grepl("Z", chlabel) ~ "Midline", grepl("4", chlabel) ~ "Right"))
+n400_1_words$anteriority <- factor(n400_1_words$anteriority, levels = c("Frontal", "Central",  "Parietal"))
+n400_1_words$laterality <- factor(n400_1_words$laterality, levels = c("Left",  "Midline",  "Right"))
+
+
+n400_2_words <- n400_2_words %>%
+  filter(chindex %in% channels_2) %>% 
+  mutate(anteriority = case_when(grepl("F", chlabel) ~ "Frontal", grepl("C", chlabel) ~ "Central", grepl("P", chlabel) ~ "Parietal"),
+         laterality = case_when(grepl("3", chlabel) ~ "Left", grepl("z", chlabel) ~ "Midline",
+                                grepl("Z", chlabel) ~ "Midline", grepl("4", chlabel) ~ "Right"))
+n400_2_words$anteriority <- factor(n400_2_words$anteriority, levels = c("Frontal", "Central", "Parietal"))
+n400_2_words$laterality <- factor(n400_2_words$laterality, levels = c("Left", "Midline", "Right"))
+
+```
+
+
+# Compute the ANOVA
+
+A linear mixed-effects modeling approach was used to analyze ERP amplitudes in the N250 time window. This method offers several advantages over traditional repeated-measures ANOVA. First, it allows for accurate estimation of fixed effects by explicitly modeling nuisance variables such as Laterality and Anteriority, which account for a substantial proportion of the variance in ERP amplitude. Including these topographic covariates in the model improves the precision of estimates for the linguistic variables of interest. Second, mixed-effects models provide a more appropriate treatment of within-subject dependencies by estimating random effects for participants, thereby avoiding the sphericity assumptions required by repeated-measures ANOVA and allowing for unbalanced data without biasing results. Third, the use of planned contrasts and post hoc comparisons with Bonferroni correction helps control the family-wise error rate, reducing the risk of Type I error across multiple tests. Finally, by treating subjects as random effects, the model supports broader generalization of the findings beyond the specific sample tested. Together, these features make linear mixed-effects models well suited for analyzing ERP data with complex factorial designs and repeated observations.
+
+## Group 1
+
+### ANOVA Model 
+
+```{r}
+# Fit the ANOVA/mixed model
+anova_model_1a <- mixed(
+  value ~ family_size  + 
+    laterality * anteriority  +  # Nuisance variables
+    (1 | SubjID), 
+  data = n250_1_words, 
+  method = "KR")  # Kenward-Roger approximation for accurate F-tests
+# Print ANOVA results
+anova_model_1a
+
+anova_model_1b <- mixed(
+  value ~ family_size  + 
+    laterality * anteriority  +  # Nuisance variables
+    (1 | SubjID), 
+  data = n400_1_words, 
+  method = "KR")  # Kenward-Roger approximation for accurate F-tests
+# Print ANOVA results
+anova_model_1b
+```
+
+### Partial Eta Squared 
+
+Compute Partial Eta Squared ($\eta_p^2$ ) for F-tests. This gives $\eta_p^2$  values for each effect.  Then, compute $R^2$ for the Mixed Model. This provides marginal $R^2$ (fixed effects only) and conditional $R^2$ (fixed + random effects).
+
+```{r}
+# Extract effect sizes from your ANOVA model
+eta_squared(anova_model_1a, partial = TRUE)
+# Compute Marginal and Conditional R²
+r2(anova_model_1a)
+
+# Extract effect sizes from your ANOVA model
+eta_squared(anova_model_1b, partial = TRUE)
+# Compute Marginal and Conditional R²
+r2(anova_model_1b)
+```
+
+### Main Findings
+
+|     |Effect        |df          |F       |p     |eta-sqrd|
+|-----|--------------|------------|--------|------|--------|
+|n250 |family_size   |(1, 1028)   |7.61 ** |.006  |7.35e-03| 
+|n400 |family_size   |(1, 1028)   |7.56 ** |.006  |7.30e-03|
+
+
+#### Morphological Family Size (Main Effect)
+#####  Custom Contrasts for Cohort 1 n250 Morphological Family Size Effect
+
+```{r}
+
+pairs_1a <- emmeans(anova_model_1a, pairwise ~ family_size, adjust = "bonferroni", pbkrtest.limit = 6480)
+(pairs_df_1a <- as.data.frame(pairs_1a$contrasts))
+cohensd_1a <- as.data.frame(cohens_d(value ~ family_size, data = n250_1_words))
+(family_size_contrasts_df_1a <- bind_cols(pairs_df_1a,cohensd_1a))
+(family_size_means_1a <- as.data.frame(pairs_1a$emmeans))
+```
+
+##### Custom Contrasts for Cohort 1 n400 Morphological Family Size Effect
+
+```{r}
+pairs_1b <- emmeans(anova_model_1b, pairwise ~ family_size, adjust = "bonferroni", pbkrtest.limit = 6480)
+(pairs_df_1b <- as.data.frame(pairs_1b$contrasts))
+cohensd_1b <- as.data.frame(cohens_d(value ~ family_size, data = n400_1_words))
+(family_size_contrasts_df_1b <- bind_cols(pairs_df_1b,cohensd_1b))
+(family_size_means_1b <- as.data.frame(pairs_1b$emmeans))
+```
+##### Mixed Model Comparison: Morphological Family Size
+
+To test the effect of `Morphological Family Size`, we compare:
+
+ - Full model (anova_model_1) → includes `Morphological Family Size` 
+ 
+ - Reduced model (reduced_model) → removes `Morphological Family Size`
+
+
+```{r}
+reduced_model_1a <- update(anova_model_1a, . ~ . - family_size)
+anova(anova_model_1a, reduced_model_1a)
+
+reduced_model_1b <- update(anova_model_1b, . ~ . - family_size)
+anova(anova_model_1b, reduced_model_1b)
+```
+
+For neither the N250 data nor for the N400 data did a model including Morphological Family Size improve model fit, $\chi^2_{n250}(1) =3.51$, $p < .061$; $\chi^2_{n400}(1) = 3.87$, $p = .049$ 
+
+##### Plot for Morphological Family Size
+
+Morphological Family Size
+
+```{r, echo = FALSE}
+p1a <- ggplot(family_size_means_1a, aes(x = family_size, y = emmean, fill = family_size, colour = family_size)) +
+  geom_bar(stat = "identity", position = position_dodge(), alpha = .4) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
+                width = 0.05, position = position_dodge(0.9)) +
+    coord_cartesian(ylim = c(-1.3, 0)) +
+  ylab("Mean ERP Amplitude (microvolts)") +
+  xlab("Morphological Family Size") +
+  ggtitle("N250") +
+  geom_text(aes(label = round(emmean, digits = 2)), colour = "black", size = 2.5, vjust = -12,
+            position = position_dodge(.9)) +
+  scale_color_custom() +
+  scale_fill_custom() +
+  theme(legend.position="none")
+
+
+p1b <- ggplot(family_size_means_1b, aes(x = family_size, y = emmean, fill = family_size, colour = family_size)) +
+  geom_bar(stat = "identity", position = position_dodge(), alpha = .4) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
+                width = 0.05, position = position_dodge(0.9)) +
+  coord_cartesian(ylim = c(0, 1.3)) +
+  ylab("Mean ERP Amplitude (microvolts)") +
+  xlab("Morphological Family Size") +
+  ggtitle("N400") +
+  geom_text(aes(label = round(emmean, digits = 2)), colour = "black", size = 2.5, vjust = 16,
+            position = position_dodge(.9)) +
+  scale_color_custom() +
+  scale_fill_custom() +
+  theme(legend.position="none")
+
+
+
+library(cowplot)
+plot_grid(p1a, p1b, nrow = 1)
+```
+
+## Group 2
+### ANOVA Model 
+
+```{r}
+anova_model_2a <- mixed(
+  value ~ family_size  + 
+    laterality * anteriority  +  # Nuisance variables
+    (1 | SubjID), 
+  data = n250_2_words, 
+  method = "KR")  # Kenward-Roger approximation for accurate F-tests
+# Print ANOVA results
+anova_model_2a
+
+anova_model_2b <- mixed(
+  value ~ family_size  + 
+    laterality * anteriority  +  # Nuisance variables
+    (1 | SubjID), 
+  data = n400_2_words, 
+  method = "KR")  # Kenward-Roger approximation for accurate F-tests
+# Print ANOVA results
+anova_model_2b
+```
+
+### Partial Eta Squared 
+
+```{r}
+# Extract effect sizes from your ANOVA model
+eta_squared(anova_model_2a, partial = TRUE)
+# Compute Marginal and Conditional R²
+r2(anova_model_2a)
+
+# Extract effect sizes from your ANOVA model
+eta_squared(anova_model_2b, partial = TRUE)
+# Compute Marginal and Conditional R²
+r2(anova_model_2b)
+```
+
+### Main Findings
+
+|     |Effect        |df         |F      |p     |eta-sqrd|
+|-----|--------------|-----------|-------|------|--------|
+|n250 |family_size   |(1, 705)   |0.32   |.573  |4.51e-03| 
+|n400 |family_size   |(1, 705)   |2.91 + |.089  |4.11e-03|
+
+
+#### Morphological Family Size (Main Effect)
+#####  Custom Contrasts for Cohort 2 n250 Morphological Family Size Effect
+
+```{r}
+pairs_2a <- emmeans(anova_model_2a, pairwise ~ family_size, adjust = "bonferroni", pbkrtest.limit = 6480)
+(pairs_df_2a <- as.data.frame(pairs_2a$contrasts))
+cohensd_2a <- as.data.frame(cohens_d(value ~ family_size, data = n250_2_words))
+(family_size_contrasts_df_2a <- bind_cols(pairs_df_2a,cohensd_2a))
+(family_size_means_2a <- as.data.frame(pairs_2a$emmeans))
+```
+
+##### Custom Contrasts for Cohort 2 n400 Morphological Family Size Effect
+
+```{r}
+pairs_2b <- emmeans(anova_model_2b, pairwise ~ family_size, adjust = "bonferroni", pbkrtest.limit = 6480)
+(pairs_df_2b <- as.data.frame(pairs_2b$contrasts))
+cohensd_2b <- as.data.frame(cohens_d(value ~ family_size, data = n400_2_words))
+(family_size_contrasts_df_2b <- bind_cols(pairs_df_2b,cohensd_2b))
+(family_size_means_2b <- as.data.frame(pairs_2b$emmeans))
+```
+
+##### Mixed Model Comparison: Morphological Family Size
+
+To test the effect of `Morphological Family Size`, we compare:
+
+ - Full model (anova_model_2) → includes `Morphological Family Size` 
+ 
+ - Reduced model (reduced_model) → removes `Morphological Family Size`
+
+
+```{r}
+reduced_model_2a <- update(anova_model_2a, . ~ . - family_size)
+anova(anova_model_2a, reduced_model_2a)
+
+reduced_model_2b <- update(anova_model_2b, . ~ . - family_size)
+anova(anova_model_2b, reduced_model_2b)
+```
+
+For neither the N250 data nor for the N400 data did a model including Morphological Family Size improve model fit, $\chi^2_{n250}(1) = 0$, $p < 1$; $\chi^2_{n400}(1) = 0.1203$, $p = .729$ 
+
+
+##### Plot for Morphological Family Size
+
+Morphological Family Size
+
+```{r, echo = FALSE}
+p2a <- ggplot(family_size_means_2a, aes(x = family_size, y = emmean, fill = family_size, colour = family_size)) +
+  geom_bar(stat = "identity", position = position_dodge(), alpha = .4) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
+                width = 0.05, position = position_dodge(0.9)) +
+  coord_cartesian(ylim = c(0, 4.2)) +
+  ylab("Mean ERP Amplitude (microvolts)") +
+  xlab("Morphological Family Size") +
+  ggtitle("N250") +
+  geom_text(aes(label = round(emmean, digits = 2)), colour = "black", size = 2.5, vjust = -12,
+            position = position_dodge(.9)) +
+  scale_color_custom() +
+  scale_fill_custom() +
+  theme(legend.position="none")
+
+
+p2b <- ggplot(family_size_means_2b, aes(x = family_size, y = emmean, fill = family_size, colour = family_size)) +
+  geom_bar(stat = "identity", position = position_dodge(), alpha = .4) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
+                width = 0.05, position = position_dodge(0.9)) +
+  coord_cartesian(ylim = c(0, 4.2)) +
+  ylab("Mean ERP Amplitude (microvolts)") +
+  xlab("Morphological Family Size") +
+  ggtitle("N400") +
+  geom_text(aes(label = round(emmean, digits = 2)), colour = "black", size = 2.5, vjust = 16,
+            position = position_dodge(.9)) +
+  scale_color_custom() +
+  scale_fill_custom() +
+  theme(legend.position="none")
+
+
+
+
+plot_grid(p2a, p2b, nrow = 1)
+```

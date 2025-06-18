@@ -17,7 +17,7 @@ prompt   = {'Enter StudyID:',...
             'Enter the sampling rate to which the data should be converted in Hz:'};
 dlgtitle =  'Input';
 dims     = [1 70];
-definput = {'M21','LDT','subjlist2_all.txt','M21_LDT_BDF.txt','pc','', '200'};
+definput = {'M21','LDT','temp.txt','M21_LDT_BDF.txt','pc','', '200'};
 my_input   = inputdlg(prompt,dlgtitle,dims,definput);
 
 DIR            = pwd;                         % Current folder (where the script should be located)

@@ -19,46 +19,45 @@ prompt         = {'Enter StudyID:',...
                   'Enter the name of the output file containing the measured values:'};  
 dlgtitle       = 'Input';                         
 dims           = [1 70];                          
-definput       = {'M21','LDT','pc','subjlist2_all.txt', 'diff_waves','1:11', 'm21_ldt_mea_200300_200000_2.csv'};  
+definput       = {'M21','LDT','pc','subjlist2_all.txt', 'diff_waves','1:11', 'm21_ldt_mea_200300_050050_2.csv'};  
 my_input       = inputdlg(prompt,dlgtitle,dims,definput);  
 
 study          = my_input{1};
-location       = my_input{3};
-
 if isempty(my_input{2})                         % which task
     taskID     = '';
 else
     taskID     = ['_' my_input{2}];
 end
 
+location       = my_input{3};
+DIR            = pwd;
+subj_list      = importdata(my_input{4}); 
 if isempty(my_input{5})   
     f_string = '';
 else
     f_string  = ['_' my_input{5}];
 end
 
-if strcmp(location, 'hampshire')
+
+nsubj          = length(subj_list); 
+output_fname   = [DIR filesep my_input{7}];
+
+
+if strcmp(location, 'hc')
     chan_num = 27;
 else
     chan_num = 31;
 end
 
-
-DIR            = pwd;
-subj_list      = importdata(my_input{4});    
-nsubj          = length(subj_list); 
-
-output_fname   = [DIR filesep my_input{7}];
-
-
 % Convert input to integer array
 if ~isempty(my_input{6})  % Check if input is not empty
-    bins = eval(my_input{6});  % Evaluate the string to get the array
+    bins = eval(my_input{6})';  % The apostrophe after the parenthesis
+% Transposes the input to get a row vector
 end
 
 %% Set up variables holding key values about the parameters for measurement
 interval       = [200 300];
-baseline       = [-200 0];
+baseline       = [-50 50];
 channels       = 1:chan_num;
 erp_list_fname = [DIR filesep 'erp_file_list.txt'];  % Text file to hold the list of .erp files
 format         = 'long';
@@ -68,8 +67,8 @@ erp_file_list = {};  % Empty cell array to hold .erp file paths
 
 %% Load the ERPsets, make them available in the ERPLAB GUI, and store the file paths
 fileID = fopen(erp_list_fname, 'w');  % Open text file for writing
-for subject     = 1:nsubj
-    subjID      = subj_list{subject};
+for subject = 1:nsubj
+    subjID = subj_list{subject};
     subject_DIR = [DIR filesep subjID];
     fname       = [subjID taskID f_string '.erp'];
     
@@ -89,7 +88,6 @@ for subject     = 1:nsubj
     end
 end
 fclose(fileID);  % Close the text file after writing
-
 
 %% Use the list of file paths stored in the text file to measure amplitude of ERPs between 150 and 250 ms
 ALLERP = pop_geterpvalues(erp_list_fname, ...

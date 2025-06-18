@@ -14,7 +14,7 @@ prompt   = {'Enter StudyID (leave blank if none):',...
             'Enter name of subject list file:'};
 dlgtitle =  'Input';
 dims     = [1 70];
-definput = {'M21','LDT','','subjlist2_all.txt'};
+definput = {'M21','LDT','EEG','temp.txt'};
 my_input   = inputdlg(prompt,dlgtitle,dims,definput);
 
 DIR            = pwd;                         % Current folder (where the script should be located)

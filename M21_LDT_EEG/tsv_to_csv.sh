@@ -2,8 +2,8 @@
 
 # List of files to process
 files=(
-    "m21_ldt_mea_200300_200000_1.csv"
-    "m21_ldt_mea_200300_200000_2.csv"
+    "m21_ldt_mea_300500_050050_1.txt"
+    "m21_ldt_mea_300500_050050_2.txt"
 )
 
 # Loop through each file and process

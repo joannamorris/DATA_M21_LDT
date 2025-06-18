@@ -1,3 +1,0 @@
-b9 = b1 - b2 label = Small Family Minus Large Family Word Difference Wave            
-b10 = b3 - b4 label = Small Family Minus Large Family Complex Nonword Difference Wave
-b11 = b5 - b6 label = Small Family Minus Large Family Simple Nonword Difference Wave 

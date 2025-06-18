@@ -7,9 +7,13 @@ output:
     toc: true
     toc_depth: 4
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
+\scriptsize
+
+# Set parameters
+Set chunk parameters
 ```{r setup, include=FALSE, echo=FALSE}
 knitr::opts_chunk$set(echo = TRUE, 
                       warning = FALSE, 
@@ -18,47 +22,56 @@ knitr::opts_chunk$set(echo = TRUE,
                       comment = "||")
 ```
 
-# Load libraries
-
 Load libraries
 ```{r}
-library(ez)
-library(pander)
-library(kableExtra)
+library(performance)
+library(effectsize)
 library(afex)
-library(gridExtra)
-library(ggplot2)
 library(emmeans)
+library(gridExtra)
+library(kableExtra)
+library(pander)
 library(tidyverse)
-library(dplyr)
-library(RColorBrewer)
-library(wesanderson)
-library(ggsci)
 ```
 
 
+Set ggplot parameters
+```{r}
+theme_set(theme_classic() +  
+            theme(legend.position = "bottom", 
+                  axis.text=element_text(size=10),
+                  axis.title=element_text(size=9)))
 
-# Set `ggplot2` parameters
-Before we begin, let's set some general parameters for `ggplot2`. We will set a general theme using the `theme_set()` function. We will use the 'classic' theme which gives us clean white background rather than the default grey with white grid lines. And we will position the legend at the top of the graph rather than at the right side which is the default.
+# Define a custom color palette
+my_palette <- c("#A6CEE3",  "#FB9A99")
+my_palette_2 <- c( "#1F78B4","#E31A1C" )
+my_palette_3 <- c("#A6CEE3","#1F78B4","#FB9A99","#E31A1C")
 
-```{r theme}
-theme_set(theme_minimal() +  theme(legend.position = "bottom"))
+
+# Create a function to apply this palette
+scale_color_custom <- function() {
+  scale_color_manual(values = my_palette_2)
+}
+
+scale_fill_custom <- function() {
+  scale_fill_manual(values = my_palette_2)
+}
 ```
 
-#Define standard error of the mean function
+
+Define standard error of the mean function
 ```{r}
 sem <- function(x) sd(x)/sqrt(length(x))
 ```
 
 
 # Load and format data files
-First we load the data files
-```{r, echo = FALSE}
-erpdat_1 <- read_csv("m21_ldt_mea_200300_200000_1.csv")
-langdat_1 <- read_csv("m21_langdat_1_pca.csv")
 
-erpdat_2 <- read_csv("m21_ldt_mea_200300_200000_2.csv")
-langdat_2 <- read_csv("m21_langdat_2_pca.csv")
+```{r, echo = FALSE}
+erpdat_1 <- read_csv("m21_ldt_mea_200300_050050_1.csv")
+erpdat_2 <- read_csv("m21_ldt_mea_200300_050050_2.csv")
+dmg_lng_vsl <- read_csv("demo_lang_vsl_pca.csv")
+
 ```
 
 Now we extract `SubjID` from the `ERPset` column
@@ -84,12 +97,15 @@ erpdat_2 <- erpdat_2 %>%
 
 We then join the ERP data, and language into a single data frame
 ```{r, echo = FALSE}
-# Join the three data frames, specifying different join columns for the third join
-n250_1 <- erpdat_1 %>%
-  full_join(langdat_1, by = "SubjID")
+
+n250_1 <- erpdat_1 |>
+  left_join(dmg_lng_vsl, by = "SubjID") |>
+  select(SubjID, everything())
 
 n250_2 <- erpdat_2 %>%
-  full_join(langdat_2, by = "SubjID") 
+  full_join(dmg_lng_vsl, by = "SubjID") |>
+  select(SubjID, everything())
+
 ```
 
 Divide into word, non-word and difference wave dataframes
@@ -106,9 +122,6 @@ n250_2_diff <- n250_2 |> filter(bini %in% c(9:11))
 Then we do some more formatting and cleanup of the dataframes.We  create separate columns, one for each independent variable (anteriority, laterality, morphological family size). To do this we have to use `seperate` function from the `stringr` package. Run `vignette("programming", package = "dplyr")` to see more about `tidy-selection` and `tidy-evaluation`.
 
 ```{r, echo = FALSE}
-library(stringr)
-library(tidyr)
-
 n250_1_nonwords <- n250_1_nonwords %>%
   separate(binlabel, into = c("trial_type", "family_size", "complexity"), sep = "_", remove = TRUE) |>
   select(-trial_type)
@@ -122,6 +135,13 @@ n250_2_nonwords <- n250_2_nonwords %>%
 n250_2_words <- n250_2_words %>%
   separate(binlabel, into = c("trial_type", "family_size"), sep = "_", remove = TRUE) |>
   select(-trial_type)
+
+n250_1_diff <- n250_1_diff |> 
+    mutate(binlabel = str_replace(binlabel, "_Small_Minus_Large_Family_Size", "")) 
+n250_2_diff <- n250_2_diff |> 
+    mutate(binlabel = str_replace(binlabel, "_Small_Minus_Large_Family_Size", "")) 
+
+  
 ```
 
 Now we need to  extract just the bins and channels that we intend to analyse. For this analysis we will use 9 channels:  F3, Fz, F4, C3, Cz, C4, P3, Pz, P4 . We will use the`mutate` function from the `dplyr` package along with the `case_when` function. The `case_when` function  is a sequence of two-sided formulas. The left hand side determines which values match this case. The right hand side provides the replacement value.
@@ -163,550 +183,381 @@ n250_2_nonwords$anteriority <- factor(n250_2_nonwords$anteriority, levels = c("F
 n250_2_nonwords$laterality <- factor(n250_2_nonwords$laterality, levels = c("Left", 
                                                                             "Midline", 
                                                                             "Right"))
-n250_2_nonwords$anteriority <- factor(n250_2_nonwords$anteriority, levels = c("Frontal", 
-                                                                              "Central", 
-                                                                              "Parietal"))
-n250_2_nonwords$laterality <- factor(n250_2_nonwords$laterality, levels = c("Left", 
-                                                                            "Midline", 
-                                                                            "Right"))
+
 
 ```
 
-# Now we can compute the ANOVA using `ezANOVA` and `aov_ez`
+# Compute the ANOVA
+
+A linear mixed-effects modeling approach was used to analyze ERP amplitudes in the N250 time window. This method offers several advantages over traditional repeated-measures ANOVA. First, it allows for accurate estimation of fixed effects by explicitly modeling nuisance variables such as Laterality and Anteriority, which account for a substantial proportion of the variance in ERP amplitude. Including these topographic covariates in the model improves the precision of estimates for the linguistic variables of interest. Second, mixed-effects models provide a more appropriate treatment of within-subject dependencies by estimating random effects for participants, thereby avoiding the sphericity assumptions required by repeated-measures ANOVA and allowing for unbalanced data without biasing results. Third, the use of planned contrasts and post hoc comparisons with Bonferroni correction helps control the family-wise error rate, reducing the risk of Type I error across multiple tests. Finally, by treating subjects as random effects, the model supports broader generalization of the findings beyond the specific sample tested. Together, these features make linear mixed-effects models well suited for analyzing ERP data with complex factorial designs and repeated observations.
 
 ## Group 1
+
+### ANOVA Model 
+
 ```{r}
-anova_results.1a <- ezANOVA(n250_1_nonwords,
-        dv = value,
-        wid = SubjID,
-        within = .(family_size, complexity, anteriority, laterality),
-        between = .(lang_type_semantic, lang_type_ortho),
-        type = 3) 
-anova_results.1a$ANOVA
-anova_results.1a$`Sphericity Corrections`
 
-anova_results.1b <- aov_ez(id = "SubjID",
-                          dv = "value",
-                          data = n250_1_nonwords,
-                          within = c("family_size",
-                                     "complexity",
-                                     "anteriority",
-                                     "laterality"),
-                          between = c("lang_type_semantic","lang_type_ortho"), 
-                          type = 3)
-anova_results.1b
+# Fit the ANOVA/mixed model
+anova_model_1 <- mixed(
+  value ~ lang_type_ortho * family_size * complexity + 
+    laterality * anteriority  +  # Nuisance variables
+    (1 | SubjID), 
+  data = n250_1_nonwords, 
+  method = "KR"  # Kenward-Roger approximation for accurate F-tests
+)
+
+# Print ANOVA results
+anova_model_1
 ```
 
-## Group 2
+### Partial Eta Squared 
+
+Compute Partial Eta Squared ($\eta_p^2$ ) for F-tests. This gives $\eta_p^2$  values for each effect.  Then, compute $R^2$ for the Mixed Model. This provides marginal $R^2$ (fixed effects only) and conditional $R^2$ (fixed + random effects).
+
 ```{r}
-anova_results.2a <- ezANOVA(n250_2_nonwords,
-        dv = value,
-        wid = SubjID,
-        within = .(family_size, complexity,anteriority, laterality),
-        between = .(lang_type_semantic, lang_type_ortho),
-        type = 3) 
-anova_results.2a$ANOVA
-anova_results.2a$`Sphericity Corrections`
+# Extract effect sizes from your ANOVA model
+eta_squared(anova_model_1, partial = TRUE)
 
-anova_results.2b <- aov_ez(id = "SubjID",
-                          dv = "value",
-                          data = n250_2_nonwords,
-                          within = c("family_size", 
-                                     "complexity", 
-                                     "anteriority", 
-                                     "laterality"),
-                          between = c("lang_type_semantic","lang_type_ortho"), 
-                          type = 3)
-anova_results.2b
+# Compute Marginal and Conditional R²
+r2(anova_model_1)
 ```
+### Main Findings
 
+  |Effect                          |df          |F       |p     |eta-sqrd|
+  |--------------------------------|------------|--------|------|--------|
+  |lang_type_ortho x family_size   |(1, 2121)   |4.52 *  |.034  |2.13e-03| 
+  |lang_type_ortho x complexity    |(1, 2121)   |6.14 *  |.013  |2.89e-03|
 
-# Examine and plot interactions
-## Group 1 
-### `Family Size` by `Complexity` by `Anteriority` Interaction
-#### Simple Effects `complexity| family_size * anteriority`
+#### lang_type_ortho × family_size (Interaction) 
+
+##### Custom contrasts for lang_type_ortho × family_size (Interaction) 
+
 ```{r}
-# Examine the 2-way interaction between ` family_size` and `complexity` 
-# at each level of `Anteriority`
-(se_frontal_1.1 <-n250_1_nonwords |> filter(anteriority == "Frontal")|>
-  ezANOVA(dv = value,
-          wid = SubjID,
-          within = .(complexity, family_size)))
-(se_central_1.1 <-n250_1_nonwords |> filter(anteriority == "Central")|>
-  ezANOVA(dv = value,
-          wid = SubjID,
-          within = .(complexity, family_size)))
-(se_parietal_1.1 <-n250_1_nonwords |> filter(anteriority == "Parietal")|>
-  ezANOVA(dv = value,
-          wid = SubjID,
-          within = .(complexity, family_size)))
+pairs <- emmeans(anova_model_1, pairwise ~ lang_type_ortho * family_size, adjust = "bonferroni", pbkrtest.limit = 6480)
+(pairs_df <- as.data.frame(pairs$contrasts))
+selected_contrasts_famsize <- pairs$contrasts[pairs_df$contrast %in% c("High large - High small",
+                                                               "Low large - Low small"),]
+selected_contrasts_orthtyp <- pairs$contrasts[pairs_df$contrast %in% c("High small - Low small",
+                                                                       "High large - Low large"), ]
+selected_contrasts_df_famsize <- as.data.frame(selected_contrasts_famsize)  # Convert the emmGrid object to a dataframe
+selected_contrasts_df_orthtyp <- as.data.frame(selected_contrasts_orthtyp)  # Convert the emmGrid object to a dataframe
+cohensd_small <- as.data.frame(cohens_d(value ~ lang_type_ortho, 
+         data = subset(n250_1_nonwords, family_size == "small")))
+cohensd_large <- as.data.frame(cohens_d(value ~ lang_type_ortho, 
+         data = subset(n250_1_nonwords, family_size == "large")))
+cohensd_hi_ortho <- as.data.frame(cohens_d(value ~ family_size, 
+         data = subset(n250_1_nonwords, lang_type_ortho == "High")))
+cohensd_lo_ortho <- as.data.frame(cohens_d(value ~ family_size, 
+         data = subset(n250_1_nonwords, lang_type_ortho == "Low")))
 
-# Examine `complexity` at each level of ` family_size` at parietal sites.
-(se_parietal_small_1.1 <-n250_1_nonwords |> filter(anteriority == "Parietal" & 
-                                                    family_size == "small")|>
-  ezANOVA(dv = value,
-          wid = SubjID,
-          within = complexity))
+cohensd_orthtyp <- bind_rows(large = cohensd_large,
+                             small = cohensd_small,
+                             .id = "famsize")
 
-(se_parietal_large_1.1 <-n250_1_nonwords |> filter(anteriority == "Parietal" & 
-                                                    family_size == "large")|>
-  ezANOVA(dv = value,
-          wid = SubjID,
-          within = complexity))
+cohensd_famsize <- bind_rows(hi_ortho = cohensd_hi_ortho,
+                             lo_ortho = cohensd_lo_ortho,
+                             .id = "orthtyp")
+
+(orthtyp_contrasts_df <- bind_cols(selected_contrasts_df_orthtyp,cohensd_orthtyp))
+(famsize_contrasts_df <- bind_cols(selected_contrasts_df_famsize,cohensd_famsize))
+(langtyp.famsize_means <- as.data.frame(pairs$emmeans))
 ```
+#### Plots for  lang_type_ortho × family_size (Interaction))
 
-There is a significant `complexity` by `family size` interaction only at parietal sites $F(1,66)=3.97705105, p=0.05025801$, where the complexity effect is a slightly more probable for small families $F(1,66)=2.621483, p=0.1101951$ than for large $F(1,66)=1.127293, p=0.2922231$. 
+Plots for  lang_type_ortho × family_size (Interaction)
 
-#### Pairwise Comparisons `complexity| family_size * anteriority`
+```{r,  echo=FALSE}
+
+p1 <- langtyp.famsize_means|>
+  ggplot(aes(x = lang_type_ortho,
+             y = emmean,
+             fill = family_size,
+             colour = family_size)) +
+  geom_col(alpha = .4, position = position_dodge(.9)) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), 
+                width = .15,
+                position = position_dodge(.9)) +
+  labs(y="Mean ERP amplitude (in microvolts)",
+       x = "Sensitivity to Orthographic Structure") +
+  geom_text(aes(label = round(emmean, digits = 2)),
+                colour = "black",size = 2.5, vjust = -1.7, position = position_dodge(.65)) +
+  scale_color_custom() +
+  scale_fill_custom()
+p1
+```
+APA-style Write-up 
+
+A significant interaction between orthographic sensitivity and morphological family size was observed, $F(1, 2121) = 4.52$, $p = .034$, despite no individual pairwise contrast reaching significance after Bonferroni correction. To better understand this effect, estimated marginal means were examined. The pattern of means revealed that in the High orthographic sensitivity condition, ERP amplitudes were numerically lower for small compared to large family size, whereas in the Low orthographic sensitivity condition, the opposite pattern was observed. Although neither of these differences was statistically significant on their own ($p\text{s} > .10$), the interaction reflects a crossover pattern in which the effect of family size differs depending on orthographic sensitivity This crossover interaction is visualized in Figure X, where the slope of ERP amplitude across family size conditions differs between high and low orthographic sensitivity
+
+#### lang_type_ortho × complexity (Interaction) 
+
+##### Custom contrasts for lang_type_ortho × complexity (Interaction) 
+
 ```{r}
-emms <- emmeans(anova_results.1b, ~ complexity| family_size * anteriority )
-pairwise_results <- pairs(emms, by = c("anteriority", "family_size"))
-summary(pairwise_results)
+pairs <- emmeans(anova_model_1, pairwise ~ lang_type_ortho * complexity, adjust = "bonferroni", pbkrtest.limit = 6480)
+(pairs_df <- as.data.frame(pairs$contrasts))
+
+selected_contrasts_cmplxty <- pairs$contrasts[pairs_df$contrast %in% c("High complex - High simple",
+                                                               "Low complex - Low simple"),]
+selected_contrasts_orthtyp <- pairs$contrasts[pairs_df$contrast %in% c("High complex - Low complex",
+                                                                       "High simple - Low simple"), ]
+
+selected_contrasts_df_cmplxty <- as.data.frame(selected_contrasts_cmplxty)  # Convert the emmGrid object to a dataframe
+selected_contrasts_df_orthtyp <- as.data.frame(selected_contrasts_orthtyp)  
+
+cohensd_complex <- as.data.frame(cohens_d(value ~ lang_type_ortho, 
+         data = subset(n250_1_nonwords, complexity == "complex")))
+cohensd_simple <- as.data.frame(cohens_d(value ~ lang_type_ortho, 
+         data = subset(n250_1_nonwords, complexity == "simple")))
+cohensd_hi_ortho <- as.data.frame(cohens_d(value ~ complexity, 
+         data = subset(n250_1_nonwords, lang_type_ortho == "High")))
+cohensd_lo_ortho <- as.data.frame(cohens_d(value ~ complexity, 
+         data = subset(n250_1_nonwords, lang_type_ortho == "Low")))
+
+cohensd_orthtyp <- bind_rows(complex = cohensd_complex,
+                             simple = cohensd_simple,
+                             .id = "cmplxty")
+
+cohensd_cmplxty <- bind_rows(hi_ortho = cohensd_hi_ortho,
+                             lo_ortho = cohensd_lo_ortho,
+                             .id = "orthtyp")
+
+(orthtyp_contrasts_df <- bind_cols(selected_contrasts_df_orthtyp,cohensd_orthtyp))
+(cmplxty_contrasts_df <- bind_cols(selected_contrasts_df_cmplxty,cohensd_cmplxty))
+(langtyp.cmplxty_means <- as.data.frame(pairs$emmeans))
+```
+Plots for  lang_type_ortho × complexity (Interaction)
+
+```{r,  echo=FALSE}
+
+p2 <- langtyp.cmplxty_means|>
+  ggplot(aes(x = lang_type_ortho,
+             y = emmean,
+             fill = complexity,
+             colour = complexity)) +
+  geom_col(alpha = .4, position = position_dodge(.9)) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), 
+                width = .15,
+                position = position_dodge(.9)) +
+  labs(y="Mean ERP amplitude (in microvolts)",
+       x = "Sensitivity to Orthographic Structure") +
+  geom_text(aes(label = round(emmean, digits = 2)),
+                colour = "black",size = 2.5, vjust = -1.7, position = position_dodge(.65)) +
+  scale_color_custom() +
+  scale_fill_custom()
+p2
 ```
 
-#### Condition Means
+APA Write-up
+
+A significant interaction between orthographic transparency and morphological complexity was observed, $F(1, 2121) = 6.14$, $p = .013$. Although no individual pairwise comparisons between levels of orthographic sensitivity and complexity were statistically significant after Bonferroni correction ($p\text{s} > .08$), the pattern of estimated marginal means revealed a crossover interaction. Specifically, in the high orthographic sensitivity condition, ERP amplitudes were slightly more negative for complex than for simple items, whereas in the Low orthographic sensitivity condition, this pattern was reversed. This non-parallel pattern of effects accounts for the significant interaction and suggests that the influence of morphological complexity on ERP responses depends on participants sensitivity to orthographic structure.
+
+
+## Cohort 2
+
+### ANOVA Model 
 ```{r}
-(nw_famsize_cmplx_ant_1 <- n250_1_nonwords |> 
-    na.omit()|>
-   group_by(family_size, anteriority, complexity) |> 
-   summarise(mean = mean(value), 
-             se = sem(value),
-             num_stim = n()))
+# Fit the ANOVA/mixed model
+anova_model_2 <- mixed(
+  value ~ lang_type_ortho * family_size * complexity + 
+    laterality * anteriority  +  # Nuisance variables
+    (1 | SubjID), 
+  data = n250_2_nonwords, 
+  method = "KR"  # Kenward-Roger approximation for accurate F-tests
+)
+
+# Print ANOVA results
+anova_model_2
 ```
 
-#### Diff Scores
+### Compute Partial Eta Squared 
+
+Compute Partial Eta Squared ($\eta_p^2$ ) for F-tests. This gives $\eta_p^2$  values for each effect.  Then, compute $R^2$ for the Mixed Model. This provides marginal $R^2$ (fixed effects only) and conditional $R^2$ (fixed + random effects).
+
 ```{r}
-(difference_scores_1.1 <- nw_famsize_cmplx_ant_1 %>%
-  pivot_wider(names_from = complexity, values_from = c(mean, se, num_stim)) %>%
-  mutate(mean_diff = `mean_simple` - `mean_complex`, 
-         avg_se = mean(`se_complex`,`se_simple`),
-         total_num_stim = sum(`num_stim_complex`, `num_stim_simple`)))
+# Extract effect sizes from your ANOVA model
+eta_squared(anova_model_2, partial = TRUE)
+
+# Compute Marginal and Conditional R²
+r2(anova_model_2)
 ```
+### Main Findings
 
-#### Plots
-First we plot the raw scores then the difference scores
-```{r, fig.width=5, fig.height=4}
-# plot raw scores
-# facet_wrap() wraps a 1d sequence of panels into 2d. Use vars() to supply faceting variables; 
-# Control the number of rows and columns with nrow and ncol.
+|Effect                          |df        |F        |p      |eta-sqrd|
+|-------------------------------|-----------|---------|-------|--------|
+|complexity                     |(1, 1421)  |12.14 ***|<.001  |8.47e-03|
+|lang_type_ortho x complexity   |(1, 1421)  |4.03 *   | .045  |2.83e-03|
+|family_size x complexity       |(1, 1421)  |17.60 ***|<.001  |0.01    |
 
+Main effect of Complexity; Simple words are more negative than complex words from 200-300 ms.
 
-p1.a <-  nw_famsize_cmplx_ant_1 |> ggplot(aes(x= family_size, y=mean, 
-                                             fill = complexity, colour = complexity,
-                                             ymin = mean - se, ymax = mean + se)) +
-  facet_wrap(vars(anteriority), ncol = 3, labeller = "label_value") +  
-  coord_cartesian(xlim = NULL, ylim = c(-2, 1), expand = TRUE, default = FALSE,clip = "on") +
-  geom_col(position = "dodge", width = 0.75, alpha = .4)  +
-  labs(y = "Voltage (microvolts)", x = "Family Size")  + 
-  geom_errorbar(width = .08, position = position_dodge(0.75)) + 
-  theme_classic(base_size = 8) + 
-   geom_text(aes(label = round(mean, digits = 1)), colour = "black",  
-             size = 2.5,  vjust = -7, 
-             position = position_dodge(.75))+
-  guides(fill=guide_legend(title="Non-Word Complexity"),
-         colour= "none") +  
-  theme(legend.position = "bottom")
-p1.a + scale_fill_brewer(palette = "Set1")+
-      scale_colour_brewer(palette = "Set1")
+#### Complexity (Main Effect)
+#####  Cohen's d for Complexity (Main Effect)
 
-# plot diff scores
-p1.b <- difference_scores_1.1 |> ggplot(aes(x = anteriority, 
-                                            y = mean_diff,
-                                            fill = family_size,
-                                            colour = family_size,
-                                            ymin = mean_diff - avg_se, 
-                                            ymax = mean_diff + avg_se)) +
-  coord_cartesian(xlim = NULL,ylim = c(-1, 1), expand = TRUE,default = FALSE,clip = "on") +
-  geom_col(position = "dodge", width = 0.75, alpha = 0.4) +
-  labs(y = "n250 amplitude for Simple minus Complex Non-words", x = "Anteriority") + 
-  geom_errorbar(width = .08, position = position_dodge(0.75)) + 
-  theme_classic(base_size = 8) + 
-  geom_text(aes(label = round(mean_diff, digits = 2)),colour = "black",size = 2.5, vjust = -6, 
-             position = position_dodge(.75))+  
-  guides(fill=guide_legend(title="Family Size"),
-         colour= "none") +  
-  theme(legend.position = "bottom")
-p1.b + scale_fill_brewer(palette = "Set2")+
-      scale_colour_brewer(palette = "Set2")
-```
-
-
-### `Language Type Semantic` by `Complexity` by `Family Size` by `Anteriority` x` Laterality` Interaction
-#### Simple Effects `complexity | lang_type_semantic * family_size * laterality * anteriority `
 ```{r}
-# Examine the 4-way interaction between `anteriority`, `laterality`, ` complexity`, 
-# and `lang_type_semantics` at each level of `family_size`
-se_large_1.2 <-n250_1_nonwords |> filter(family_size == "small")|>
-  ezANOVA(dv = value,
-         wid = SubjID,
-         within = .(complexity, anteriority, laterality),
-         between = .(lang_type_semantic),
-         type = 3)
-se_large_1.2$`Sphericity Corrections`
-
-se_small_1.2 <-n250_1_nonwords |> filter(family_size == "large")|>
-  ezANOVA(dv = value,
-          wid = SubjID,
-          within = .(complexity, anteriority, laterality),
-          between = lang_type_semantic)
-se_small_1.2$`Sphericity Corrections`
-
-# Examine the 3-way interaction between ` complexity`, `anteriority` and `laterality` 
-# at each level of `lang_type_semantics` for non-words from large families
-
-se_large_hisem_1.2 <-n250_1_nonwords |> filter(family_size == "large" & 
-                                                 lang_type_semantic == "High Semantic")|>
-  ezANOVA(dv = value,
-          wid = SubjID,
-          within = .(anteriority, laterality, complexity))
-se_large_hisem_1.2$`Sphericity Corrections`
-
-se_large_losem_1.2 <-n250_1_nonwords |> filter(family_size == "large" & 
-                                                 lang_type_semantic == "Low Semantic")|>
-  ezANOVA(dv = value,
-          wid = SubjID,
-          within = .(complexity, anteriority, laterality))
-se_large_losem_1.2$`Sphericity Corrections`
-
-
-# Examine the 2-way interaction between complexity and anteriority 
-# at each level of laterality for non-words from large families for high semantic readers
-
-# left
-se_large_hisem_left_1.2 <-n250_1_nonwords |> 
-  filter(family_size == "large" & 
-           lang_type_semantic == "High Semantic" & 
-           laterality == "Left")|>
-    ezANOVA(dv = value,
-          wid = SubjID,
-          within = .(complexity, anteriority))
-se_large_hisem_left_1.2$`Sphericity Corrections`
-
-# midline
-se_large_hisem_mid_1.2 <-n250_1_nonwords |> 
-    filter(family_size == "large" & 
-             lang_type_semantic == "High Semantic" & 
-             laterality == "Midline")|>
-    ezANOVA(dv = value,
-          wid = SubjID,
-          within = .(complexity, anteriority))
-se_large_hisem_mid_1.2$`Sphericity Corrections`
-
-# right
-se_large_hisem_right_1.2 <-n250_1_nonwords |> 
-    filter(family_size == "large" & 
-             lang_type_semantic == "High Semantic" & 
-             laterality == "Right")|>
-    ezANOVA(dv = value,
-          wid = SubjID,
-          within = .(complexity, anteriority))
-se_large_hisem_right_1.2$`Sphericity Corrections`
-
-# Finally we examine the simple effect of complexity at each level of anteriority 
-# for non-words from large families for high semantic readers at left sites
-# Frontal
-se_large_hisem_left_frontal_1.2 <- n250_1_nonwords |>
-      filter(family_size == "large" & 
-               lang_type_semantic == "High Semantic" & 
-               laterality == "Left" & 
-               anteriority == "Frontal" )|>
-  ezANOVA(dv = value,
-          wid = SubjID,
-          within = .(complexity))
-se_large_hisem_left_frontal_1.2$ANOVA
-
-# Central
-se_large_hisem_left_central_1.2 <- n250_1_nonwords |>
-      filter(family_size == "large" & 
-               lang_type_semantic == "High Semantic" & 
-               laterality == "Left" & 
-               anteriority == "Central" )|>
-  ezANOVA(dv = value,
-          wid = SubjID,
-          within = .(complexity))
-se_large_hisem_left_central_1.2$ANOVA  
-
-
-# Parietal
-se_large_hisem_left_parietal_1.2 <- n250_1_nonwords |>
-      filter(family_size == "large" & 
-               lang_type_semantic == "High Semantic" & 
-               laterality == "Left" & 
-               anteriority == "Parietal" )|>
-  ezANOVA(dv = value,
-          wid = SubjID,
-          within = .(complexity))
-se_large_hisem_left_parietal_1.2$ANOVA  
-
+pairs_2 <- emmeans(anova_model_2, pairwise ~ complexity, adjust = "bonferroni", pbkrtest.limit = 6480)
+(pairs_df_2 <- as.data.frame(pairs_2$contrasts))
+cohensd_2 <- as.data.frame(cohens_d(value ~ complexity, data = n250_2_nonwords))
+(complexity_contrasts_df_2 <- bind_cols(pairs_df_2,cohensd_2))
+(complexity_means_2 <- as.data.frame(pairs_2$emmeans))
 ```
 
 
-#### Pairwise Comparisons  `complexity | lang_type_semantic * family_size * laterality * anteriority`
-```{r}
-emms <- emmeans(anova_results.1b,~complexity|lang_type_semantic*family_size*laterality*anteriority)
-pairwise_results <- pairs(emms,by = c("laterality","anteriority","lang_type_semantic","family_size"))
-summary(pairwise_results)
-```
+##### Mixed Model Comparison: Complexity
 
-#### Condition Means `complexity | lang_type_semantic * family_size * laterality * anteriority`
-```{r}
-(nw_sem_famsize_lat_ant_cmplx_1 <- n250_1_nonwords |> 
-    na.omit()|>
-   group_by( lang_type_semantic, family_size, laterality, anteriority, complexity  ) |> 
-   summarise(mean = mean(value), 
-             se = sem(value),
-             num_stim = n()))
-```
+To test the effect of `Complexity`, we compare:
 
-#### Diff Scores `complexity | lang_type_semantic * family_size * laterality * anteriority`
-```{r}
-(difference_scores_1.2 <- nw_sem_famsize_lat_ant_cmplx_1 %>%
-  pivot_wider(names_from = complexity, values_from = c(mean, se, num_stim)) %>%
-  mutate(mean_diff = `mean_simple` - `mean_complex`, 
-         avg_se = mean(`se_complex`,`se_simple`),
-         total_num_stim = sum(`num_stim_complex`, `num_stim_simple`)))
-```
-
-#### Plots `complexity | lang_type_semantic * family_size * laterality * anteriority`
-First we plot the raw scores then the difference scores
-
-**Plot interaction `complexity | lang_type_semantic * family_size * laterality * anteriority ` Raw Scores**
-`facet_wrap()` wraps a 1d sequence of panels into 2d. Use `vars()` to supply faceting variables;  Control the number of rows and columns with `nrow` and `ncol.` `labeller` options are "label_value" and "label_both".  The latter prints the name of the variable & its value.
-
- Plot raw scores
-```{r, fig.width=7, fig.height=10}
-
-p2.a <-  nw_sem_famsize_lat_ant_cmplx_1 |> ggplot(aes(x= lang_type_semantic, y=mean,
-                                          fill = complexity, colour = complexity,
-                                          ymin = mean - se, ymax = mean + se)) +
-  facet_wrap(vars(family_size, anteriority, laterality),
-             labeller = "label_value", ncol = 3) +  
-  coord_cartesian(xlim = NULL, ylim = c(-3.5, 3.5), expand=TRUE, default=FALSE, clip="on") +
-  geom_col(position = "dodge", width = 0.75, alpha = 0.4)  +
-  labs(y = "Voltage (microvolts)", x = "Participant Reading Style")  +  
-  geom_errorbar(width = .08, position = position_dodge(0.75)) + 
-  theme_classic(base_size = 8) + 
-   geom_text(aes(label = round(mean, digits = 1)),
-             colour = "black", 
-             size = 2.5, 
-             vjust = -2, 
-             position = position_dodge(.75))+
-  guides(fill=guide_legend(title="Complexity"),
-         colour= "none") +  
-  theme(legend.position = "bottom")
-p2.a + scale_fill_brewer(palette = "Set1")+
-      scale_colour_brewer(palette = "Set1")
-```
-
-Plot diff scores
-```{r, fig.width=7, fig.height=6}
-
-p2.b <- difference_scores_1.2 |> ggplot(aes(x = family_size, y = mean_diff,
-                                        fill = lang_type_semantic, colour = lang_type_semantic,
-                                        ymin = mean_diff - avg_se, ymax = mean_diff + avg_se)) +
-      facet_wrap(vars(anteriority, laterality),
-             labeller = "label_value", ncol = 3) + 
-  coord_cartesian(xlim = NULL,ylim = c(-2, 3), expand = TRUE,default = FALSE,clip = "on") +
-  geom_col(position = "dodge", width = 0.75, alpha = 0.4) +
-  labs(y = "n250 amplitude for Simple Minus Complex", x = "Family Size") + 
-  geom_errorbar(width = .08, position = position_dodge(0.75)) + 
-  theme_classic(base_size = 8) + 
-  geom_text(aes(label = round(mean_diff, digits = 2)),colour = "black",size = 2.5, vjust = -3, 
-             position = position_dodge(.75))+  
-  guides(fill=guide_legend(title="Participant Reading Style"),
-         colour= "none") +  
-  theme(legend.position = "bottom")
-p2.b + scale_fill_brewer(palette = "Paired")+
-      scale_colour_brewer(palette = "Paired")
-```
-
-
-
-## Group 2
-### `Language Type Semantic` by `Laterality` Interaction 
-#### Simple Effects `lang_type_semantic| laterality`
-```{r}
-# Examine the diffence between `lang_type_semantic` at each level of `laterality` 
-
-se_left_2.1 <-n250_2_nonwords |> filter(laterality == "Left")|>
-  ezANOVA(dv = value,
-          wid = SubjID,
-          between = lang_type_semantic)
-se_left_2.1$ANOVA
-
-se_mid_2.1 <-n250_2_nonwords |> filter(laterality == "Midline")|>
-  ezANOVA(dv = value,
-          wid = SubjID,
-          between = lang_type_semantic)
-se_mid_2.1$ANOVA
-
-se_right_2.1 <-n250_2_nonwords |> filter(laterality == "Right")|>
-  ezANOVA(dv = value,
-          wid = SubjID,
-          between = lang_type_semantic)
-se_right_2.1$ANOVA
-```
-
-No significant effect of `lang_type_semantic` at any laterality, but the effect is less probable at midline sites ($F(1,37) =  0.02925513, p=0.8651233$)  than at   left ($F(1,37)= 0.2837876, p=0.5974145$) or right ($F(1,37)=0.6945411, p=0.4099719$) sites
-
-#### Pairwise Comparisons `lang_type_semantic | laterality`
-```{r}
-emms <- emmeans(anova_results.2b, ~ lang_type_semantic | laterality )
-pairwise_results <- pairs(emms, by = c("laterality"))
-summary(pairwise_results)
-```
-
-#### Condition Means
-```{r}
-(nw_langsem_lat_2 <- n250_2_nonwords |> 
-    na.omit()|>
-   group_by(laterality, lang_type_semantic) |> 
-   summarise(mean = mean(value), 
-             se = sem(value),
-             num = n()))
-```
-
-#### Diff Scores
-```{r}
-(difference_scores_2.1 <- nw_langsem_lat_2 %>%
-  pivot_wider(names_from = lang_type_semantic, values_from = c(mean, se, num)) %>%
-  mutate(mean_diff = `mean_Low Semantic` - `mean_High Semantic`, 
-         avg_se = mean(`se_Low Semantic`,`se_High Semantic`),
-         total_num_stim = sum(`num_Low Semantic`, `num_High Semantic`)))
-```
-
-#### Plots`lang_type_ortho | anteriority` 
-First we plot the raw scores then the difference scores
-```{r, fig.width=5, fig.height=3}
-# plot raw scores
-p3.a <-  nw_langsem_lat_2 |> ggplot(aes(x=laterality, 
-                                   y=mean, 
-                                   fill = lang_type_semantic, 
-                                   colour = lang_type_semantic,
-                                   ymin = mean - se, 
-                                   ymax = mean + se)) +
-  coord_cartesian(xlim = NULL,ylim = c(0, 5), expand = TRUE,default = FALSE,clip = "on") +
-  geom_col(position = "dodge", width = .75,  alpha = 0.4)  +
-  labs(y = "Voltage (microvolts)", x = "Laterality")  +  
-  geom_errorbar(width = .1, position = position_dodge(0.75)) + 
-  theme_classic(base_size = 8) + 
-   geom_text(aes(label = round(mean, digits = 2)),colour = "black",size = 2.5, vjust = -5, 
-             position = position_dodge(.75))+
-  guides(fill=guide_legend(title="Participant Reading Style"),
-         colour= "none") +  
-  theme(legend.position = "bottom")
-p3.a + scale_fill_brewer(palette = "Paired")+
-      scale_colour_brewer(palette = "Paired")
-
-# plot diff scores
-p3.b <- difference_scores_2.1 |> ggplot(aes(x = laterality,
-                                        y = mean_diff,
-                                        ymin = mean_diff - avg_se,
-                                        ymax = mean_diff + avg_se)) +
-  coord_cartesian(xlim = NULL,ylim = c(-1.5, 2), expand = TRUE,default = FALSE,clip = "on") +
-  geom_col(position = "dodge", width = 0.75, alpha = 0.4, 
-           colour = "deepskyblue3", fill= "deepskyblue3") +
-  labs(y = "N250 for Low Semantic Minus High Semantic", x = "Laterality") + 
-  geom_errorbar(width = .08, position = position_dodge(0.75), colour = "deepskyblue3") + 
-  theme_classic(base_size = 8) + 
-  geom_text(aes(label = round(mean_diff, digits = 2)),colour = "black",size = 2.5, vjust = -5.5, 
-             position = position_dodge(.75))+  
-    guides(fill=guide_legend(title="Laterality"),
-           colour= "none") +  
-  theme(legend.position = "bottom")
-p3.b 
+ - Full model (anova_model_2) → includes `Complexity` and all interactions.
  
-# grid.arrange(p1.a, p1.b, nrow = 1)
-```
+ - Reduced model (reduced_model) → removes `Complexity` and all interactions involving `Complexity`
 
-### `Family Size` by `Complexity` Interaction
-#### Simple Effects `complexity | family_size`
+
 ```{r}
-# Examine the diffence between `complexity` at each level of `family_size` 
-
-se_smlfam_2.2 <-n250_2_nonwords |> filter(family_size == "small")|>
-  ezANOVA(dv = value,
-          wid = SubjID,
-          within = complexity)
-se_smlfam_2.2$ANOVA
-
-se_lrgfam_2.2 <-n250_2_nonwords |> filter(family_size == "large")|>
-  ezANOVA(dv = value,
-          wid = SubjID,
-          within = complexity)
-se_lrgfam_2.2$ANOVA
+reduced_model <- update(anova_model_2,
+                        . ~ . - complexity - complexity:family_size - complexity:lang_type_ortho - complexity:family_size:lang_type_ortho)
+anova(anova_model_2, reduced_model)
 ```
 
-No significant effect of `lang_type_semantic` at any laterality, but the effect is less probable at midline sites ($F(1,37) =  0.02925513, p=0.8651233$)  than at   left ($F(1,37)= 0.2837876, p=0.5974145$) or right ($F(1,37)=0.6945411, p=0.4099719$) sites
+A model including Complexity and its interactions provided a significantly better fit than a model without it, $\chi^2(4) = 21.779$, $p < .001$, indicating that the complexity of words  modulates the ERP responses.
 
-#### Pairwise Comparisons `complexity | family_size`
+##### Plot for Complexity
+
+Complexity
+
+```{r, echo = FALSE}
+p3 <- ggplot(complexity_means_2, aes(x = complexity, y = emmean, fill = complexity, colour = complexity)) +
+  geom_bar(stat = "identity", position = position_dodge(), alpha = .4) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
+                width = 0.05, position = position_dodge(0.9)) +
+  coord_cartesian(ylim = c(2.5, 4.5)) +
+  ylab("Mean ERP Amplitude (microvolts)") +
+  geom_text(aes(label = round(emmean, digits = 2)), colour = "black", size = 2.5, vjust = 12,
+            position = position_dodge(.9)) +
+  scale_color_custom() +
+  scale_fill_custom()
+p3
+```
+
+#### lang_type_ortho × complexity (Interaction) 
+
+##### Custom contrasts for lang_type_ortho × complexity (Interaction) 
+
 ```{r}
-emms <- emmeans(anova_results.2b, ~ complexity | family_size )
-pairwise_results <- pairs(emms, by = c("family_size"))
-summary(pairwise_results)
+pairs_2 <- emmeans(anova_model_2, pairwise ~ lang_type_ortho * complexity, adjust = "bonferroni", pbkrtest.limit = 6480)
+(pairs_df_2 <- as.data.frame(pairs_2$contrasts))
+
+selected_contrasts_cmplxty_2 <- pairs_2$contrasts[pairs_df_2$contrast %in% c("High complex - High simple",
+                                                               "Low complex - Low simple"),]
+selected_contrasts_orthtyp_2 <- pairs_2$contrasts[pairs_df_2$contrast %in% c("High complex - Low complex",
+                                                                       "High simple - Low simple"), ]
+
+selected_contrasts_df_cmplxty_2 <- as.data.frame(selected_contrasts_cmplxty_2)  # Convert the emmGrid object to a dataframe
+selected_contrasts_df_orthtyp_2 <- as.data.frame(selected_contrasts_orthtyp_2)  
+
+cohensd_complex_2 <- as.data.frame(cohens_d(value ~ lang_type_ortho, 
+         data = subset(n250_2_nonwords, complexity == "complex")))
+cohensd_simple_2 <- as.data.frame(cohens_d(value ~ lang_type_ortho, 
+         data = subset(n250_2_nonwords, complexity == "simple")))
+cohensd_hi_ortho_2 <- as.data.frame(cohens_d(value ~ complexity, 
+         data = subset(n250_2_nonwords, lang_type_ortho == "High")))
+cohensd_lo_ortho_2 <- as.data.frame(cohens_d(value ~ complexity, 
+         data = subset(n250_2_nonwords, lang_type_ortho == "Low")))
+
+cohensd_orthtyp_2 <- bind_rows(complex = cohensd_complex_2,
+                             simple = cohensd_simple_2,
+                             .id = "cmplxty")
+
+cohensd_cmplxty_2 <- bind_rows(hi_ortho = cohensd_hi_ortho_2,
+                             lo_ortho = cohensd_lo_ortho_2,
+                             .id = "orthtyp")
+
+(orthtyp_contrasts_df_2 <- bind_cols(selected_contrasts_df_orthtyp_2,cohensd_orthtyp))
+(cmplxty_contrasts_df_2 <- bind_cols(selected_contrasts_df_cmplxty_2,cohensd_cmplxty))
+(langtyp.cmplxty_means_2 <- as.data.frame(pairs_2$emmeans))
 ```
 
-#### Condition Means `complexity | family_size`
+Plots for  lang_type_ortho × complexity (Interaction)
+
+```{r,  echo=FALSE}
+
+p4 <- langtyp.cmplxty_means_2|>
+  ggplot(aes(x = lang_type_ortho,
+             y = emmean,
+             fill = complexity,
+             colour = complexity)) +
+  geom_col(alpha = .4, position = position_dodge(.9)) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), 
+                width = .15,
+                position = position_dodge(.9)) +
+  coord_cartesian(ylim = c(2.5, 5)) +
+  labs(y="Mean ERP amplitude (in microvolts)",
+       x = "Sensitivity to Orthographic Structure") +
+  geom_text(aes(label = round(emmean, digits = 2)),
+                colour = "black",size = 2.5, vjust = -1.7, position = position_dodge(.65)) +
+  scale_color_custom() +
+  scale_fill_custom()
+p4
+```
+
+#### family_size x complexity (Interaction) 
+
+##### Custom contrasts for family_size x complexity (Interaction) 
+
 ```{r}
-(nw_cmplx_famsize_2 <- n250_2_nonwords |> 
-    na.omit()|>
-   group_by(family_size, complexity) |> 
-   summarise(mean = mean(value), 
-             se = sem(value),
-             num_stim = n()))
+pairs_2 <- emmeans(anova_model_2, pairwise ~ complexity * family_size, adjust = "bonferroni", pbkrtest.limit = 6480)
+(pairs_df_2 <- as.data.frame(pairs_2$contrasts))
+selected_contrasts_famsize_2 <- pairs_2$contrasts[pairs_df_2$contrast %in% c("complex large - complex small",
+                                                                             "simple large - simple small"),]
+selected_contrasts_cmplxty_2 <- pairs_2$contrasts[pairs_df_2$contrast %in% c("complex small - simple small",
+                                                                             "complex large - simple large"), ]
+selected_contrasts_df_famsize_2 <- as.data.frame(selected_contrasts_famsize_2)
+# Convert the emmGrid object to a dataframe
+selected_contrasts_df_cmplxty_2 <- as.data.frame(selected_contrasts_cmplxty_2)
+# Convert the emmGrid object to a dataframe
+cohensd_small_2 <- as.data.frame(cohens_d(value ~ complexity, 
+         data = subset(n250_2_nonwords, family_size == "small")))
+cohensd_large_2 <- as.data.frame(cohens_d(value ~ complexity, 
+         data = subset(n250_2_nonwords, family_size == "large")))
+cohensd_complex_2 <- as.data.frame(cohens_d(value ~ family_size, 
+         data = subset(n250_2_nonwords, complexity == "complex")))
+cohensd_simple_2 <- as.data.frame(cohens_d(value ~ family_size, 
+         data = subset(n250_2_nonwords, complexity == "simple")))
+
+cohensd_famsize_2 <- bind_rows(complex = cohensd_complex_2,
+                               simple = cohensd_simple_2,
+                               .id = "cmplxty")
+
+cohensd_cmplxty_2 <- bind_rows(large = cohensd_large_2,
+                               small = cohensd_small_2,
+                               .id = "famsize")
+
+
+
+(cmplxty_contrasts_df_2 <- bind_cols(selected_contrasts_df_cmplxty_2,cohensd_cmplxty_2))
+(famsize_contrasts_df_2 <- bind_cols(selected_contrasts_df_famsize_2,cohensd_famsize_2))
+(famsize_cmplxty_means_2 <- as.data.frame(pairs_2$emmeans))
+
 ```
 
-#### Diff Scores `complexity | family_size`
-```{r}
-(difference_scores_2.2 <- nw_cmplx_famsize_2 %>%
-  pivot_wider(names_from = complexity, values_from = c(mean, se, num_stim)) %>%
-  mutate(mean_diff = `mean_simple` - `mean_complex`, 
-         avg_se = mean(`se_simple`,`se_complex`),
-         total_num_stim = sum(`num_stim_simple`, `num_stim_complex`)))
+Plots for  family_size x complexity (Interaction)
+
+```{r,  echo=FALSE}
+
+p5 <- famsize_cmplxty_means_2|>
+  ggplot(aes(x = family_size,
+             y = emmean,
+             fill = complexity,
+             colour = complexity)) +
+  geom_col(alpha = .4, position = position_dodge(.9)) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), 
+                width = .15,
+                position = position_dodge(.9)) +
+  coord_cartesian(ylim = c(2.5, 4.5)) +
+  labs(y="Mean ERP amplitude (in microvolts)",
+       x = "Morphological Family Size") +
+  geom_text(aes(label = round(emmean, digits = 2)),
+                colour = "black",size = 2.5, vjust = -1.7, position = position_dodge(.65)) +
+  scale_color_custom() +
+  scale_fill_custom()
+p5
 ```
-
-#### Plots`complexity | family_size`
-First we plot the raw scores then the difference scores
-```{r, fig.width=5, fig.height=3}
-# plot raw scores
-p4.a <-  nw_cmplx_famsize_2 |> ggplot(aes(x=family_size, 
-                                   y=mean, 
-                                   fill = complexity, 
-                                   colour = complexity,
-                                   ymin = mean - se, 
-                                   ymax = mean + se)) +
-  coord_cartesian(xlim = NULL,ylim = c(0, 4), expand = TRUE,default = FALSE,clip = "on") +
-  geom_col(position = "dodge", width = .75,  alpha = .4)  +
-  labs(y = "Voltage (microvolts)", x = "Family Size")  +  
-  geom_errorbar(width = .1, position = position_dodge(0.75)) + 
-  theme_classic(base_size = 8) + 
-   geom_text(aes(label = round(mean, digits = 2)),colour = "black",size = 2.5, vjust = -2.5, 
-             position = position_dodge(.75))+
-  guides(fill=guide_legend(title="Complexity"),
-         colour= "none") +  
-  theme(legend.position = "bottom")
-p4.a + scale_fill_brewer(palette = "Set1")+
-      scale_colour_brewer(palette = "Set1")
-
-# plot diff scores
-p4.b <- difference_scores_2.2 |> ggplot(aes(x = family_size,
-                                        y = mean_diff,
-                                        ymin = mean_diff - avg_se,
-                                        ymax = mean_diff + avg_se)) +
-  coord_cartesian(xlim = NULL,ylim = c(-1.5, 2), expand = TRUE,default = FALSE,clip = "on") +
-  geom_col(position = "dodge", width = 0.75, alpha = 0.4, 
-           colour = "deepskyblue3", fill= "deepskyblue3") +
-  labs(y = "N250 for Simple Minus Comlex Non-words", x = "Family Size") + 
-  geom_errorbar(width = .08, position = position_dodge(0.75), colour = "deepskyblue3") + 
-  theme_classic(base_size = 8) + 
-  geom_text(aes(label = round(mean_diff, digits = 2)),colour = "black",size = 2.5, vjust = -6, 
-             position = position_dodge(.75))+  
-    guides(fill=guide_legend(title="Complexity Effect"),
-           colour= "none") +  
-  theme(legend.position = "bottom")
-p4.b 
- 
-# grid.arrange(p1.a, p1.b, nrow = 1)
-```
-
-

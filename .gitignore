@@ -2,7 +2,7 @@
 *.erp
 *.eeg
 *.fdt
-*.setw
+*.set
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
