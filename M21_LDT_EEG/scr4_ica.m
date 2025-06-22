@@ -18,7 +18,7 @@ prompt   = {'Enter StudyID:',...
             'Enter the part of the file name that comes after the subject and task IDs, including the underscores (leave blank if none). :'};
 dlgtitle =  'Input';
 dims     = [1 70];
-definput = {'M21','LDT','pc','temp.txt','_FLT_RSP_REF_ELS_BIN'};
+definput = {'M21','LDT','hc','temp.txt','_FLT_RSP_REF_ELS_BIN'};
 my_input   = inputdlg(prompt,dlgtitle,dims,definput);
 
 DIR            = pwd;                         % Current folder (where the script should be located)
@@ -29,7 +29,7 @@ subj_list      = importdata(my_input{4});     % list of subject ids
 f_string       = my_input{5};                 % this string allows you to specify which .set file to load
 nsubj          = length(subj_list);           % number of subjects
 
-if strcmp(location, 'hampshire')
+if strcmp(location, 'hc')
     chan_num = 32;
 else
     chan_num = 31;

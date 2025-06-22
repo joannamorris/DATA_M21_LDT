@@ -1,0 +1,551 @@
+---
+title: "M21 RT (Continuous Predictors)"
+author: "Joanna Morris"
+date: "`r Sys.Date()`"
+output:
+  bookdown::pdf_document2:
+    toc: true
+    toc_depth: 4
+editor_options: 
+  chunk_output_type: inline
+---
+
+\scriptsize
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      error = FALSE,
+                      comment = "||",
+                      fig.height = 4,
+                      fig.width = 4)
+options(width = 130)
+```
+
+# Setup  {-}
+
+Load libraries
+```{r, echo=FALSE}
+library(tidyverse)
+library(ggeffects)
+library(lme4)
+library(afex)
+library(gridExtra)
+library(emmeans)
+library(effectsize)
+library(performance)
+library(cowplot)  # for use with `plot_grid(x,x,ncol = x)` function
+library(e1071) # for use with `skewness()` function
+```
+
+
+1. Set `ggplot2` parameters
+```{r theme, echo = FALSE}
+theme_set(theme_classic() +  
+            theme(legend.position = "bottom", 
+                  axis.text=element_text(size=8),
+                  axis.title=element_text(size=9),
+                  plot.title = element_text(size = 9),
+                  plot.subtitle = element_text(size = 8)))
+
+# Define a custom color palette
+my_palette <- c("#1F78B4","#E31A1C", "#33A02C")
+my_palette_1 <- c("#A6CEE3",  "#FB9A99")
+my_palette_2 <- c( "#1F78B4","#E31A1C" )
+my_palette_3 <- c("#A6CEE3","#1F78B4","#FB9A99","#E31A1C")
+
+# Create a function to apply this palette
+scale_color_custom <- function() {
+  scale_color_manual(values = my_palette)
+}
+
+scale_fill_custom <- function() {
+  scale_fill_manual(values = my_palette)
+}
+
+# set emm options
+emm_options(pbkrtest.limit = 4671)
+```
+
+
+# Load Files and Format Files  
+
+## Load Files 
+```{r}
+rt_1 <- read_csv("rt_data_chrt1.csv")
+rt_2 <- read_csv("rt_data_chrt2.csv")
+frq_w <- read_csv("frq_cw.csv")
+frq_nw <- read_csv("frq_nw.csv")
+dmg <- read_csv("demo_lang_vsl_pca.csv")
+```
+
+
+## Format Files 
+```{r}
+# Concatenate datasets
+rt <- bind_rows(Hampshire = rt_1, 
+                Providence =rt_2,
+                .id = "location")
+rt_dmg<- right_join(dmg, rt, join_by(SubjID == subject_nr))  # Join Participant Demographic and Lang Data
+rt_dmg <- rt_dmg |> mutate(target = tolower(target))
+rt_dmg_cor <- rt_dmg |> filter(correct == 1)
+
+# Divide into Experimental and Filler Items
+rt_fill <- rt_dmg_cor |> filter(str_detect(targ_type, "^FILL"))
+rt_exp <- rt_dmg_cor |> filter(!str_detect(targ_type, "^FILL"))
+
+# Define Factors and Conditions
+rt_exp_cln <- rt_exp |>
+  separate(targ_type, into = c("trial_type", "family_size", "complexity"), sep = "_",
+           remove = TRUE,
+           extra = "drop",
+           fill = "right")
+
+# Divide into Words and Nonwords
+rt_words <- rt_exp_cln |> filter(trial_type == "CW") |> select(- complexity)
+rt_nwords <- rt_exp_cln |> filter(trial_type == "NW")
+
+# Join Stimulus Frequency Data
+rt_words_frq <- left_join(rt_words, frq_w, join_by(target))|>
+  select(-cond_trig.y, -word_trig.y) |>
+  rename(cond_trig = cond_trig.x, word_trig = word_trig.x)  # remove duplicate columns
+
+rt_nwords_frq <-  left_join(rt_nwords, frq_nw, join_by(target==word))
+
+
+
+# Create a median-split factor for base frequency
+rt_words_frq$BF_MedianSplit <- ifelse(
+  rt_words_frq$Log10BF <= median(rt_words_frq$Log10BF, na.rm = TRUE),
+  "Low", "High")
+
+rt_words_frq$BF_Split <- factor(rt_words_frq$BF_Split)
+rt_words_frq$FS_Split <- factor(rt_words_frq$FS_Split)
+
+rt_nwords_frq$BF_Split <- factor(rt_nwords_frq$BF_Split)
+rt_nwords_frq$FS_Split <- factor(rt_nwords_frq$FS_Split)
+
+# Divide into cohorts
+rt_words_1 <- rt_words_frq |> filter(location == "Hampshire") |> select(- location)
+rt_words_2 <- rt_words_frq |> filter(location == "Providence") |> select(- location)
+
+rt_nwords_1 <- rt_nwords_frq |> filter(location == "Hampshire") |> select(- location)
+rt_nwords_2 <- rt_nwords_frq |> filter(location == "Providence") |> select(- location)
+# str(rt_words_1)
+
+
+
+```
+
+
+
+## Plot RT  distributions
+...
+
+```{r, echo = FALSE, fig.width=7, height = 5.5}
+# RT boxplot
+p1 <- rt_words_1 |> ggplot(aes(x = SubjID, y = response_time)) +
+  geom_boxplot(colour = "#1F78B4", fill = "#1F78B4", alpha = .4 )+
+  labs(y = "Respose Time (in milliseconds)", title = "Response Time (Words)") +
+  theme( plot.title = element_text(size = 9, hjust = .5),
+         legend.title = element_blank(),
+         axis.title.x = element_blank(),
+         axis.text.x = element_text(size = 6, angle = 70, vjust = 0.5, hjust=1))
+
+p2 <- rt_nwords_1 |> ggplot(aes(x = SubjID, y = response_time)) +
+  geom_boxplot(colour = "#E31A1C", fill = "#E31A1C", alpha = .4)+
+  labs(y = "Respose Time (in milliseconds)",title = "Response Time (NonWords)") +
+  theme( plot.title = element_text(size = 9, hjust = .5),
+         legend.title = element_blank(),
+         axis.title.x = element_blank(),
+         axis.text.x = element_text(size = 6, angle = 70, vjust = 0.5, hjust=1))
+plot_grid(p1, p2, ncol = 1)
+
+```
+
+## Test for Skewness
+
+`Response Time`
+
+```{r,fig.width=6, fig.height=2 }
+# Words Skewness values
+skewness(rt_words_1$response_time, na.rm = TRUE)
+skewness(rt_words_1$LogRT, na.rm = TRUE)
+
+# Words Raw RT Distribution
+p1 <- rt_words_1 |> ggplot(aes(x = response_time)) +
+  geom_density(colour = "#1F78B4", fill = "#1F78B4", alpha = .4) +
+  labs(title = "Raw RT Distribution (Words)") +
+  theme( plot.title = element_text(size = 9, hjust = .5),
+         legend.title = element_blank(),
+         axis.title.x = element_blank(),
+         axis.text.x = element_text(size = 8)) 
+
+# Words Log RT Distribution
+p2 <- rt_words_1 |> ggplot(aes(x = InvRT)) +
+  geom_density(colour = "#A6CEE3", fill = "#A6CEE3", alpha = .4)  +
+  labs(title = "Log RT Distribution (Words)") +
+  theme( plot.title = element_text(size = 9, hjust = .5),
+         legend.title = element_blank(),
+         axis.title.x = element_blank(),
+         axis.text.x = element_text(size = 8))
+plot_grid(p1, p2, ncol = 2)
+
+
+# NONWORDS
+# Skewness values
+skewness(rt_nwords_1$response_time, na.rm = TRUE)
+skewness(rt_nwords_1$LogRT, na.rm = TRUE)
+
+# Raw RT
+p1 <- rt_nwords_1 |> ggplot(aes(x = response_time)) +
+  geom_density(colour = "#E31A1C", fill = "#E31A1C", alpha = .4) +
+  labs(y = "Density",title = "Raw RT Distribution (NonWords)") +
+  theme( plot.title = element_text(size = 9, hjust = .5),
+         legend.title = element_blank(),
+         axis.title.x = element_blank(),
+         axis.text.x = element_text(size = 8)) 
+# LogRT
+p2 <- rt_nwords_1 |> ggplot(aes(x = LogRT)) +
+  geom_density(colour = "#FB9A99", fill = "#FB9A99", alpha = .4)  +
+  labs(y = "Density", title = "Log RT Distribution (NonWords)") +
+  theme( plot.title = element_text(size = 9, hjust = .5),
+         legend.title = element_blank(),
+         axis.title.x = element_blank(),
+         axis.text.x = element_text(size = 8))
+plot_grid(p1, p2, ncol = 2)
+```
+
+`Base Frequency`
+
+```{r, echo=FALSE, fig.width=6, fig.height=2}
+# WORDS
+# Skewness values
+skewness(rt_words_1$BF, na.rm = TRUE)
+skewness(rt_words_1$Log10BF, na.rm = TRUE)
+
+# Raw BF
+p1 <- ggplot(rt_words_1, aes(x = BF)) +
+  geom_density(colour = "#B2DF8A", fill = "#B2DF8A", alpha = .4) +
+  labs(y = "Density",title = "Raw Base Frequency Distributions (Words)") +
+  theme( plot.title = element_text(size = 9, hjust = .5),
+         legend.title = element_blank(),
+         axis.title.x = element_blank(),
+         axis.text.x = element_text(size = 8)) 
+# Log10BF
+p2 <- ggplot(rt_words_1, aes(x = Log10BF)) +
+  geom_density(colour = "#33A02C", fill = "#33A02C", alpha = .4) +
+  labs(y = "Density",title = "Log10 Base Frequency Distribution (Words)") +
+  theme( plot.title = element_text(size = 9, hjust = .5),
+         legend.title = element_blank(),
+         axis.title.x = element_blank(),
+         axis.text.x = element_text(size = 8)) 
+plot_grid(p1, p2, ncol = 2)
+
+# Nonword
+# Skewness values
+skewness(rt_nwords_1$BF, na.rm = TRUE)
+skewness(rt_nwords_1$LogBF, na.rm = TRUE)
+
+# Raw BF
+p1 <- ggplot(rt_nwords_1, aes(x = BF)) +
+  geom_density(colour = "#B2DF8A", fill = "#B2DF8A", alpha = .4) +
+  labs(y = "Density",title = "Raw Base Frequency Distributions (NonWords)") +
+  theme( plot.title = element_text(size = 9, hjust = .5),
+         legend.title = element_blank(),
+         axis.title.x = element_blank(),
+         axis.text.x = element_text(size = 8)) 
+
+# Log10BF
+p2 <- ggplot(rt_nwords_1, aes(x = LogBF)) +
+  geom_density(colour = "#33A02C", fill = "#33A02C", alpha = .4) +
+  labs(title = "Log Base Frequency Distribution (NonWords)", y = "Density") +
+  theme( plot.title = element_text(size = 9, hjust = .5),
+         legend.title = element_blank(),
+         axis.title.x = element_blank(),
+         axis.text.x = element_text(size = 8))
+plot_grid(p1, p2, ncol = 2)
+```
+
+`Family Size`
+
+```{r, fig.width=6, fig.height=2}
+# Words
+# Skewness values
+rt_words_1 <- rt_words_1 |> mutate(Log10FS = log10(FS))
+skewness(rt_words_1$FS, na.rm = TRUE)
+skewness(rt_words_1$Log10FS, na.rm = TRUE)
+
+# Raw FS 
+p1 <- ggplot(rt_words_1, aes(x = FS)) +
+  geom_density(colour = "#A6CEE3", fill = "#1F78B4", alpha = .4) +
+  labs(title = "Family Size (Words)", y = "Density") +
+  theme( plot.title = element_text(size = 9, hjust = .5),
+         legend.title = element_blank(),
+         axis.title.x = element_blank(),
+         axis.text.x = element_text(size = 8)) 
+# Log10 FS 
+p2 <- ggplot(rt_words_1, aes(x = Log10FS)) +
+  geom_density(colour = "#FB9A99", fill = "#E31A1C", alpha = .4) +
+  labs(title = "Log10 Family Size (Words)", y = "Density") +
+  theme( plot.title = element_text(size = 9, hjust = .5),
+         legend.title = element_blank(),
+         axis.title.x = element_blank(),
+         axis.text.x = element_text(size = 8)) 
+plot_grid(p1, p2, ncol = 2)
+
+
+# NonWords
+# Skewness values
+rt_nwords_1 <- rt_nwords_1 |> mutate(Log10FS = log10(FS))
+skewness(rt_nwords_1$FS, na.rm = TRUE)
+skewness(rt_nwords_1$Log10FS, na.rm = TRUE)
+
+# Raw FS 
+p1 <- ggplot(rt_nwords_1, aes(x = FS)) +
+  geom_density(colour = "#A6CEE3", fill = "#1F78B4", alpha = .4) +
+  labs(title = "Family Size (NonWords)", y = "Density") +
+  theme( plot.title = element_text(size = 9, hjust = .5),
+         legend.title = element_blank(),
+         axis.title.x = element_blank(),
+         axis.text.x = element_text(size = 8))   
+# Log10 FS 
+p2 <- ggplot(rt_nwords_1, aes(x = Log10FS)) +
+  geom_density(colour = "#FB9A99", fill = "#E31A1C", alpha = .4) +
+  labs(title = "Log10 Family Size (NonWords)", y = "Density") +
+  theme( plot.title = element_text(size = 9, hjust = .5),
+         legend.title = element_blank(),
+         axis.title.x = element_blank(),
+         axis.text.x = element_text(size = 8))  
+plot_grid(p1, p2, ncol = 2)
+
+```
+
+## ANOVA Words
+
+Use `complete.cases()` to find which rows had missing data in the model-relevant variables:
+```{r, echo=FALSE, results = "hide"}
+# Specify only the variables used in the model
+model_vars <- c("response_time", "InvRT", "Log10BF","BF", "FS","FS_Split", "Dim.2","SubjID")
+
+# Identify incomplete rows cohort 1
+incomplete_cases_1 <- rt_words_1[!complete.cases(rt_words_1[, model_vars]), ]
+rt_words_1_cmpl <- rt_words_1[complete.cases(rt_words_1[, model_vars]), ]
+# View them
+print(incomplete_cases_1)
+
+# str(rt_words_1_cmpl)
+```
+
+
+Standardize the predictors
+```{r}
+rt_words_1_cmpl$Log10BF_std <- as.numeric(scale(rt_words_1_cmpl$Log10BF, center = TRUE, scale = TRUE))
+rt_words_1_cmpl$FS_std <- as.numeric(scale(rt_words_1_cmpl$FS, center = TRUE, scale = TRUE))
+rt_words_1_cmpl$Log10WF_std <- as.numeric(scale(rt_words_1_cmpl$Log10WF, center = TRUE, scale = TRUE))
+rt_words_1_cmpl$Log10FS_std <- as.numeric(scale(rt_words_1_cmpl$Log10FS, center = TRUE, scale = TRUE))
+rt_words_1_cmpl$Dim.2_std <- as.numeric(scale(rt_words_1_cmpl$Dim.2, center = TRUE, scale = TRUE))
+```
+
+### Anova with Continuous `Log10BF` and Continuous `Log10FS`
+
+```{r}
+# Anova with Continuous Log10BF AND Continous FS
+anova_model_1 <- mixed(
+  response_time ~ Log10BF_std * Log10FS_std * lang_type_ortho + (1  | SubjID),
+  data = rt_words_1_cmpl,
+  method = "KR"
+)
+anova_model_1
+summary(anova_model_1)
+
+```
+
+### Effects
+
+|                     Effect|         df |       F |p.value |
+|---------------------------|------------|---------|--------|
+|                Log10BF_std| 1, 5792.77 |46.75 ***|   <.001|
+|                Log10FS_std| 1, 5792.45 |29.26 ***|   <.001|
+|            lang_type_ortho| 1,   64.04 | 3.12 +  |    .082|
+|Log10BF_std:lang_type_ortho| 1, 5792.77 |   2.24  |    .135|
+	
+
+
+Main Effect of `Family Size` and `Base Frequency`
+
+```{r}
+emm_options(pbkrtest.limit = 5864)
+emtrends(anova_model_1, ~1, var = "Log10FS_std")
+emtrends(anova_model_1, ~1, var = "Log10BF_std")
+```
+
+`Base Frequency` by `Orthographic Sensitivity` Interaction
+
+```{r}
+# estimate simple slopes of base frequency by group:
+emtrends(anova_model_1, ~ lang_type_ortho, var = "Log10BF_std")
+emtrends(anova_model_1, pairwise ~ lang_type_ortho, var = "Log10BF_std")
+
+# Estimate marginal means of RT at the mean of both predictors
+emm <- emmeans(anova_model_1, ~ lang_type_ortho, at = list(Log10BF_std = 0, Log10FS_std = 0))
+emm_df <- as.data.frame(emm)
+
+print(emm_df)
+```
+
+
+### Plots
+
+`Family Size` x `Base Frequency` x `Orthographic Sensitivity`
+
+```{r, fig.width=7}
+# re-run anova with lmer to use `ggeffects`
+anova_model_lmer <- lmer(response_time ~ Log10BF_std * Log10FS_std * lang_type_ortho + (1 | SubjID), data = rt_words_1_cmpl)
+# Generate predicted values
+preds <- ggpredict(anova_model_lmer, terms = c("Log10BF_std", "lang_type_ortho", "Log10FS_std [-3,0,3]"))
+
+# Plot
+ggplot(preds, aes(x = x, y = predicted, color = group, fill = group)) +
+  geom_line(linewidth = 1) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.15, color = NA) +
+  facet_wrap(~facet, labeller = label_value) +
+  labs(x = "Standardized Base Frequency (Log10 BF)",
+       y = "Predicted  RT",
+       color = "Family Size (Log10 FS)",
+       fill = "Family Size (Log10 FS)",
+       title = "Predicted  RT by Base Frequency, Family Size, and Orthographic Sensitivity")+
+  theme( plot.title = element_text(size = 8, hjust = .5),
+         legend.title = element_blank(),
+         axis.text.x = element_text(size = 8))   
+```
+
+
+## ANOVA Non-Words
+
+Use `complete.cases()` to find which rows had missing data in the model-relevant variables:
+```{r, echo=FALSE, results = "hide"}
+# Specify only the variables used in the model
+model_vars <- c("response_time", "InvRT", "Dim.2","SubjID")
+
+# Identify incomplete rows cohort 1
+incomplete_cases_1 <- rt_nwords_1[!complete.cases(rt_nwords_1[, model_vars]), ]
+rt_nwords_1_cmpl <- rt_nwords_1[complete.cases(rt_nwords_1[, model_vars]), ]
+# View them
+print(incomplete_cases_1)
+
+# str(rt_nwords_1_cmpl)
+```
+
+Standardize the predictors
+
+```{r}
+
+rt_nwords_1_cmpl$LogBF_std <- as.numeric(scale(rt_nwords_1_cmpl$LogBF, center = TRUE, scale = TRUE))
+rt_nwords_1_cmpl$FS_std <- as.numeric(scale(rt_nwords_1_cmpl$FS, center = TRUE, scale = TRUE))
+rt_nwords_1_cmpl$Log10FS_std <- as.numeric(scale(rt_nwords_1_cmpl$Log10FS, center = TRUE, scale = TRUE))
+rt_nwords_1_cmpl$BF_std <- as.numeric(scale(rt_nwords_1_cmpl$BF, center = TRUE, scale = TRUE))
+rt_nwords_1_cmpl$Dim.2_std <- as.numeric(scale(rt_nwords_1_cmpl$Dim.2, center = TRUE, scale = TRUE))
+rt_nwords_1_cmpl <- rt_nwords_1_cmpl |>  select(-complexity.x)
+rt_nwords_1_cmpl <- rename(rt_nwords_1_cmpl, complexity = complexity.y)
+```
+
+
+Test Correlation between `Base Frequency` and `Complexity`
+
+```{r}
+t.test(LogBF ~ complexity, data = rt_nwords_1_cmpl)
+
+# Create a contingency table
+table_data <- table(rt_nwords_1_cmpl$complexity, rt_nwords_1_cmpl$BF_Split)
+
+# Run the chi-square test
+chisq.test(table_data)
+```
+
+
+### Anova with Continuous `Log10BF` and Categorical `Complexity`
+
+```{r}
+
+anova_model_2 <- mixed(
+  response_time ~ complexity * Log10FS_std * lang_type_ortho + (1  | SubjID),
+  data = rt_nwords_1_cmpl,
+  method = "KR"
+)
+anova_model_2
+summary(anova_model_2)
+```
+
+
+### Effects
+
+|                     Effect|         df |       F    |p.value  |
+|---------------------------|------------|------------|---------|
+|               complexity  |  1, 4600.75| 102.69 *** |  <.001  |
+|     complexity:Log10FS_std| 1, 4600.27 |  4.11 *    |   .043  |
+
+
+
+```{r}
+
+pairs <- emmeans(anova_model_2, pairwise ~ complexity, adjust = "bonferroni", pbkrtest.limit = 6480)
+pairs_df <- as.data.frame(pairs$contrasts)
+cohensd <- as.data.frame(cohens_d(response_time ~ complexity, data = rt_nwords_1_cmpl))
+(complexity_contrasts_df <- bind_cols(pairs_df,cohensd))
+(complexity_means <- as.data.frame(pairs$emmeans))
+
+# Get estimated marginal means for each level of complexity
+em_means_complexity <- emmeans(anova_model_2, ~ complexity)
+contrast(em_means_complexity, method = "pairwise")
+summary(em_means_complexity)
+
+```
+
+
+```{r}
+# Estimate the effect of complexity at low, mean, and high FS
+em_complexity <- emmeans(anova_model_2, ~ complexity | Log10FS_std, at = list(Log10FS_std = c(-1, 0, 1)))
+summary(em_complexity)
+
+# Estimate the slope of Log10FS within each complexity level
+em_trends <- emtrends(anova_model_2, ~ complexity, var = "Log10FS_std")
+summary(em_trends)
+
+```
+
+
+### Plots
+...
+
+```{r, fig.height=3.5, fig.width=3.5}
+# Plot
+
+# Refit the model using lmer()
+anova_model_lmer <- lmer(
+  response_time ~ complexity * Log10FS_std * lang_type_ortho + (1 | SubjID),
+  data = rt_nwords_1_cmpl,
+  REML = FALSE
+)
+
+# Get predicted values
+preds <- ggpredict(anova_model_lmer, terms = c("Log10FS_std", "complexity"))
+
+# Plot
+ggplot(preds, aes(x = x, y = predicted, color = group, fill = group)) +
+  geom_line(linewidth = 1) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.2, color = NA) +
+  labs(x = "Standardized Log Family Size",
+       y = "Predicted RT (ms)",
+       color = "Complexity",
+       fill = "Complexity",
+       title = "Interaction of Morphological Complexity and Family Size on RT") +
+  theme( plot.title = element_text(size = 8, hjust = .5),
+         legend.title = element_blank(),
+         axis.text.x = element_text(size = 8))   
+
+```
+
+
+

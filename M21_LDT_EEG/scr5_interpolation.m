@@ -21,7 +21,7 @@ prompt   = {'Enter StudyID:',...
             'Enter the part of the file names that comes after the subject and task IDs. If there are no filename extensions, leave the box empty:'};
 dlgtitle =  'Input';
 dims     = [1 70];
-definput = {'M21','LDT','pc','temp_interp.txt','temp_interp_chan.txt','FLT_RSP_REF_ELS_BIN_ICA'};
+definput = {'M21','LDT','hc','temp_interp.txt','temp_interp_chan.txt','FLT_RSP_REF_ELS_BIN_ICA'};
 my_input   = inputdlg(prompt,dlgtitle,dims,definput);
 
 
@@ -33,7 +33,7 @@ subj_list      = importdata(my_input{4});     % list of subject ids
 f_string       = ['_' my_input{6}];                 % this string allows you to specify which .set file to load
 nsubj          = length(subj_list);           % number of subjects
 
-if strcmp(location,'hampshire')
+if strcmp(location,'hc')
     chan_ignore = [1, 27:33];
 else
     chan_ignore = [1 31];

@@ -17,7 +17,7 @@ prompt   = {'Enter StudyID:',...
             'What do you want to call your grand average file?'};
 dlgtitle = 'Input';
 dims     = [1 70];
-definput = {'M21','LDT','subjlist2_hi_ortho.txt','diff_waves','M21_LDT_GA2_hi_ortho' };
+definput = {'M21','LDT','subjlist1_lo_ortho.txt','diff_waves','M21_LDT_GA1_lo_ortho' };
 my_input = inputdlg(prompt, dlgtitle, dims, definput);
 
 DIR            = pwd;

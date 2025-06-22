@@ -17,7 +17,7 @@ prompt   = {'Enter StudyID:',...
             'Enter the part of the file names that comes after the subject and task IDs, including the underscores. If there are no filename extensions, leave the box empty:'};
 dlgtitle =  'Input';
 dims     = [1 70];
-definput = {'M18','','m18_subjlist1.txt','M18_BDF.txt','reref_eq_brainvision_hampshire.txt','_FLT_RSP_REF_ELS'};
+definput = {'M21','LDT','subjlist1_all.txt','M21_LDT_BDF.txt','reref_eq_brainvision_hampshire.txt','FLT_RSP_REF_ELS'};
 my_input   = inputdlg(prompt,dlgtitle,dims,definput);
 
 DIR            = pwd;                         % Current folder (where the script should be located)
@@ -39,11 +39,12 @@ for subject = 1:nsubj
    
     % Handle the case where taskID is empty
     if isempty(taskID)
-        fname = [subjID f_string];  % No taskID in the filename
+        fname1 = [subjID];  % No taskID in the filename
     else
-        fname = [subjID '_' taskID f_string];  % Include taskID if it's not empty
+        fname1 = [subjID '_' taskID];  % Include taskID if it's not empty
     end
     
+    fname       = [fname1 '_' f_string];
     fname_set   = [fname '.set'];
     fname_fdt   = [fname '.fdt'];
     
@@ -69,12 +70,12 @@ for subject = 1:nsubj
           %% Assign Bins
         EEG = pop_binlister( EEG , ...
                              'BDF', bdf_file, ...
-                             'ExportEL', [subject_DIR filesep fname '_ELS_BIN.txt'],...
+                             'ExportEL', [subject_DIR filesep fname1 '_ELS_BIN.txt'],...
                              'IndexEL', 1, ...
                              'SendEL2', 'EEG&Text', ...
                              'UpdateEEG', 'on', ...
                              'Voutput', 'EEG' );
-        EEG.setname = [fname '_FLT_RSP_REF_ELS_BIN'];
+        EEG.setname = [fname1 '_FLT_RSP_REF_ELS_BIN'];
         [ALLEEG, EEG, CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET,...
                                                  'setname',EEG.setname,...
                                                  'save', [subject_DIR filesep EEG.setname '.set'],...
