@@ -66,12 +66,13 @@ Define standard error of the mean function
 sem <- function(x) sd(x)/sqrt(length(x))
 ```
 
-# N250 
-## Load and format data files 
+
+# Load and format data files 
 
 ```{r}
-erpdat_1 <- read_csv("m21_ldt_mea_200300_050050_1.csv")
-dmg_lng_vsl <- read_csv("demo_lang_vsl_pca.csv")
+erp_2 <- read_csv("m21_ldt_mea_200300_050050_1.csv")
+erp_4 <- read_csv("m21_ldt_mea_300500_050050_1.csv")
+dmg_lng_vsl <- read_csv("demo_lang_vsl_pca_hc.csv")
 ```
 
 
@@ -81,8 +82,15 @@ Now we extract `SubjID` from the `ERPset` column
 # Remove '_LDT_diff_waves' from each string in the ERPset column
 # This code first renames the column and then applies the `str_replace` function 
 # to the newly renamed column.
-erpdat_1 <- erpdat_1 %>%
-  rename(SubjID = ERPset) %>%
+erp_2 <- erp_2 |>
+  rename(SubjID = ERPset) |>
+  mutate(SubjID = str_replace(SubjID, "_LDT_diff_waves", "")) |>
+  mutate(binlabel = str_replace(binlabel, "Critical_", "")) |>
+  mutate(binlabel = str_replace(binlabel, "_family", "")) |>
+  select(-mlabel)
+
+erp_4 <- erp_4 |>
+  rename(SubjID = ERPset) |>
   mutate(SubjID = str_replace(SubjID, "_LDT_diff_waves", "")) |>
   mutate(binlabel = str_replace(binlabel, "Critical_", "")) |>
   mutate(binlabel = str_replace(binlabel, "_family", "")) |>
@@ -92,52 +100,81 @@ erpdat_1 <- erpdat_1 %>%
 We then join the ERP data and language into a single data frame
 ```{r}
 
-n250_1 <- erpdat_1 |>
+n250 <- erp_2 |>
   left_join(dmg_lng_vsl, by = "SubjID") |>
-  select(SubjID, everything()) |>
-  rename(orthographic_sensitivity = lang_type_ortho)
+  select(SubjID, everything()) 
+n400 <- erp_4 |>
+  left_join(dmg_lng_vsl, by = "SubjID") |>
+  select(SubjID, everything()) 
 ```
 
 Divide into word, non-word and difference wave dataframes
 ```{r, echo=FALSE}
-n250_1_words <- n250_1 |> filter(bini %in% c(1:2))
-n250_1_words_b <- n250_1 |> filter(bini %in% c(9:12))
-n250_1_nonwords <- n250_1 |> filter(bini %in% c(3:6))
+n250_words <- n250 |> filter(bini %in% c(1:2))
+n250_words_b <- n250 |> filter(bini %in% c(9:12))
+n250_nonwords <- n250 |> filter(bini %in% c(3:6))
+
+n400_words <- n400 |> filter(bini %in% c(1:2))
+n400_words_b <- n400 |> filter(bini %in% c(9:12))
+n400_nonwords <- n400 |> filter(bini %in% c(3:6))
 ```
 
 Then we do some more formatting and cleanup of the dataframes.We  create separate columns, one for each independent variable (anteriority, laterality, morphological family size). To do this we have to use `seperate` function from the `stringr` package. Run `vignette("programming", package = "dplyr")` to see more about `tidy-selection` and `tidy-evaluation`.
 
 ```{r}
 # Words
-n250_1_words <- n250_1_words %>%
+n250_words <- n250_words |>
   separate(binlabel, into = c("trial_type","family_size"), sep = "_", remove = TRUE) |>
   select(-trial_type)
+n250_words_b <- n250_words_b |>
+  separate(binlabel, into = c("trial_type", "family_size","tmp1", "base_freq", "tmp2"), sep = "_", remove = TRUE) |>
+  select(-c(trial_type, tmp1, tmp2))
 
-n250_1_words_b <- n250_1_words_b %>%
+n400_words <- n400_words |>
+  separate(binlabel, into = c("trial_type","family_size"), sep = "_", remove = TRUE) |>
+  select(-trial_type)
+n400_words_b <- n400_words_b |>
   separate(binlabel, into = c("trial_type", "family_size","tmp1", "base_freq", "tmp2"), sep = "_", remove = TRUE) |>
   select(-c(trial_type, tmp1, tmp2))
 
 # Assuming your data frame is named 'df' and the column is named 'your_column'
-n250_1_words_b$orthographic_sensitivity[n250_1_words_b$orthographic_sensitivity == "Low"] <- "Low Sensitivity"
-n250_1_words_b$orthographic_sensitivity[n250_1_words_b$orthographic_sensitivity == "High"] <- "High Sensitivity"
-n250_1_words_b$base_freq[n250_1_words_b$base_freq == "Low"] <- "Low Base Frequency"
-n250_1_words_b$base_freq[n250_1_words_b$base_freq == "High"] <- "High Base Frequency"
-n250_1_words_b$family_size[n250_1_words_b$family_size == "large"] <- "Large Family"
-n250_1_words_b$family_size[n250_1_words_b$family_size == "small"] <- "Small Family"
+n250_words_b$Orthographic_Sensitivity[n250_words_b$Orthographic_Sensitivity == "Low"] <- "Low Sensitivity"
+n250_words_b$Orthographic_Sensitivity[n250_words_b$Orthographic_Sensitivity == "High"] <- "High Sensitivity"
+n250_words_b$base_freq[n250_words_b$base_freq == "Low"] <- "Low Base Frequency"
+n250_words_b$base_freq[n250_words_b$base_freq == "High"] <- "High Base Frequency"
+n250_words_b$family_size[n250_words_b$family_size == "large"] <- "Large Family"
+n250_words_b$family_size[n250_words_b$family_size == "small"] <- "Small Family"
+
+n400_words_b$Orthographic_Sensitivity[n400_words_b$Orthographic_Sensitivity == "Low"] <- "Low Sensitivity"
+n400_words_b$Orthographic_Sensitivity[n400_words_b$Orthographic_Sensitivity == "High"] <- "High Sensitivity"
+n400_words_b$base_freq[n400_words_b$base_freq == "Low"] <- "Low Base Frequency"
+n400_words_b$base_freq[n400_words_b$base_freq == "High"] <- "High Base Frequency"
+n400_words_b$family_size[n400_words_b$family_size == "large"] <- "Large Family"
+n400_words_b$family_size[n400_words_b$family_size == "small"] <- "Small Family"
 
 # Nonwords
-n250_1_nonwords <- n250_1_nonwords %>%
+n250_nonwords <- n250_nonwords |>
+  separate(binlabel, into = c("trial_type", "family_size", "complexity"), sep = "_", remove = TRUE) |>
+  select(-trial_type)
+
+n400_nonwords <- n400_nonwords |>
   separate(binlabel, into = c("trial_type", "family_size", "complexity"), sep = "_", remove = TRUE) |>
   select(-trial_type)
 
 # Assuming your data frame is named 'df' and the column is named 'your_column'
-n250_1_nonwords$orthographic_sensitivity[n250_1_nonwords$orthographic_sensitivity == "Low"] <- "Low Sensitivity"
-n250_1_nonwords$orthographic_sensitivity[n250_1_nonwords$orthographic_sensitivity == "High"] <- "High Sensitivity"
-n250_1_nonwords$complexity[n250_1_nonwords$complexity == "complex"] <- "Complex"
-n250_1_nonwords$complexity[n250_1_nonwords$complexity == "simple"] <- "Simple"
-n250_1_nonwords$family_size[n250_1_nonwords$family_size == "large"] <- "Large Family"
-n250_1_nonwords$family_size[n250_1_nonwords$family_size == "small"] <- "Small Family"
+n250_nonwords$Orthographic_Sensitivity[n250_nonwords$Orthographic_Sensitivity == "Low"] <- "Low Sensitivity"
+n250_nonwords$Orthographic_Sensitivity[n250_nonwords$Orthographic_Sensitivity == "High"] <- "High Sensitivity"
+n250_nonwords$complexity[n250_nonwords$complexity == "complex"] <- "Complex"
+n250_nonwords$complexity[n250_nonwords$complexity == "simple"] <- "Simple"
+n250_nonwords$family_size[n250_nonwords$family_size == "large"] <- "Large Family"
+n250_nonwords$family_size[n250_nonwords$family_size == "small"] <- "Small Family"
 
+n400_nonwords$Orthographic_Sensitivity[n400_nonwords$Orthographic_Sensitivity == "Low"] <- "Low Sensitivity"
+n400_nonwords$Orthographic_Sensitivity[n400_nonwords$Orthographic_Sensitivity == "High"] <- "High Sensitivity"
+n400_nonwords$complexity[n400_nonwords$complexity == "complex"] <- "Complex"
+n400_nonwords$complexity[n400_nonwords$complexity == "simple"] <- "Simple"
+n400_nonwords$family_size[n400_nonwords$family_size == "large"] <- "Large Family"
+n400_nonwords$family_size[n400_nonwords$family_size == "small"] <- "Small Family"
 ```
 
 Now we need to  extract just the bins and channels that we intend to analyse. For this analysis we will use 9 channels:  F3, Fz, F4, C3, Cz, C4, P3, Pz, P4 . We will use the`mutate` function from the `dplyr` package along with the `case_when` function. The `case_when` function  is a sequence of two-sided formulas. The left hand side determines which values match this case. The right hand side provides the replacement value.
@@ -148,50 +185,81 @@ channels_1 <-  c(3, 2, 25, 7, 20, 21, 12, 11, 16)
 channels_2 <-  c(3, 2, 29, 8, 23, 24, 14, 13, 19)
 
 # Words
-n250_1_words <- n250_1_words %>%
-  filter(chindex %in% channels_1) %>% 
+n250_words <- n250_words |>
+  filter(chindex %in% channels_1) |> 
   mutate(anteriority = case_when(grepl("F", chlabel) ~ "Frontal", 
                                  grepl("C", chlabel) ~ "Central",
                                  grepl("P", chlabel) ~ "Parietal"),
          laterality = case_when(grepl("3", chlabel) ~ "Left",grepl("z", chlabel) ~ "Midline",
                                 grepl("Z", chlabel) ~ "Midline",grepl("4", chlabel) ~ "Right"))
-n250_1_words$anteriority <- factor(n250_1_words$anteriority, levels = c("Frontal",  "Central",  "Parietal"))
-n250_1_words$laterality <- factor(n250_1_words$laterality, levels = c("Left", "Midline", "Right"))
+n250_words$anteriority <- factor(n250_words$anteriority, levels = c("Frontal",  "Central",  "Parietal"))
+n250_words$laterality <- factor(n250_words$laterality, levels = c("Left", "Midline", "Right"))
 
-n250_1_words_b <- n250_1_words_b %>%
-  filter(chindex %in% channels_1) %>% 
+n250_words_b <- n250_words_b |>
+  filter(chindex %in% channels_1) |> 
   mutate(anteriority = case_when(grepl("F", chlabel) ~ "Frontal", 
                                  grepl("C", chlabel) ~ "Central",
                                  grepl("P", chlabel) ~ "Parietal"),
          laterality = case_when(grepl("3", chlabel) ~ "Left",grepl("z", chlabel) ~ "Midline",
                                 grepl("Z", chlabel) ~ "Midline",grepl("4", chlabel) ~ "Right"))
-n250_1_words_b$anteriority <- factor(n250_1_words_b$anteriority, levels = c("Frontal",  "Central",  "Parietal"))
-n250_1_words_b$laterality <- factor(n250_1_words_b$laterality, levels = c("Left", "Midline", "Right"))
+n250_words_b$anteriority <- factor(n250_words_b$anteriority, levels = c("Frontal",  "Central",  "Parietal"))
+n250_words_b$laterality <- factor(n250_words_b$laterality, levels = c("Left", "Midline", "Right"))
+
+n400_words <- n400_words |>
+  filter(chindex %in% channels_1) |> 
+  mutate(anteriority = case_when(grepl("F", chlabel) ~ "Frontal", 
+                                 grepl("C", chlabel) ~ "Central",
+                                 grepl("P", chlabel) ~ "Parietal"),
+         laterality = case_when(grepl("3", chlabel) ~ "Left",grepl("z", chlabel) ~ "Midline",
+                                grepl("Z", chlabel) ~ "Midline",grepl("4", chlabel) ~ "Right"))
+n400_words$anteriority <- factor(n400_words$anteriority, levels = c("Frontal",  "Central",  "Parietal"))
+n400_words$laterality <- factor(n400_words$laterality, levels = c("Left", "Midline", "Right"))
+
+n400_words_b <- n400_words_b |>
+  filter(chindex %in% channels_1) |> 
+  mutate(anteriority = case_when(grepl("F", chlabel) ~ "Frontal", 
+                                 grepl("C", chlabel) ~ "Central",
+                                 grepl("P", chlabel) ~ "Parietal"),
+         laterality = case_when(grepl("3", chlabel) ~ "Left",grepl("z", chlabel) ~ "Midline",
+                                grepl("Z", chlabel) ~ "Midline",grepl("4", chlabel) ~ "Right"))
+n400_words_b$anteriority <- factor(n400_words_b$anteriority, levels = c("Frontal",  "Central",  "Parietal"))
+n400_words_b$laterality <- factor(n400_words_b$laterality, levels = c("Left", "Midline", "Right"))
 
 # Nonwords
-n250_1_nonwords <- n250_1_nonwords %>%
-  filter(chindex %in% channels_1) %>% 
+n250_nonwords <- n250_nonwords |>
+  filter(chindex %in% channels_1) |> 
   mutate(anteriority = case_when(grepl("F", chlabel) ~ "Frontal",
                                  grepl("C", chlabel) ~ "Central", 
                                  grepl("P", chlabel) ~ "Parietal"),
          laterality = case_when(grepl("3", chlabel) ~ "Left",grepl("z", chlabel) ~ "Midline",
                                 grepl("Z", chlabel) ~ "Midline", grepl("4", chlabel) ~ "Right"))
-n250_1_nonwords$anteriority <- factor(n250_1_nonwords$anteriority, levels = c("Frontal",  "Central","Parietal"))
-n250_1_nonwords$laterality <- factor(n250_1_nonwords$laterality, levels = c("Left", "Midline", "Right"))
+n250_nonwords$anteriority <- factor(n250_nonwords$anteriority, levels = c("Frontal",  "Central","Parietal"))
+n250_nonwords$laterality <- factor(n250_nonwords$laterality, levels = c("Left", "Midline", "Right"))
+
+n400_nonwords <- n400_nonwords |>
+  filter(chindex %in% channels_1) |> 
+  mutate(anteriority = case_when(grepl("F", chlabel) ~ "Frontal",
+                                 grepl("C", chlabel) ~ "Central", 
+                                 grepl("P", chlabel) ~ "Parietal"),
+         laterality = case_when(grepl("3", chlabel) ~ "Left",grepl("z", chlabel) ~ "Midline",
+                                grepl("Z", chlabel) ~ "Midline", grepl("4", chlabel) ~ "Right"))
+n400_nonwords$anteriority <- factor(n400_nonwords$anteriority, levels = c("Frontal",  "Central","Parietal"))
+n400_nonwords$laterality <- factor(n400_nonwords$laterality, levels = c("Left", "Midline", "Right"))
 
 
 
 ```
 
-## Real Word Data
 
-### Compute the ANOVA
+# N250 Word Data
+
+## Compute the ANOVA
 ```{r}
 anova_model_1a <- mixed(
-  value ~ orthographic_sensitivity * family_size * base_freq  + 
+  value ~ Orthographic_Sensitivity * family_size * base_freq  + 
     laterality * anteriority  +  # Nuisance variables
     (1 | SubjID), 
-  data = n250_1_words_b, 
+  data = n250_words_b, 
   method = "KR")  # Kenward-Roger approximation for accurate F-tests
 # Print ANOVA results
 anova_model_1a
@@ -204,79 +272,97 @@ eta_squared(anova_model_1a , partial = TRUE)
 # Compute Marginal (fixed effects) and Conditional (fixed + random effects) R²
 r2(anova_model_1a)
 ```
-### Significant Effects
+## Significant Effects
 
 |                            Effect|      df|         F| p.value||eta-sqrd|  
 |----------------------------------|--------|----------|--------|---------|
-|                       family_size| 1, 2121|   8.56 **|    .003|4.02e-03 | 
-|                         base_freq| 1, 2121|   6.67 **|    .010|3.13e-03 |
-|orthographic_sensitivity:base_freq| 1, 2121|    4.12 *|    .043|1.94e-03 |
-|             family_size:base_freq| 1, 2121| 14.76 ***|   <.001|6.91e-03 |
+|                       family_size| 1, 2121|   8.10 **|    .003|3.81e-03 | 
+|                         base_freq| 1, 2121|   6.24  *|    .010|2.94e-03 |
+|             family_size:base_freq| 1, 2121| 14.43 ***|   <.001|6.76e-03 |
 
 
+*Main Effects*
 
 ```{r}
 ## `family_size` main effect
 pairs <- emmeans(anova_model_1a, pairwise ~ family_size, adjust = "bonferroni", pbkrtest.limit = 6480)
 (pairs_df <- as.data.frame(pairs$contrasts))
-cohensd <- as.data.frame(cohens_d(value ~ family_size, data = n250_1_words_b))
+cohensd <- as.data.frame(cohens_d(value ~ family_size, data = n250_words_b))
 (family_size_contrasts_df <- bind_cols(pairs_df,cohensd))
 (family_size_means <- as.data.frame(pairs$emmeans))
 
 ## `base_freq` main effect
 pairs <- emmeans(anova_model_1a, pairwise ~ base_freq, adjust = "bonferroni", pbkrtest.limit = 6480)
 (pairs_df <- as.data.frame(pairs$contrasts))
-cohensd <- as.data.frame(cohens_d(value ~ base_freq, data = n250_1_words_b))
+cohensd <- as.data.frame(cohens_d(value ~ base_freq, data = n250_words_b))
 (base_freq_contrasts_df <- bind_cols(pairs_df,cohensd))
 (base_freq_means <- as.data.frame(pairs$emmeans))
 ```
 
+*Interactions*
 
 ```{r}
-# Test whether the interaction between orthographic_sensitivity and base_freq improves model fit
-reduced_model_int <- update(anova_model_1a,
-  . ~ . - orthographic_sensitivity:base_freq - orthographic_sensitivity:family_size:base_freq)
+# `base_freq` x `family_size` interaction
 
-anova(anova_model_1a, reduced_model_int)
+selected_contrasts_famsize <- c("Large Family High Base Frequency - Small Family High Base Frequency",
+                                 "Large Family Low Base Frequency - Small Family Low Base Frequency")
+selected_contrasts_basefreq <- c("Large Family High Base Frequency - Large Family Low Base Frequency", 
+                                "Small Family High Base Frequency - Small Family Low Base Frequency")  
 
-# Custom contrasts for orthographic_sensitivity × base_freq Interaction
-pairs <- emmeans(anova_model_1a, pairwise ~ orthographic_sensitivity * base_freq, adjust = "bonferroni", pbkrtest.limit = 6480)
-(pairs_df <- as.data.frame(pairs$contrasts))
+emmeans_obj <- emmeans(anova_model_1a, pairwise ~ family_size * base_freq, adjust = "bonferroni", pbkrtest.limit = 6480)
 
-selected_contrasts_basefrq <- pairs$contrasts[pairs_df$contrast %in% c("High Sensitivity High Base Frequency - High Sensitivity Low Base Frequency",
-                                                                       "Low Sensitivity High Base Frequency - Low Sensitivity Low Base Frequency"),]
-selected_contrasts_sensit <- pairs$contrasts[pairs_df$contrast %in% c("High Sensitivity High Base Frequency - Low Sensitivity High Base Frequency",
-                                                                      "Low Sensitivity High Base Frequency - High Sensitivity Low Base Frequency"), ]
+# Get selected contrasts and convert the emmGrid object to a dataframe
+(contrasts_df <- as.data.frame(emmeans_obj$contrasts))
+selected_contrasts_famsize_df <- as.data.frame(emmeans_obj$contrasts[contrasts_df$contrast %in% selected_contrasts_famsize, ])
+selected_contrasts_basefrq_df <- as.data.frame(emmeans_obj$contrasts[contrasts_df$contrast %in% selected_contrasts_basefreq,])
 
-selected_contrasts_basefrq_df <- as.data.frame(selected_contrasts_basefrq)  # Convert the emmGrid object to a dataframe
-selected_contrasts_sensit_df <- as.data.frame(selected_contrasts_sensit)  
 
-cohensd_hi_basefrq <- as.data.frame(cohens_d(value ~ orthographic_sensitivity,
-                                          data = subset(n250_1_words_b, base_freq == "High Base Frequency")))
-cohensd_lo_basefrq <- as.data.frame(cohens_d(value ~ orthographic_sensitivity, 
-                                             data = subset(n250_1_words_b, base_freq == "Low Base Frequency")))
-cohensd_hi_sensit <- as.data.frame(cohens_d(value ~ base_freq, 
-                                            data = subset(n250_1_words_b, orthographic_sensitivity == "High Sensitivity")))
-cohensd_lo_sensit <- as.data.frame(cohens_d(value ~ base_freq,
-                                           data = subset(n250_1_words_b, orthographic_sensitivity == "Low Sensitivity")))
+cohensd_hi_basefrq <- as.data.frame(cohens_d(value ~ family_size,
+                                          data = subset(n250_words_b, base_freq == "High Base Frequency")))
+cohensd_lo_basefrq <- as.data.frame(cohens_d(value ~ family_size, 
+                                             data = subset(n250_words_b, base_freq == "Low Base Frequency")))
+cohensd_lrg_fam <- as.data.frame(cohens_d(value ~ base_freq, 
+                                            data = subset(n250_words_b, family_size == "Large Family")))
+cohensd_sml_fam <- as.data.frame(cohens_d(value ~ base_freq,
+                                           data = subset(n250_words_b, family_size == "Small Family")))
 
 cohensd_basefrq <- bind_rows(hi_basefrq = cohensd_hi_basefrq,
                              lo_basefrq = cohensd_lo_basefrq,
                              .id = "base_freq")
 
-cohensd_sensit <- bind_rows(hi_sensit = cohensd_hi_sensit,
-                            lo_sensi = cohensd_lo_sensit,
-                             .id = "sensitivity")
+cohensd_famsize <- bind_rows(lrg_fam = cohensd_lrg_fam,
+                             sml_fam = cohensd_sml_fam,
+                             .id = "family_size")
 
 (basefreq_contrasts_df <- bind_cols(selected_contrasts_basefrq_df,cohensd_basefrq))
-(sensitivity_contrasts_df <- bind_cols(selected_contrasts_sensit_df,cohensd_sensit))
-(sensitivity.basefreq_means <- as.data.frame(pairs$emmeans))
+(sensitivity_contrasts_df <- bind_cols(selected_contrasts_famsize_df,cohensd_famsize))
+(famsize.basefreq_means <- as.data.frame(emmeans_obj$emmeans))
+
+```
+
+## Model Comparisons
+
+```{r}
+# Family Size
+reduced_model <- update(anova_model_1a,
+                        . ~ . - family_size - Orthographic_Sensitivity:family_size - family_size:base_freq - Orthographic_Sensitivity:family_size:base_freq)
+anova(anova_model_1a, reduced_model)
+
+# Base Frequency
+reduced_model <- update(anova_model_1a,
+                        . ~ . - base_freq - Orthographic_Sensitivity:base_freq - base_freq:family_size - Orthographic_Sensitivity:base_freq:family_size)
+anova(anova_model_1a, reduced_model)
+
+
+# Family Size x Base Frequency
+reduced_model_int <- update(anova_model_1a,
+  . ~ . - family_size:base_freq - Orthographic_Sensitivity:family_size:base_freq)
+anova(anova_model_1a, reduced_model_int)
 ```
 
 
-###  Plots
+##  Plots
 
-N250 Amplitude by *Stem Base Frequency* & *Morphological Family Size*
 
 ```{r, echo=FALSE, fig.width=7, fig.height=3}
 p1 <- ggplot(base_freq_means, aes(x = base_freq, y = emmean, fill = base_freq, colour = base_freq)) +
@@ -311,18 +397,13 @@ p2 <- ggplot(family_size_means, aes(x = family_size, y = emmean, fill = family_s
 
 plot_grid(p1, p2, ncol = 2)
 
-# combined_plot <- plot_grid(p1, p2, ncol = 2)
-# (combined_plot_with_title <- combined_plot +
-#   ggtitle("N250 Amplitude by Stem Base Frequency & Morphological Family Size") +
-#   theme(plot.title = element_text(hjust = 0.5)))
-
 ```
 
 
 ```{r,  echo=FALSE, fig.width=5, fig.height=3.5}
 
-p3 <- sensitivity.basefreq_means|>
-  ggplot(aes(x = orthographic_sensitivity,
+p3 <- famsize.basefreq_means|>
+  ggplot(aes(x = family_size,
              y = emmean,
              fill = base_freq,
              colour = base_freq)) +
@@ -335,7 +416,7 @@ p3 <- sensitivity.basefreq_means|>
                 colour = "black",size = 2.5, vjust = -1.7, position = position_dodge(.65)) +
   scale_color_custom() +
   scale_fill_custom() +
-  labs(title = "Orthographic Sensitivity x Base Frequency") +
+  labs(title = "Morphological Family Size x Base Frequency") +
   theme( plot.title = element_text(size = 10, hjust = 0.5),
          legend.title = element_blank(),
          axis.title.x = element_blank(),
@@ -343,18 +424,18 @@ p3 <- sensitivity.basefreq_means|>
 p3
 ```
 
-## Nonword Data
+# N250 Nonword Data
 
-### Compute the ANOVA
+## Compute the ANOVA
 
 ```{r}
 
 # Fit the ANOVA/mixed model
 anova_model_1b <- mixed(
-  value ~ orthographic_sensitivity * family_size * complexity + 
+  value ~ Orthographic_Sensitivity * family_size * complexity + 
     laterality * anteriority  +  # Nuisance variables
     (1 | SubjID), 
-  data = n250_1_nonwords, 
+  data = n250_nonwords, 
   method = "KR"  # Kenward-Roger approximation for accurate F-tests
 )
 
@@ -369,151 +450,247 @@ eta_squared(anova_model_1b , partial = TRUE)
 r2(anova_model_1b)
 ```
 
-### Effects
+## Effects
 
-  |Effect                                   |df          |F       |p     |eta-sqrd|
-  |-----------------------------------------|------------|--------|------|--------|
-  |orthographic_sensitivity x family_size   |(1, 2121)   |3.55 *  |.060  |1.67e-03| 
-  |orthographic_sensitivity x complexity    |(1, 2121)   |5.15 *  |.023  |2.42e-03|
+No significant effects
 
+# N400 Word Data
 
-
+## Compute the ANOVA
 
 ```{r}
-# Test whether the interaction between orthographic_sensitivity and complexity improves model fit
-reduced_model_int <- update(anova_model_1b,
-  . ~ . - orthographic_sensitivity:family_size - orthographic_sensitivity:family_size:complexity)
+anova_model_2a <- mixed(
+  value ~ Orthographic_Sensitivity * family_size * base_freq  + 
+    laterality * anteriority  +  # Nuisance variables
+    (1 | SubjID), 
+  data = n400_words_b, 
+  method = "KR")  # Kenward-Roger approximation for accurate F-tests
+# Print ANOVA results
+anova_model_2a
 
-anova(anova_model_1b, reduced_model_int)
 
-# Custom contrasts for orthographic_sensitivity × family_size (Interaction)
+# Partial Eta Squared
+# Extract effect sizes from your ANOVA model
+eta_squared(anova_model_2a , partial = TRUE)
 
-pairs <- emmeans(anova_model_1b, pairwise ~ orthographic_sensitivity * family_size, adjust = "bonferroni", pbkrtest.limit = 6480)
+# Compute Marginal (fixed effects) and Conditional (fixed + random effects) R²
+r2(anova_model_2a)
+```
+
+## Effects
+
+
+|                            Effect|      df|         F| p.value||eta-sqrd|  
+|----------------------------------|--------|----------|--------|---------|
+|                       family_size| 1, 2121|  11.63 **|    .003|5.45e-03 | 
+|Orthographic_Sensitivity:base_freq| 1, 2121|   4.36 * |    .037|2.05e-03 |
+|             family_size:base_freq| 1, 2121| 21.94 ***|   <.001|0.01     |
+
+
+*Main Effects*
+
+```{r}
+## `family_size` main effect
+pairs <- emmeans(anova_model_2a, pairwise ~ family_size, adjust = "bonferroni", pbkrtest.limit = 6480)
 (pairs_df <- as.data.frame(pairs$contrasts))
+cohensd <- as.data.frame(cohens_d(value ~ family_size, data = n400_words_b))
+(family_size_contrasts_df <- bind_cols(pairs_df,cohensd))
+(family_size_means <- as.data.frame(pairs$emmeans))
 
-selected_contrasts_famsize <- pairs$contrasts[pairs_df$contrast %in% c("High Sensitivity Large Family - High Sensitivity Small Family",
-                                                               "Low Sensitivity Large Family - Low Sensitivity Small Family"),]
-selected_contrasts_sensit <- pairs$contrasts[pairs_df$contrast %in% c("High Sensitivity Large Family - Low Sensitivity Large Family ",
-                                                                       "High Sensitivity Small Family - Low Sensitivity Small Family"), ]
+```
 
-selected_contrasts_df_famsize <- as.data.frame(selected_contrasts_famsize)  # Convert the emmGrid object to a dataframe
-selected_contrasts_df_sensit <- as.data.frame(selected_contrasts_sensit)  # Convert the emmGrid object to a dataframe
+*Interactions*
 
-cohensd_small <- as.data.frame(cohens_d(value ~ orthographic_sensitivity, 
-         data = subset(n250_1_nonwords, family_size == "Small Family")))
-cohensd_large <- as.data.frame(cohens_d(value ~ orthographic_sensitivity, 
-         data = subset(n250_1_nonwords, family_size == "Large Family")))
-cohensd_hi_sensit <- as.data.frame(cohens_d(value ~ family_size, 
-         data = subset(n250_1_nonwords, orthographic_sensitivity == "High Sensitivity")))
-cohensd_lo_sensit <- as.data.frame(cohens_d(value ~ family_size, 
-         data = subset(n250_1_nonwords, orthographic_sensitivity == "Low Sensitivity")))
+```{r}
+# `Orthographic_Sensitivity` x `base_freq`  interaction
 
-cohensd_sensit <- bind_rows(large = cohensd_large,
-                             small = cohensd_small,
-                             .id = "famsize")
+selected_contrasts_orthosens <- c("High Orthographic High Base Frequency - Low Orthographic High Base Frequency",
+                                  "High Orthographic Low Base Frequency - Low Orthographic Low Base Frequency")
+selected_contrasts_basefreq <- c("High Orthographic High Base Frequency - High Orthographic Low Base Frequency", 
+                                 "Low Orthographic High Base Frequency - Low Orthographic Low Base Frequency")  
 
-cohensd_famsize <- bind_rows(hi_ortho = cohensd_hi_sensit,
-                             lo_ortho = cohensd_lo_sensit,
-                             .id = "sensit")
+emmeans_obj <- emmeans(anova_model_2a, pairwise ~ Orthographic_Sensitivity * base_freq, adjust = "bonferroni", pbkrtest.limit = 6480)
 
-(sensit_contrasts_df <- bind_cols(selected_contrasts_df_sensit,cohensd_sensit))
-(famsize_contrasts_df <- bind_cols(selected_contrasts_df_famsize,cohensd_famsize))
-(sensit.famsize_means <- as.data.frame(pairs$emmeans))
+# Get selected contrasts and convert the emmGrid object to a dataframe
+contrasts_df <- as.data.frame(emmeans_obj$contrasts)
+selected_contrasts_orthosens_df <- as.data.frame(emmeans_obj$contrasts[contrasts_df$contrast %in% selected_contrasts_orthosens, ])
+selected_contrasts_basefrq_df <- as.data.frame(emmeans_obj$contrasts[contrasts_df$contrast %in% selected_contrasts_basefreq,])
+
+
+cohensd_hi_basefrq <- as.data.frame(cohens_d(value ~ Orthographic_Sensitivity,
+                                          data = subset(n400_words_b, base_freq == "High Base Frequency")))
+cohensd_lo_basefrq <- as.data.frame(cohens_d(value ~ Orthographic_Sensitivity, 
+                                             data = subset(n400_words_b, base_freq == "Low Base Frequency")))
+cohensd_hi_orthosens <- as.data.frame(cohens_d(value ~ base_freq, 
+                                            data = subset(n400_words_b, Orthographic_Sensitivity == "High Orthographic")))
+cohensd_lo_orthosens <- as.data.frame(cohens_d(value ~ base_freq,
+                                           data = subset(n400_words_b, Orthographic_Sensitivity == "Low Orthographic")))
+
+cohensd_basefrq <- bind_rows(hi_basefrq = cohensd_hi_basefrq,
+                             lo_basefrq = cohensd_lo_basefrq,
+                             .id = "base_freq")
+
+cohensd_orthosens <- bind_rows(hi_orthosens = cohensd_hi_orthosens,
+                             lo_orthosens = cohensd_lo_orthosens,
+                             .id = "Orthographic_Sensitivity")
+
+(basefreq_contrasts_df <- bind_cols(selected_contrasts_basefrq_df,cohensd_basefrq))
+(orthosens_contrasts_df <- bind_cols(selected_contrasts_orthosens_df,cohensd_orthosens))
+(orthosens.basefreq_means <- as.data.frame(emmeans_obj$emmeans))
+
+# `base_freq` x `family_size` interaction
+
+selected_contrasts_famsize <- c("Large Family High Base Frequency - Small Family High Base Frequency",
+                                 "Large Family Low Base Frequency - Small Family Low Base Frequency")
+selected_contrasts_basefreq <- c("Large Family High Base Frequency - Large Family Low Base Frequency", 
+                                "Small Family High Base Frequency - Small Family Low Base Frequency")  
+
+emmeans_obj <- emmeans(anova_model_2a, pairwise ~ family_size * base_freq, adjust = "bonferroni", pbkrtest.limit = 6480)
+
+# Get selected contrasts and convert the emmGrid object to a dataframe
+contrasts_df <- as.data.frame(emmeans_obj$contrasts)
+selected_contrasts_famsize_df <- as.data.frame(emmeans_obj$contrasts[contrasts_df$contrast %in% selected_contrasts_famsize, ])
+selected_contrasts_basefrq_df <- as.data.frame(emmeans_obj$contrasts[contrasts_df$contrast %in% selected_contrasts_basefreq,])
+
+
+cohensd_hi_basefrq <- as.data.frame(cohens_d(value ~ family_size,
+                                          data = subset(n400_words_b, base_freq == "High Base Frequency")))
+cohensd_lo_basefrq <- as.data.frame(cohens_d(value ~ family_size, 
+                                             data = subset(n400_words_b, base_freq == "Low Base Frequency")))
+cohensd_lrg_fam <- as.data.frame(cohens_d(value ~ base_freq, 
+                                            data = subset(n400_words_b, family_size == "Large Family")))
+cohensd_sml_fam <- as.data.frame(cohens_d(value ~ base_freq,
+                                           data = subset(n400_words_b, family_size == "Small Family")))
+
+cohensd_basefrq <- bind_rows(hi_basefrq = cohensd_hi_basefrq,
+                             lo_basefrq = cohensd_lo_basefrq,
+                             .id = "base_freq")
+
+cohensd_famsize <- bind_rows(lrg_fam = cohensd_lrg_fam,
+                             sml_fam = cohensd_sml_fam,
+                             .id = "family_size")
+
+(basefreq_contrasts_df <- bind_cols(selected_contrasts_basefrq_df,cohensd_basefrq))
+(sensitivity_contrasts_df <- bind_cols(selected_contrasts_famsize_df,cohensd_famsize))
+(famsize.basefreq_means <- as.data.frame(emmeans_obj$emmeans))
 ```
 
 
+## Model Comparisons
 
 ```{r}
-# Test whether the interaction between orthographic_sensitivity and complexity improves model fit
-reduced_model_int <- update(anova_model_1b,
-  . ~ . - orthographic_sensitivity:complexity - orthographic_sensitivity:family_size:complexity)
+# Family Size
+reduced_model <- update(anova_model_1a,
+                        . ~ . - family_size - Orthographic_Sensitivity:family_size - family_size:base_freq - Orthographic_Sensitivity:family_size:base_freq)
+anova(anova_model_1a, reduced_model)
 
-anova(anova_model_1b, reduced_model_int)
+# Orthographic Sensitivity x Base Frequency
+reduced_model_int <- update(anova_model_1a,
+  . ~ . - Orthographic_Sensitivity:base_freq - Orthographic_Sensitivity:family_size:base_freq)
+anova(anova_model_1a, reduced_model_int)
 
-# Custom contrasts for lang_type_ortho × complexity (Interaction) 
-pairs <- emmeans(anova_model_1b, pairwise ~ orthographic_sensitivity * complexity, adjust = "bonferroni", pbkrtest.limit = 6480)
-(pairs_df <- as.data.frame(pairs$contrasts))
 
-selected_contrasts_cmplxty <- pairs$contrasts[pairs_df$contrast %in% c("High Sensitivity Complex - High Sensitivity Simple",
-                                                                       "Low Sensitivity Complex - Low Sensitivity Simple"),]
-selected_contrasts_sensit <- pairs$contrasts[pairs_df$contrast %in% c("High Sensitivity Complex - Low Sensitivity Complex",
-                                                                      "High Sensitivity Simple - Low Sensitivity Simple"), ]
-
-selected_contrasts_df_cmplxty <- as.data.frame(selected_contrasts_cmplxty)  # Convert the emmGrid object to a dataframe
-selected_contrasts_df_sensit  <- as.data.frame(selected_contrasts_sensit)  
-
-cohensd_complex <- as.data.frame(cohens_d(value ~ orthographic_sensitivity, 
-         data = subset(n250_1_nonwords, complexity == "Complex")))
-cohensd_simple <- as.data.frame(cohens_d(value ~ orthographic_sensitivity, 
-         data = subset(n250_1_nonwords, complexity == "Simple")))
-cohensd_hi_sensit <- as.data.frame(cohens_d(value ~ complexity, 
-         data = subset(n250_1_nonwords, orthographic_sensitivity == "High Sensitivity")))
-cohensd_lo_sensit <- as.data.frame(cohens_d(value ~ complexity, 
-         data = subset(n250_1_nonwords, orthographic_sensitivity == "Low Sensitivity")))
-
-cohensd_sensit <- bind_rows(complex = cohensd_complex,
-                             simple = cohensd_simple,
-                             .id = "sensitivity")
-
-cohensd_cmplxty <- bind_rows(hi_sensit= cohensd_hi_sensit,
-                             lo_sensit = cohensd_lo_sensit,
-                             .id = "complexity")
-
-(sensit_contrasts_df <- bind_cols(selected_contrasts_df_sensit,cohensd_sensit))
-(cmplxty_contrasts_df <- bind_cols(selected_contrasts_df_cmplxty,cohensd_cmplxty))
-(sensit.cmplxty_means <- as.data.frame(pairs$emmeans))
+# Family Size x Base Frequency
+reduced_model_int <- update(anova_model_1a,
+  . ~ . - family_size:base_freq - Orthographic_Sensitivity:family_size:base_freq)
+anova(anova_model_1a, reduced_model_int)
 ```
 
-### Plots 
+##  Plots
+
 ...
 
-```{r,  echo=FALSE}
-p1 <- sensit.famsize_means|>
-  ggplot(aes(x = orthographic_sensitivity,
-             y = emmean,
-             fill = family_size,
-             colour = family_size)) +
-  geom_col(alpha = .4, position = position_dodge(.9)) +
-  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), 
-                width = .15,
-                position = position_dodge(.9)) +
-  labs(y="Mean ERP amplitude (in microvolts)") +
-  geom_text(aes(label = round(emmean, digits = 2)),
-                colour = "black",size = 2.5, vjust = -1.7, position = position_dodge(.65)) +
+```{r, echo=FALSE, fig.width=3.5, fig.height=3.5}
+p1 <- ggplot(family_size_means, aes(x = family_size, y = emmean, fill = family_size, colour = family_size)) +
+  geom_bar(stat = "identity", position = position_dodge(), alpha = .4) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
+                width = 0.05, position = position_dodge(0.9)) +
+  ylab("Mean ERP Amplitude (microvolts)") +
+  geom_text(aes(label = round(emmean, digits = 2)), colour = "black", size = 2.5, vjust = 14,
+            position = position_dodge(.9)) +
   scale_color_custom() +
   scale_fill_custom() +
-  labs(title = "Orthographic Sensitivity x Family Size") +
-  theme( plot.title = element_text(size = 10, hjust = .5),
-         legend.title = element_blank(),
+  labs(title = "Family Size") +
+  theme( plot.title = element_text(size = 10, hjust = 0.5),
+         legend.position = "none",
          axis.title.x = element_blank(),
          axis.text.x = element_text(size = 8))
-#p1
+p1
 ```
-...
+
 
 ```{r,  echo=FALSE, fig.width=7, fig.height=3.5}
-
-p2 <- sensit.cmplxty_means|>
-  ggplot(aes(x = orthographic_sensitivity,
+p2 <- orthosens.basefreq_means |>
+  ggplot(aes(x = Orthographic_Sensitivity,
              y = emmean,
-             fill = complexity,
-             colour = complexity)) +
+             fill = base_freq,
+             colour = base_freq)) +
   geom_col(alpha = .4, position = position_dodge(.9)) +
   geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), 
                 width = .15,
                 position = position_dodge(.9)) +
   labs(y="Mean ERP amplitude (in microvolts)") +
   geom_text(aes(label = round(emmean, digits = 2)),
-                colour = "black",size = 2.5, vjust = -1.7, position = position_dodge(.6)) +
+                colour = "black",size = 2.5, vjust = 2, position = position_dodge(.5)) +
+  coord_cartesian(ylim = c(-.25, 1.75)) +
   scale_color_custom() +
   scale_fill_custom() +
-  labs(title = "Orthographic Sensitivity x Complexity") +
-  theme(  plot.title = element_text(size = 10, hjust = .5),
+  labs(title = "Orthographic Sensitivity x Base Frequency") +
+  theme( plot.title = element_text(size = 10, hjust = 0.5),
          legend.title = element_blank(),
          axis.title.x = element_blank(),
          axis.text.x = element_text(size = 8))
-#p2
-plot_grid(p1, p2, ncol = 2)
+
+
+p3 <- famsize.basefreq_means|>
+  ggplot(aes(x = family_size,
+             y = emmean,
+             fill = base_freq,
+             colour = base_freq)) +
+  geom_col(alpha = .4, position = position_dodge(.9)) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), 
+                width = .15,
+                position = position_dodge(.9)) +
+  labs(y="Mean ERP amplitude (in microvolts)") +
+  geom_text(aes(label = round(emmean, digits = 2)),
+                colour = "black",size = 2.5, vjust = 1.6, position = position_dodge(.5)) +
+  coord_cartesian(ylim = c(-.25, 1.75)) +
+  scale_color_custom() +
+  scale_fill_custom() +
+  labs(title = "Morphological Family Size x Base Frequency") +
+  theme( plot.title = element_text(size = 10, hjust = 0.5),
+         legend.title = element_blank(),
+         axis.title.x = element_blank(),
+         axis.text.x = element_text(size = 8))
+plot_grid(p2, p3, ncol = 2)
 ```
 
+# N400 Nonword Data
 
+## Compute the ANOVA
+
+```{r}
+
+# Fit the ANOVA/mixed model
+anova_model_2b <- mixed(
+  value ~ Orthographic_Sensitivity * family_size * complexity + 
+    laterality * anteriority  +  # Nuisance variables
+    (1 | SubjID), 
+  data = n400_nonwords, 
+  method = "KR"  # Kenward-Roger approximation for accurate F-tests
+)
+
+# Print ANOVA results
+anova_model_2b 
+
+# Partial Eta Squared
+# Extract effect sizes from your ANOVA model
+eta_squared(anova_model_2b , partial = TRUE)
+
+# Compute Marginal (fixed effects) and Conditional (fixed + random effects) R²
+r2(anova_model_2b)
+```
+
+## Effects
+
+No Significant Effects 
