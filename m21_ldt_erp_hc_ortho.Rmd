@@ -1,5 +1,5 @@
 ---
-title: "M21 LDT ERP  N250"
+title: "M21 LDT ERP HC ORTHOGRAPIC SENSITIVITY"
 author: "Joanna Morris"
 date: "`r Sys.Date()`"
 output:
@@ -245,9 +245,6 @@ n400_nonwords <- n400_nonwords |>
                                 grepl("Z", chlabel) ~ "Midline", grepl("4", chlabel) ~ "Right"))
 n400_nonwords$anteriority <- factor(n400_nonwords$anteriority, levels = c("Frontal",  "Central","Parietal"))
 n400_nonwords$laterality <- factor(n400_nonwords$laterality, levels = c("Left", "Midline", "Right"))
-
-
-
 ```
 
 
@@ -272,6 +269,7 @@ eta_squared(anova_model_1a , partial = TRUE)
 # Compute Marginal (fixed effects) and Conditional (fixed + random effects) R²
 r2(anova_model_1a)
 ```
+
 ## Significant Effects
 
 |                            Effect|      df|         F| p.value||eta-sqrd|  
@@ -363,7 +361,6 @@ anova(anova_model_1a, reduced_model_int)
 
 ##  Plots
 
-
 ```{r, echo=FALSE, fig.width=7, fig.height=3}
 p1 <- ggplot(base_freq_means, aes(x = base_freq, y = emmean, fill = base_freq, colour = base_freq)) +
   geom_bar(stat = "identity", position = position_dodge(), alpha = .4) +
@@ -450,6 +447,27 @@ eta_squared(anova_model_1b , partial = TRUE)
 r2(anova_model_1b)
 ```
 
+```{r}
+
+# Fit the ANOVA/mixed model
+anova_model_1b <- mixed(
+  value ~ Semantic_Sensitivity * family_size * complexity + 
+    laterality * anteriority  +  # Nuisance variables
+    (1 | SubjID), 
+  data = n250_nonwords, 
+  method = "KR"  # Kenward-Roger approximation for accurate F-tests
+)
+
+# Print ANOVA results
+anova_model_1b 
+
+# Partial Eta Squared
+# Extract effect sizes from your ANOVA model
+eta_squared(anova_model_1b , partial = TRUE)
+
+# Compute Marginal (fixed effects) and Conditional (fixed + random effects) R²
+r2(anova_model_1b)
+```
 ## Effects
 
 No significant effects
@@ -690,6 +708,8 @@ eta_squared(anova_model_2b , partial = TRUE)
 # Compute Marginal (fixed effects) and Conditional (fixed + random effects) R²
 r2(anova_model_2b)
 ```
+
+
 
 ## Effects
 

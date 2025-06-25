@@ -306,7 +306,7 @@ plot_grid(p1, p2, ncol = 2)
 
 ```
 
-## ANOVA Words
+# ANOVA Words
 
 Use `complete.cases()` to find which rows had missing data in the model-relevant variables:
 ```{r, echo=FALSE, results = "hide"}
@@ -415,7 +415,7 @@ ggplot(preds, aes(x = x, y = predicted, color = group, fill = group)) +
 ```
 
 
-## ANOVA Non-Words
+# ANOVA Non-Words
 
 Use `complete.cases()` to find which rows had missing data in the model-relevant variables:
 ```{r, echo=FALSE, results = "hide"}
