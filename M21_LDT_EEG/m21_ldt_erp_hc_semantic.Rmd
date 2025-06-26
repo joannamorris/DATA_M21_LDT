@@ -336,42 +336,51 @@ cohensd_famsize <- bind_rows(lrg_fam = cohensd_lrg_fam,
 (basefreq_contrasts_df <- bind_cols(selected_contrasts_basefrq_df,cohensd_basefrq))
 (sensitivity_contrasts_df <- bind_cols(selected_contrasts_famsize_df,cohensd_famsize))
 (famsize.basefreq_means <- as.data.frame(emmeans_obj$emmeans))
-
 ```
 
 ```{r}
 # Semantic Sensitivity x Family Size x Base Frequency
 
-selected_contrasts <- c("High Semantic Large Family High Base Frequency - High Semantic Small Family High Base Frequency",
-                        "High Semantic Large Family High Base Frequency - High Semantic Large Family Low Base Frequency",
-                        "Low Semantic Large Family High Base Frequency - Low Semantic Small Family High Base Frequency",
-                        "Low Semantic Large Family High Base Frequency - Low Semantic Large Family Low Base Frequency",
-                        
-                        "High Semantic Small Family High Base Frequency - High Semantic Small Family Low Base Frequency",
-                        "Low Semantic Small Family High Base Frequency - Low Semantic Small Family Low Base Frequency",
-                        "High Semantic Large Family Low Base Frequency - High Semantic Small Family Low Base Frequency",
-                        "Low Semantic Large Family Low Base Frequency - Low Semantic Small Family Low Base Frequency")      
+selected_contrasts_hisem_famsize <- c("High Semantic Small Family High Base Frequency - High Semantic Small Family Low Base Frequency",
+                                       "High Semantic Large Family High Base Frequency - High Semantic Large Family Low Base Frequency")
+selected_contrasts_losem_famsize <- c("Low Semantic Small Family High Base Frequency - Low Semantic Small Family Low Base Frequency",
+                                       "Low Semantic Large Family High Base Frequency - Low Semantic Large Family Low Base Frequency")
+selected_contrasts_hisem_basefrq <- c("High Semantic Large Family High Base Frequency - High Semantic Small Family High Base Frequency",
+                                       "High Semantic Large Family Low Base Frequency - High Semantic Small Family Low Base Frequency")
+selected_contrasts_losem_basefrq <- c("Low Semantic Large Family High Base Frequency - Low Semantic Small Family High Base Frequency",
+                                      "Low Semantic Large Family Low Base Frequency - Low Semantic Small Family Low Base Frequency")      
 
-emmeans_obj <- emmeans(anova_model_1a, 
-                 pairwise ~ Semantic_Sensitivity * family_size * base_freq, 
-                 adjust = "bonferroni", 
-                 pbkrtest.limit = 6480)
-(contrasts_df <- as.data.frame(emmeans_obj$contrasts))
-selected_contrasts_df <- as.data.frame(emmeans_obj$contrasts[contrasts_df$contrast %in% selected_contrasts, ])
+emmeans_obj <- emmeans(anova_model_1a,  pairwise ~ Semantic_Sensitivity * family_size * base_freq, adjust = "bonferroni",  pbkrtest.limit = 6480)
 
-cohensd_1 <- as.data.frame(cohens_d(value ~ family_size,  data = subset(n250_words_b, Semantic_Sensitivity == "High Semantic" & base_freq == "High Base Frequency")))
-cohensd_2 <- as.data.frame(cohens_d(value ~ base_freq, data = subset(n250_words_b, Semantic_Sensitivity == "High Semantic" & family_size == "Large Family")))
-cohensd_3 <- as.data.frame(cohens_d(value ~ family_size,  data = subset(n250_words_b, Semantic_Sensitivity == "Low Semantic" & base_freq == "High Base Frequency")))
-cohensd_4 <- as.data.frame(cohens_d(value ~ base_freq,  data = subset(n250_words_b, Semantic_Sensitivity == "Low Semantic" & family_size == "Large Family")))
-cohensd_5 <- as.data.frame(cohens_d(value ~ base_freq, data = subset(n250_words_b, Semantic_Sensitivity == "High Semantic" & family_size == "Small Family")))
-cohensd_6 <- as.data.frame(cohens_d(value ~ base_freq, data = subset(n250_words_b, Semantic_Sensitivity == "Low Semantic" & family_size == "Small Family")))
-cohensd_7 <- as.data.frame(cohens_d(value ~ family_size,  data = subset(n250_words_b, Semantic_Sensitivity == "High Semantic" & base_freq == "Low Base Frequency")))
+contrasts_df <- as.data.frame(emmeans_obj$contrasts)
+selected_contrasts_hisem_famsize_df <- as.data.frame(emmeans_obj$contrasts[contrasts_df$contrast %in% selected_contrasts_hisem_famsize, ])
+selected_contrasts_losem_famsize_df <- as.data.frame(emmeans_obj$contrasts[contrasts_df$contrast %in% selected_contrasts_losem_famsize, ])
+selected_contrasts_hisem_basefrq_df <- as.data.frame(emmeans_obj$contrasts[contrasts_df$contrast %in% selected_contrasts_hisem_basefrq, ])
+selected_contrasts_losem_basefrq_df <- as.data.frame(emmeans_obj$contrasts[contrasts_df$contrast %in% selected_contrasts_losem_basefrq, ])
+
+cohensd_1 <- as.data.frame(cohens_d(value ~ base_freq, data = subset(n250_words_b, Semantic_Sensitivity == "High Semantic" & family_size == "Large Family")))
+cohensd_2 <- as.data.frame(cohens_d(value ~ base_freq, data = subset(n250_words_b, Semantic_Sensitivity == "High Semantic" & family_size == "Small Family")))
+
+cohensd_3 <- as.data.frame(cohens_d(value ~ base_freq,  data = subset(n250_words_b, Semantic_Sensitivity == "Low Semantic" & family_size == "Large Family")))
+cohensd_4 <- as.data.frame(cohens_d(value ~ base_freq, data = subset(n250_words_b, Semantic_Sensitivity == "Low Semantic" & family_size == "Small Family")))
+
+cohensd_5 <- as.data.frame(cohens_d(value ~ family_size,  data = subset(n250_words_b, Semantic_Sensitivity == "High Semantic" & base_freq == "High Base Frequency")))
+cohensd_6 <- as.data.frame(cohens_d(value ~ family_size,  data = subset(n250_words_b, Semantic_Sensitivity == "High Semantic" & base_freq == "Low Base Frequency")))
+
+cohensd_7 <- as.data.frame(cohens_d(value ~ family_size,  data = subset(n250_words_b, Semantic_Sensitivity == "Low Semantic" & base_freq == "High Base Frequency")))
 cohensd_8 <- as.data.frame(cohens_d(value ~ family_size, data = subset(n250_words_b, Semantic_Sensitivity == "Low Semantic" & base_freq == "Low Base Frequency")))
 
-cohensd_df <- bind_rows(cohensd_1, cohensd_2, cohensd_3, cohensd_4, cohensd_5, cohensd_6, cohensd_7, cohensd_8)
-(sensitivity.familiarity.accuracy_contrasts <- bind_cols(selected_contrasts_df,cohensd))
-(sensitivity.familiarity.accuracy_means_1 <- as.data.frame(emmeans_obj$emmeans))
+cohensd_hisem_famsize_df<- bind_rows(cohensd_1, cohensd_2)
+cohensd_losem_famsize_df <- bind_rows(cohensd_3, cohensd_4)
+cohensd_hisem_basefrq_df <- bind_rows(cohensd_5, cohensd_6)
+cohensd_losem_basefrq_df <- bind_rows(cohensd_7, cohensd_8)
 
+
+(hisem_famsize_df <- bind_cols(selected_contrasts_hisem_famsize_df, cohensd_hisem_famsize_df))
+(losem_famsize_df <- bind_cols(selected_contrasts_losem_famsize_df, cohensd_losem_famsize_df))
+(hisem_basefrq_df <- bind_cols(selected_contrasts_hisem_basefrq_df, cohensd_hisem_basefrq_df) )
+(basefrq_df <- bind_cols(selected_contrasts_losem_basefrq_df, cohensd_losem_basefrq_df))
+(sensitivity.familysize.basefreq_means <- as.data.frame(emmeans_obj$emmeans))
 ```
 ## Model Comparisons
 
@@ -386,16 +395,19 @@ reduced_model <- update(anova_model_1a,
                         . ~ . - base_freq - Semantic_Sensitivity:base_freq - base_freq:family_size - Semantic_Sensitivity:base_freq:family_size)
 anova(anova_model_1a, reduced_model)
 
-
 # Family Size x Base Frequency
 reduced_model_int <- update(anova_model_1a,
   . ~ . - family_size:base_freq - Semantic_Sensitivity:family_size:base_freq)
+anova(anova_model_1a, reduced_model_int)
+
+# Semantic Sensitivity x Family Size x Base Frequency
+reduced_model_int <- update(anova_model_1a,
+  . ~ .  - Semantic_Sensitivity:family_size:base_freq)
 anova(anova_model_1a, reduced_model_int)
 ```
 
 
 ##  Plots
-
 
 ```{r, echo=FALSE, fig.width=7, fig.height=3}
 p1 <- ggplot(base_freq_means, aes(x = base_freq, y = emmean, fill = base_freq, colour = base_freq)) +
@@ -434,7 +446,6 @@ plot_grid(p1, p2, ncol = 2)
 
 
 ```{r,  echo=FALSE, fig.width=5, fig.height=3.5}
-
 p3 <- famsize.basefreq_means|>
   ggplot(aes(x = family_size,
              y = emmean,
@@ -455,6 +466,31 @@ p3 <- famsize.basefreq_means|>
          axis.title.x = element_blank(),
          axis.text.x = element_text(size = 8))
 p3
+```
+
+```{r,  echo=FALSE, fig.width=7, fig.height=3.5}
+p4 <- sensitivity.familysize.basefreq_means|>
+  ggplot(aes(x = family_size,
+             y = emmean,
+             fill = base_freq,
+             colour = base_freq)) +
+  facet_grid( ~ Semantic_Sensitivity) +
+  geom_col(alpha = .4, position = position_dodge(.9)) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), 
+                width = .15,
+                position = position_dodge(.9)) +
+  labs(y="Mean ERP amplitude (in microvolts)") +
+  geom_text(aes(label = round(emmean, digits = 2)),
+                colour = "black",size = 2.5, vjust = -7, position = position_dodge(.9)) +
+  coord_cartesian(ylim = c(-1.7, .7)) +
+  scale_color_custom() +
+  scale_fill_custom() +
+  labs(title = "Morphological Family Size x Base Frequency x Semantic Sensitivity") +
+  theme( plot.title = element_text(size = 10, hjust = 0.5),
+         legend.title = element_blank(),
+         axis.title.x = element_blank(),
+         axis.text.x = element_text(size = 8))
+p4
 ```
 
 # N250 Nonword Data
@@ -506,7 +542,94 @@ r2(anova_model_1b)
 ```
 ## Effects
 
-No significant effects
+|                            Effect|      df|         F| p.value||eta-sqrd|  
+|----------------------------------|--------|----------|--------|---------|
+|   Semantic_Sensitivity:complexity| 1, 2121|  11.16 **|   <.001|5.23e-03 | 
+
+*Interactions*
+
+```{r}
+# `Semantic_Sensitivity` x `Complexity` interaction
+selected_contrasts<- c("High Semantic Complex - High Semantic Simple",
+                       "Low Semantic Complex - Low Semantic Simple")
+
+emmeans_obj <- emmeans(anova_model_1b, pairwise ~ Semantic_Sensitivity * complexity, adjust = "bonferroni", pbkrtest.limit = 6480)
+
+# Get selected contrasts and convert the emmGrid object to a dataframe
+contrasts_df <- as.data.frame(emmeans_obj$contrasts)
+selected_contrasts_df <- as.data.frame(emmeans_obj$contrasts[contrasts_df$contrast %in% selected_contrasts, ])
+
+cohensd_hisem <- as.data.frame(cohens_d(value ~ complexity, data = subset(n250_nonwords, Semantic_Sensitivity == "High Semantic")))
+cohensd_losem <- as.data.frame(cohens_d(value ~ complexity,  data = subset(n250_nonwords, Semantic_Sensitivity == "Low Semantic")))
+
+cohensd_df <- bind_rows(cohensd_hisem,cohensd_losem, .id = "sensitivity" )
+
+(sensitivity.complexity_contrasts_df <- bind_cols(selected_contrasts_df,cohensd_df))
+(sensitivity.complexity_means <- as.data.frame(emmeans_obj$emmeans))
+```
+
+## Model Comparisons
+
+```{r}
+
+# Reduced model: remove Semantic_Sensitivity:complexity interaction and all higher-order terms that include it
+reduced_model <- update(anova_model_1b,
+  . ~ . - Semantic_Sensitivity:complexity - Semantic_Sensitivity:family_size:complexity
+)
+# Model comparison
+anova(anova_model_1b, reduced_model)
+```
+
+```{r,  echo=FALSE, fig.width=5, fig.height=3.5}
+p3 <- sensitivity.complexity_means|>
+  ggplot(aes(x = Semantic_Sensitivity,
+             y = emmean,
+             fill = complexity,
+             colour = complexity)) +
+  geom_col(alpha = .4, position = position_dodge(.9)) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), 
+                width = .15,
+                position = position_dodge(.9)) +
+  labs(y="Mean ERP amplitude (in microvolts)") +
+  geom_text(aes(label = round(emmean, digits = 2)),
+                colour = "black",size = 2.5, vjust = -1.7, position = position_dodge(.65)) +
+  scale_color_custom() +
+  scale_fill_custom() +
+  labs(title = "Semantic Sensitivity x Morphological Complexity") +
+  theme( plot.title = element_text(size = 10, hjust = 0.5),
+         legend.title = element_blank(),
+         axis.title.x = element_blank(),
+         axis.text.x = element_text(size = 8))
+p3
+```
+
+## Plots
+
+...
+
+```{r}
+p2 <- sensitivity.complexity_means |>
+  ggplot(aes(x = Semantic_Sensitivity,
+             y = emmean,
+             fill = complexity,
+             colour = complexity)) +
+  geom_col(alpha = .4, position = position_dodge(.9)) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), 
+                width = .15,
+                position = position_dodge(.9)) +
+  labs(y="Mean ERP amplitude (in microvolts)") +
+  geom_text(aes(label = round(emmean, digits = 2)),
+                colour = "black",size = 2.5, vjust = 2, position = position_dodge(.5)) +
+  # coord_cartesian(ylim = c(-.25, 1.75)) +
+  scale_color_custom() +
+  scale_fill_custom() +
+  labs(title = "Semantic Sensitivity x Complexity") +
+  theme( plot.title = element_text(size = 10, hjust = 0.5),
+         legend.title = element_blank(),
+         axis.title.x = element_blank(),
+         axis.text.x = element_text(size = 8))
+p2
+```
 
 # N400 Word Data
 
@@ -537,63 +660,26 @@ r2(anova_model_2a)
 |                            Effect|      df|         F| p.value||eta-sqrd|  
 |----------------------------------|--------|----------|--------|---------|
 |                       family_size| 1, 2121|  11.63 **|    .003|5.45e-03 | 
-|Semantic_Sensitivity:base_freq| 1, 2121|   4.36 * |    .037|2.05e-03 |
-|             family_size:base_freq| 1, 2121| 21.94 ***|   <.001|0.01     |
+|             family_size:base_freq| 1, 2121| 23.02 ***|   <.001|0.01     |
+| Sensitivity:family_size:base_freq| 1, 2121|   3.12 + |    .078|1.47e-03 |
 
 
 *Main Effects*
 
 ```{r}
 ## `family_size` main effect
-pairs <- emmeans(anova_model_2a, pairwise ~ family_size, adjust = "bonferroni", pbkrtest.limit = 6480)
-(pairs_df <- as.data.frame(pairs$contrasts))
-cohensd <- as.data.frame(cohens_d(value ~ family_size, data = n400_words_b))
-(family_size_contrasts_df <- bind_cols(pairs_df,cohensd))
-(family_size_means <- as.data.frame(pairs$emmeans))
+emmeans_obj <- emmeans(anova_model_2a, pairwise ~ family_size, adjust = "bonferroni", pbkrtest.limit = 6480)
+(contrasts_df <- as.data.frame(emmeans_obj$contrasts))
+cohensd_df <- as.data.frame(cohens_d(value ~ family_size, data = n400_words_b))
+(family_size_contrasts_df <- bind_cols(contrasts_df,cohensd_df))
+(family_size_means <- as.data.frame(emmeans_obj$emmeans))
 
 ```
 
 *Interactions*
 
 ```{r}
-# `Semantic_Sensitivity` x `base_freq`  interaction
-
-selected_contrasts_orthosens <- c("High Orthographic High Base Frequency - Low Orthographic High Base Frequency",
-                                  "High Orthographic Low Base Frequency - Low Orthographic Low Base Frequency")
-selected_contrasts_basefreq <- c("High Orthographic High Base Frequency - High Orthographic Low Base Frequency", 
-                                 "Low Orthographic High Base Frequency - Low Orthographic Low Base Frequency")  
-
-emmeans_obj <- emmeans(anova_model_2a, pairwise ~ Semantic_Sensitivity * base_freq, adjust = "bonferroni", pbkrtest.limit = 6480)
-
-# Get selected contrasts and convert the emmGrid object to a dataframe
-contrasts_df <- as.data.frame(emmeans_obj$contrasts)
-selected_contrasts_orthosens_df <- as.data.frame(emmeans_obj$contrasts[contrasts_df$contrast %in% selected_contrasts_orthosens, ])
-selected_contrasts_basefrq_df <- as.data.frame(emmeans_obj$contrasts[contrasts_df$contrast %in% selected_contrasts_basefreq,])
-
-
-cohensd_hi_basefrq <- as.data.frame(cohens_d(value ~ Semantic_Sensitivity,
-                                          data = subset(n400_words_b, base_freq == "High Base Frequency")))
-cohensd_lo_basefrq <- as.data.frame(cohens_d(value ~ Semantic_Sensitivity, 
-                                             data = subset(n400_words_b, base_freq == "Low Base Frequency")))
-cohensd_hi_orthosens <- as.data.frame(cohens_d(value ~ base_freq, 
-                                            data = subset(n400_words_b, Semantic_Sensitivity == "High Orthographic")))
-cohensd_lo_orthosens <- as.data.frame(cohens_d(value ~ base_freq,
-                                           data = subset(n400_words_b, Semantic_Sensitivity == "Low Orthographic")))
-
-cohensd_basefrq <- bind_rows(hi_basefrq = cohensd_hi_basefrq,
-                             lo_basefrq = cohensd_lo_basefrq,
-                             .id = "base_freq")
-
-cohensd_orthosens <- bind_rows(hi_orthosens = cohensd_hi_orthosens,
-                             lo_orthosens = cohensd_lo_orthosens,
-                             .id = "Semantic_Sensitivity")
-
-(basefreq_contrasts_df <- bind_cols(selected_contrasts_basefrq_df,cohensd_basefrq))
-(orthosens_contrasts_df <- bind_cols(selected_contrasts_orthosens_df,cohensd_orthosens))
-(orthosens.basefreq_means <- as.data.frame(emmeans_obj$emmeans))
-
 # `base_freq` x `family_size` interaction
-
 selected_contrasts_famsize <- c("Large Family High Base Frequency - Small Family High Base Frequency",
                                  "Large Family Low Base Frequency - Small Family Low Base Frequency")
 selected_contrasts_basefreq <- c("Large Family High Base Frequency - Large Family Low Base Frequency", 
@@ -601,28 +687,17 @@ selected_contrasts_basefreq <- c("Large Family High Base Frequency - Large Famil
 
 emmeans_obj <- emmeans(anova_model_2a, pairwise ~ family_size * base_freq, adjust = "bonferroni", pbkrtest.limit = 6480)
 
-# Get selected contrasts and convert the emmGrid object to a dataframe
 contrasts_df <- as.data.frame(emmeans_obj$contrasts)
 selected_contrasts_famsize_df <- as.data.frame(emmeans_obj$contrasts[contrasts_df$contrast %in% selected_contrasts_famsize, ])
 selected_contrasts_basefrq_df <- as.data.frame(emmeans_obj$contrasts[contrasts_df$contrast %in% selected_contrasts_basefreq,])
 
+cohensd_hi_basefrq <- as.data.frame(cohens_d(value ~ family_size,data = subset(n400_words_b, base_freq == "High Base Frequency")))
+cohensd_lo_basefrq <- as.data.frame(cohens_d(value ~ family_size,data = subset(n400_words_b, base_freq == "Low Base Frequency")))
+cohensd_lrg_fam <- as.data.frame(cohens_d(value ~ base_freq,data = subset(n400_words_b, family_size == "Large Family")))
+cohensd_sml_fam <- as.data.frame(cohens_d(value ~ base_freq,data = subset(n400_words_b, family_size == "Small Family")))
 
-cohensd_hi_basefrq <- as.data.frame(cohens_d(value ~ family_size,
-                                          data = subset(n400_words_b, base_freq == "High Base Frequency")))
-cohensd_lo_basefrq <- as.data.frame(cohens_d(value ~ family_size, 
-                                             data = subset(n400_words_b, base_freq == "Low Base Frequency")))
-cohensd_lrg_fam <- as.data.frame(cohens_d(value ~ base_freq, 
-                                            data = subset(n400_words_b, family_size == "Large Family")))
-cohensd_sml_fam <- as.data.frame(cohens_d(value ~ base_freq,
-                                           data = subset(n400_words_b, family_size == "Small Family")))
-
-cohensd_basefrq <- bind_rows(hi_basefrq = cohensd_hi_basefrq,
-                             lo_basefrq = cohensd_lo_basefrq,
-                             .id = "base_freq")
-
-cohensd_famsize <- bind_rows(lrg_fam = cohensd_lrg_fam,
-                             sml_fam = cohensd_sml_fam,
-                             .id = "family_size")
+cohensd_basefrq <- bind_rows(hi_basefrq = cohensd_hi_basefrq,lo_basefrq = cohensd_lo_basefrq,.id = "base_freq")
+cohensd_famsize <- bind_rows(lrg_fam = cohensd_lrg_fam,sml_fam = cohensd_sml_fam,.id = "family_size")
 
 (basefreq_contrasts_df <- bind_cols(selected_contrasts_basefrq_df,cohensd_basefrq))
 (sensitivity_contrasts_df <- bind_cols(selected_contrasts_famsize_df,cohensd_famsize))
@@ -630,23 +705,67 @@ cohensd_famsize <- bind_rows(lrg_fam = cohensd_lrg_fam,
 ```
 
 
+```{r}
+# Semantic Sensitivity x Family Size x Base Frequency
+
+selected_contrasts_hisem_famsize <- c("High Semantic Small Family High Base Frequency - High Semantic Small Family Low Base Frequency",
+                                       "High Semantic Large Family High Base Frequency - High Semantic Large Family Low Base Frequency")
+selected_contrasts_losem_famsize <- c("Low Semantic Small Family High Base Frequency - Low Semantic Small Family Low Base Frequency",
+                                       "Low Semantic Large Family High Base Frequency - Low Semantic Large Family Low Base Frequency")
+selected_contrasts_hisem_basefrq <- c("High Semantic Large Family High Base Frequency - High Semantic Small Family High Base Frequency",
+                                       "High Semantic Large Family Low Base Frequency - High Semantic Small Family Low Base Frequency")
+selected_contrasts_losem_basefrq <- c("Low Semantic Large Family High Base Frequency - Low Semantic Small Family High Base Frequency",
+                                      "Low Semantic Large Family Low Base Frequency - Low Semantic Small Family Low Base Frequency")      
+
+emmeans_obj <- emmeans(anova_model_2a,  pairwise ~ Semantic_Sensitivity * family_size * base_freq, adjust = "bonferroni",  pbkrtest.limit = 6480)
+
+contrasts_df <- as.data.frame(emmeans_obj$contrasts)
+selected_contrasts_hisem_famsize_df <- as.data.frame(emmeans_obj$contrasts[contrasts_df$contrast %in% selected_contrasts_hisem_famsize, ])
+selected_contrasts_losem_famsize_df <- as.data.frame(emmeans_obj$contrasts[contrasts_df$contrast %in% selected_contrasts_losem_famsize, ])
+selected_contrasts_hisem_basefrq_df <- as.data.frame(emmeans_obj$contrasts[contrasts_df$contrast %in% selected_contrasts_hisem_basefrq, ])
+selected_contrasts_losem_basefrq_df <- as.data.frame(emmeans_obj$contrasts[contrasts_df$contrast %in% selected_contrasts_losem_basefrq, ])
+
+cohensd_1 <- as.data.frame(cohens_d(value ~ base_freq, data = subset(n400_words_b, Semantic_Sensitivity == "High Semantic" & family_size == "Large Family")))
+cohensd_2 <- as.data.frame(cohens_d(value ~ base_freq, data = subset(n400_words_b, Semantic_Sensitivity == "High Semantic" & family_size == "Small Family")))
+
+cohensd_3 <- as.data.frame(cohens_d(value ~ base_freq,  data = subset(n400_words_b, Semantic_Sensitivity == "Low Semantic" & family_size == "Large Family")))
+cohensd_4 <- as.data.frame(cohens_d(value ~ base_freq, data = subset(n400_words_b, Semantic_Sensitivity == "Low Semantic" & family_size == "Small Family")))
+
+cohensd_5 <- as.data.frame(cohens_d(value ~ family_size,  data = subset(n400_words_b, Semantic_Sensitivity == "High Semantic" & base_freq == "High Base Frequency")))
+cohensd_6 <- as.data.frame(cohens_d(value ~ family_size,  data = subset(n400_words_b, Semantic_Sensitivity == "High Semantic" & base_freq == "Low Base Frequency")))
+
+cohensd_7 <- as.data.frame(cohens_d(value ~ family_size,  data = subset(n400_words_b, Semantic_Sensitivity == "Low Semantic" & base_freq == "High Base Frequency")))
+cohensd_8 <- as.data.frame(cohens_d(value ~ family_size, data = subset(n400_words_b, Semantic_Sensitivity == "Low Semantic" & base_freq == "Low Base Frequency")))
+
+cohensd_hisem_famsize_df<- bind_rows(cohensd_1, cohensd_2)
+cohensd_losem_famsize_df <- bind_rows(cohensd_3, cohensd_4)
+cohensd_hisem_basefrq_df <- bind_rows(cohensd_5, cohensd_6)
+cohensd_losem_basefrq_df <- bind_rows(cohensd_7, cohensd_8)
+
+
+(hisem_famsize_df <- bind_cols(selected_contrasts_hisem_famsize_df, cohensd_hisem_famsize_df))
+(losem_famsize_df <- bind_cols(selected_contrasts_losem_famsize_df, cohensd_losem_famsize_df))
+(hisem_basefrq_df <- bind_cols(selected_contrasts_hisem_basefrq_df, cohensd_hisem_basefrq_df))
+(basefrq_df <- bind_cols(selected_contrasts_losem_basefrq_df, cohensd_losem_basefrq_df))
+(sensitivity.familysize.basefreq_means <- as.data.frame(emmeans_obj$emmeans))
+```
+
 ## Model Comparisons
 
 ```{r}
 # Family Size
-reduced_model <- update(anova_model_1a,
+reduced_model <- update(anova_model_2a,
                         . ~ . - family_size - Semantic_Sensitivity:family_size - family_size:base_freq - Semantic_Sensitivity:family_size:base_freq)
 anova(anova_model_1a, reduced_model)
 
-# Orthographic Sensitivity x Base Frequency
-reduced_model_int <- update(anova_model_1a,
-  . ~ . - Semantic_Sensitivity:base_freq - Semantic_Sensitivity:family_size:base_freq)
+# Family Size x Base Frequency
+reduced_model_int <- update(anova_model_2a,
+  . ~ . - family_size:base_freq - Semantic_Sensitivity:family_size:base_freq)
 anova(anova_model_1a, reduced_model_int)
 
-
-# Family Size x Base Frequency
-reduced_model_int <- update(anova_model_1a,
-  . ~ . - family_size:base_freq - Semantic_Sensitivity:family_size:base_freq)
+# Semantic Sensitivity x Family Size x Base Frequency
+reduced_model_int <- update(anova_model_2a,
+  . ~ . - Semantic_Sensitivity:family_size:base_freq)
 anova(anova_model_1a, reduced_model_int)
 ```
 
@@ -674,8 +793,8 @@ p1
 
 
 ```{r,  echo=FALSE, fig.width=7, fig.height=3.5}
-p2 <- orthosens.basefreq_means |>
-  ggplot(aes(x = Semantic_Sensitivity,
+p2 <- famsize.basefreq_means |>
+  ggplot(aes(x = family_size,
              y = emmean,
              fill = base_freq,
              colour = base_freq)) +
@@ -689,7 +808,7 @@ p2 <- orthosens.basefreq_means |>
   coord_cartesian(ylim = c(-.25, 1.75)) +
   scale_color_custom() +
   scale_fill_custom() +
-  labs(title = "Orthographic Sensitivity x Base Frequency") +
+  labs(title = "Morphological Family Size x Base Frequency") +
   theme( plot.title = element_text(size = 10, hjust = 0.5),
          legend.title = element_blank(),
          axis.title.x = element_blank(),
@@ -697,10 +816,10 @@ p2 <- orthosens.basefreq_means |>
 
 
 p3 <- famsize.basefreq_means|>
-  ggplot(aes(x = family_size,
+  ggplot(aes(x = base_freq,
              y = emmean,
-             fill = base_freq,
-             colour = base_freq)) +
+             fill = family_size,
+             colour = family_size)) +
   geom_col(alpha = .4, position = position_dodge(.9)) +
   geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), 
                 width = .15,
@@ -711,13 +830,39 @@ p3 <- famsize.basefreq_means|>
   coord_cartesian(ylim = c(-.25, 1.75)) +
   scale_color_custom() +
   scale_fill_custom() +
-  labs(title = "Morphological Family Size x Base Frequency") +
+  labs(title = "Base Frequency x Morphological Family Size") +
   theme( plot.title = element_text(size = 10, hjust = 0.5),
          legend.title = element_blank(),
          axis.title.x = element_blank(),
          axis.text.x = element_text(size = 8))
 plot_grid(p2, p3, ncol = 2)
 ```
+
+```{r}
+p4 <- sensitivity.familysize.basefreq_means|>
+  ggplot(aes(x = family_size,
+             y = emmean,
+             fill = base_freq,
+             colour = base_freq)) +
+  facet_grid( ~ Semantic_Sensitivity) +
+  geom_col(alpha = .4, position = position_dodge(.9)) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), 
+                width = .15,
+                position = position_dodge(.9)) +
+  labs(y="Mean ERP amplitude (in microvolts)") +
+  geom_text(aes(label = round(emmean, digits = 2)),
+                colour = "black",size = 2.5, vjust = -7, position = position_dodge(.9)) +
+ # coord_cartesian(ylim = c(-1.7, .7)) +
+  scale_color_custom() +
+  scale_fill_custom() +
+  labs(title = "Morphological Family Size x Base Frequency x Semantic Sensitivity") +
+  theme( plot.title = element_text(size = 10, hjust = 0.5),
+         legend.title = element_blank(),
+         axis.title.x = element_blank(),
+         axis.text.x = element_text(size = 8))
+p4
+```
+
 
 # N400 Nonword Data
 
