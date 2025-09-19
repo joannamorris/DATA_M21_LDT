@@ -33,7 +33,6 @@ write_csv(df_1, "rt_data_chrt1.csv")
 df_2 <- read_csv("csv_files/rt_cw_nw_2_frm_vmrk.csv")
 
 
-
 # We now need to bind this df with the stimuli df  the word and condition triggers
 df_2_stm <- left_join(df_2, stimuli, by = join_by(cond_trig, word_trig))
 write_csv(df_2_stm, "rt_data_chrt2.csv")
