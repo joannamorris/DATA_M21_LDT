@@ -221,8 +221,6 @@ A two-way interaction betweeen Family Size and Base Frequency
 ### Simple Contrasts
 
 ```{r}
-# `base_freq` x `family_size` interaction
-
 # Estimated marginal means for the family_size × base_freq interaction
 emm <- emmeans(anova_model_n400_words_b, ~ family_size * base_freq)
 
@@ -280,7 +278,7 @@ p1<- ggplot(emm_df,
                 width = 0.1, position = position_dodge(0.2)) +
   labs(x = "Base Frequency", y = "Estimated N250 amplitude",
        color = "Family Size",
-       title = "Base Frequency × Family Size") +
+       title = "Family Size × Base Frequency") +
   scale_color_custom() +
   scale_fill_custom() 
 
@@ -307,6 +305,15 @@ plot_grid(p1, p2, ncol = 2)
 ## Compute the ANOVA
 
 ```{r}
+anova_model_n400_nonwords_a <- lmer(
+    value ~ Orthographic_Sensitivity * family_size * complexity +
+    (1 + family_size + complexity | SubjID) +     # by-subject intercept + slopes
+    (1 | SubjID:chlabel),                        # electrode nested within subject
+  data   = n400_nonwords
+)
+anova(anova_model_n400_nonwords_a)
+
+
 anova_model_n400_nonwords <- mixed(
     value ~ Orthographic_Sensitivity * family_size * complexity +
     (1 + family_size + complexity | SubjID) +     # by-subject intercept + slopes
@@ -327,20 +334,20 @@ eta_squared(anova_model_n400_nonwords, partial = TRUE)
 r2(anova_model_n400_nonwords)
 ```
 
-
-
 All partial $\eta^2$ values are extremely small (all < .01), confirming that the observed family_size × complexity interaction, although statistically significant, explains a very small proportion of variance.
+
+The N400 responses to nonwords were largely unaffected by orthographic sensitivity, family size, or complexity considered separately. A small but reliable family_size × complexity interaction suggests some modulation of the N400 pattern, possibly because “complex” nonwords with large families evoke slightly different expectations or morphological parsing attempts than “simple” ones — but this effect is weak and not influenced by reader sensitivity. Overall, the nonword data show minimal systematic structure, consistent with the idea that participants did not engage lexical-semantic processing for these stimuli in a meaningful way.
 
 
 ## Main Effects
 
-For non-words, participants’ sensitivity status and orthographic sensitivity played no role
+No main effects
 
 ## Interactions
 
 There was a two-way interaction between family size and complexity; the effect of family size (large vs. small) reversed or changed in magnitude depending on whether the nonwords were simple or complex
 
-  - `Family Size × Complexity`: significant ($t = 5.87 = .016$, $p =.033$).
+  - `Family Size × Complexity`: significant ($t = 5.87$, $p =.016$).
 
 ###  Simple Contrasts
 
@@ -351,54 +358,41 @@ Simple effects ask: within one level of one factor, what is the effect of the ot
 (b) Effect of complexity within each level of family_size.  Tests whether “*complex vs. simple*” differs within large and small families.
 
 ```{r}
+# Estimated marginal means for the family_size × complexity interaction
+emm1 <- emmeans(anova_model_n400_nonwords, ~ family_size * complexity)
 
-```
+# Look at the table of estimated means
+emm1
 
-
-
-Compare High vs Low Orthographic Sensitivity within each combination of Family Size and Complexity  
-
-
-This gives you: 4 contrasts: one for each `Family Size × Complexity` combination. Each shows whether `High` vs `Low Orthographic Sensitivity` differs significantly
-
-If simple effects aren’t significant, try looking at interaction contrasts, which test differences in the differences. You’re now asking: Does the effect of Sensitivity change more in some complexity/family combinations than others?
-
-
-```{r}
-# 1. Get the EMM grid for all combinations
-(emm1 <- emmeans(anova_model_n400_nonwords, ~ family_size * complexity))
-
-# Effect of family_size within each level of complexity.
+# Simple effects of family_size at each level of base_freq
 contrast(emm1, method = "pairwise", by = "complexity", adjust = "holm")
 
-# Effect of complexity within each level of family_size.
+# Simple effects of base_freq at each level of family_size
 contrast(emm1, method = "pairwise", by = "family_size", adjust = "holm")
+
 ```
 
 ### Interaction Contrasts
+
+If simple effects aren’t significant, try looking at interaction contrasts, which test differences in the differences. You’re now asking: Does the effect of Sensitivity change more in some complexity/family combinations than others?
 
 The interaction contrast tests:
 
 Is the difference in the effect of A across levels of B different at Complex vs. Simple levels?
 
-Mathematically
-
-You’re testing:
+Mathematically:
 
 $$
  [ [(A_1 - A_2)\text{ in }B_1] - [(A_1 - A_2)\text{ in }B_2]
-    \text{ in Condition }C_1]
-  -
-  [[(A_1 - A_2) in B_1] - [(A_1 - A_2) in B_2]
-    \text{in Condition }C_2]
 $$
 
 ```{r}
 #  Interaction contrasts (difference-of-differences)
-#    Compare (complexity effect in large vs small family) across sensitivity
-(contrast(emm1, interaction = c("pairwise", "pairwise"), by = NULL, adjust = "holm"))
+#    Compare complexity effect in large vs small family)
+contrast(emm1, interaction = "pairwise", by = NULL, adjust = "holm")
 
-# (contrast(emm1, interaction = c("pairwise", "pairwise"), combine = TRUE, adjust = "bonferroni"))
+eff_size(emm1, sigma = ?, edf = 67)
+
 
 # Optionally: get confidence intervals
 (confint(contrast(emm1, interaction = c("pairwise", "pairwise"))))
