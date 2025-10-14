@@ -71,7 +71,7 @@ sem <- function(x) sd(x)/sqrt(length(x))
 ```
 
 
-# Load and format data files 
+# Load data files 
 
 ```{r}
 dir_path <- "CSV files"
@@ -113,6 +113,8 @@ n400 <- erp_4 |>
   left_join(dmg_lng_vsl, by = "SubjID") |>
   select(SubjID, everything()) 
 ```
+
+# Format data files 
 
 Divide into word, non-word and difference wave dataframes
 ```{r, echo=FALSE}
@@ -182,6 +184,11 @@ n250_nonwords <- n250_nonwords |>
 
 # N250 Word Data
 
+Statistical analysis.
+
+Linear mixed-effects models were fit using the afex::mixed function (method = “KR”) to account for both subject-level and electrode-level variability. Each model included random intercepts for participants (SubjID) and electrodes nested within participants (SubjID:chlabel), as well as by-subject random slopes for within-subject factors ( Family Size, Complexity, or Base Frequency, depending on the analysis). When a significant interaction was obtained, we probed it using estimated marginal means from the fitted model (emmeans package) to clarify the source of the effect.
+Because these follow-up contrasts were intended to interpret a significant higher-order interaction rather than to test independent hypotheses, we reported uncorrected p-values (adjust = "none") for interpretive clarity. The robustness of the overall pattern was verified using a Holm correction, which did not change the substantive conclusions.
+
 ## Nested ANOVA Model
 ```{r}
 #Fit ANOVA model
@@ -218,22 +225,34 @@ No significant main effects
 |             family_size:base_freq| 1, 1523| 35.14 ***|   <.001|6.76e-03 |
 
 ### Simple Contrasts
-
+<br>
 ```{r}
-# `base_freq` x `family_size` interaction
+# Estimated marginal means for the family_size × base frequency interaction
+(emm1 <- emmeans(anova_model_n250_words_b, ~ family_size * base_freq))
 
-# Estimated marginal means for the family_size × base_freq interaction
-emm <- emmeans(anova_model_n250_words_b, ~ family_size * base_freq)
+# Get all pairswise contrasts
+emm1_contrasts <- contrast(emm1,  method = "pairwise", by = NULL, adjust = "none")
 
-# Look at the table of estimated means
-emm
-
+# Keep only the contrasts you want
 # Simple effects of family_size at each level of base_freq
-contrast(emm, method = "pairwise", by = "base_freq", adjust = "holm")
-
 # Simple effects of base_freq at each level of family_size
-contrast(emm, method = "pairwise", by = "family_size", adjust = "holm")
+keep <- c("Large Family High Base Frequency - Small Family High Base Frequency",
+          "Large Family Low Base Frequency - Small Family Low Base Frequency",
+          "Large Family High Base Frequency - Large Family Low Base Frequency",
+          "Small Family High Base Frequency - Small Family Low Base Frequency")
+(emm1_contrasts_filtered <- subset(emm1_contrasts, contrast %in% keep))
 
+# Get Confidence Intervals
+(emm1_contrasts_filtered_ci <- confint(emm1_contrasts_filtered))
+
+
+# Get effect sizes
+# Get all pairwise effect sizes
+effs1 <- eff_size(emm1, sigma = sigma(m1), edf = df.residual(m1))
+
+# Remove the two redundant rows (rows 3 and 4)
+(effs1_filtered <- subset(effs1, !contrast %in% c("Large Family High Base Frequency - Small Family Low Base Frequency",
+                                               "Small Family High Base Frequency - Large Family Low Base Frequency")))
 ```
 
 For large-family words, N250 amplitude is more negative when base frequency is high than when it is low. For small-family words, base frequency has little effect. For low-frequency bases, small-family words elicit more negative amplitudes than large-family words.
@@ -247,18 +266,22 @@ For large-family words, N250 amplitude is more negative when base frequency is h
 - Within **Large Family**: High vs. Low base frequency → significant (*p* = .012). Large-family words show more negative amplitudes when their base frequency is high.
 
 ### Interaction Contrasts
-
+<br>
 ```{r}
-# Interaction contrasts (e.g., difference of differences)
-contrast(emm, interaction = "pairwise", adjust = "holm")
-```
+#  Interaction contrasts (difference-of-differences)
+#    Compare base frequency effect in large vs small family)
+contrast(emm1, interaction = "pairwise", by = NULL, adjust = "holm")
 
+# Get confidence intervals, for each base frequency effect for each family size and then for interaction effect
+confint(contrast(emmeans(m1, ~ family_size | base_freq), "pairwise"))
+confint(contrast(emm1, interaction = c("pairwise", "pairwise")))
+```
 
 ## Plots
 
 ```{r}
-emm_df <- as.data.frame(emm)
-p1<- ggplot(emm_df,
+emm1_df <- as.data.frame(emm1)
+p1<- ggplot(emm1_df,
        aes(x = base_freq, y = emmean,
            color = family_size, group = family_size)) +
   geom_line(position = position_dodge(0.2)) +
@@ -267,11 +290,11 @@ p1<- ggplot(emm_df,
                 width = 0.1, position = position_dodge(0.2)) +
   labs(x = "Base Frequency", y = "Estimated N250 amplitude",
        color = "Family Size",
-       title = "Base Frequency × Family Size") +
+       title = "Family Size × Base Frequency") +
   scale_color_custom() +
   scale_fill_custom() 
 
-p2 <- ggplot(emm_df,
+p2 <- ggplot(emm1_df,
        aes(x = family_size, y = emmean,
            color = base_freq, group = base_freq)) +
   geom_line(position = position_dodge(0.2)) +
@@ -304,9 +327,8 @@ anova_model_n250_nonwords <- mixed(
 )
 anova_model_n250_nonwords 
 
-m1 <- anova_model_n250_nonwords$full_model    # Extract the lmer model
-ranova(m1)    # Run random effects comparison
-
+m2 <- anova_model_n250_nonwords$full_model    # Extract the lmer model
+ranova(m2)    # Run random effects comparison
 
 
 # Extract effect sizes from your ANOVA model
@@ -325,7 +347,7 @@ No main effects.
 
 A three way interaction between
 
-  - `Sensitivity × Family Size × Complexity`: significant (*p* =.033).
+  - `Sensitivity × Family Size × Complexity`: significant (*t* = 4.58, *p* =.033).
 
 ###  Simple Contrasts
 
@@ -334,36 +356,48 @@ Compare High vs Low Orthographic Sensitivity within each combination of Family S
 This gives you: 4 contrasts: one for each `Family Size × Complexity` combination. Each shows whether `High` vs `Low Orthographic Sensitivity` differs significantly
 
 If simple effects aren’t significant, try looking at interaction contrasts, which test differences in the differences. You’re now asking: Does the effect of Sensitivity change more in some complexity/family combinations than others?
-
-
+<br>
 ```{r}
-# 1. Get the EMM grid for all combinations
-(emm1 <- emmeans(anova_model_n250_nonwords, ~ Orthographic_Sensitivity * family_size * complexity))
+# Estimated marginal means for the family_size × complexity interaction
+(emm2 <- emmeans(anova_model_n250_nonwords, ~ Orthographic_Sensitivity * family_size * complexity))
+
+# Get all pairswise contrasts
+emm2_contrasts <- contrast(emm2,  method = "pairwise", by = NULL, adjust = "none")
+
+# Keep only the contrasts you want
+# Simple effects of family_size at each level of complexity
+# Simple effects of complexity at each level of family_size
+keep2 <- c("High Orthographic Large Family Complex - High Orthographic Large Family Simple",
+          "High Orthographic Small Family Complex - High Orthographic Small Family Simple",
+          "Low Orthographic Large Family Complex - Low Orthographic Large Family Simple",
+          "Low Orthographic Small Family Complex - Low Orthographic Small Family Simple",
+          "High Orthographic Large Family Complex - High Orthographic Small Family Complex",
+          "High Orthographic Large Family Simple - High Orthographic Small Family Simple",
+          "Low Orthographic Large Family Complex - Low Orthographic Small Family Complex",
+          "Low Orthographic Large Family Simple - Low Orthographic Small Family Simple",
+          "High Orthographic Large Family Complex - Low Orthographic Large Family Complex",
+          "High Orthographic Small Family Complex - Low Orthographic Small Family Complex",
+          "High Orthographic Large Family Simple - Low Orthographic Small Family Simple",
+          "High Orthographic Small Family Simple - Low Orthographic Small Family Simple")
+
+(emm2_contrasts_filtered <- subset(emm2_contrasts, contrast %in% keep2))
+
+# Get Confidence Intervals
+(emm2_contrasts_filtered_ci <- confint(emm2_contrasts_filtered))
 
 
-# “Simple effects” contrasts:
-#    a) Effect of complexity within each Sensitivity × family_size cell
-(contrast(emm1, method = "pairwise", by = c("Orthographic_Sensitivity", "family_size"),
-         simple = "complexity", adjust = "holm"))
+# Get effect sizes
+# Get all pairwise effect sizes
+effs2 <- eff_size(emm2, sigma = sigma(m2), edf = df.residual(m2))
 
-#    b) Effect of family_size within each Sensitivity × complexity cell
-(contrast(emm1, method = "pairwise", by = c("Orthographic_Sensitivity", "complexity"),
-         simple = "family_size", adjust = "holm"))
-
-#    c) Effect of Sensitivity within each family_size × complexity cell
-(contrast(emm1, method = "pairwise", by = c("family_size", "complexity"),
-         simple = "Orthographic_Sensitivity", adjust = "holm"))
+# Remove the  redundant rows 
+(effs2_filtered <- subset(effs2, contrast %in% keep2))
 ```
 
 ### Interaction Contrasts
 
-The interaction contrast tests:
+The interaction contrast tests whether the difference in the complexity effect for large vs small families differs across sensitivity?
 
-Is the difference in the effect of A across levels of B different at Complex vs. Simple levels?
-
-Mathematically
-
-You’re testing:
 
 $$
  [ [(A_1 - A_2)\text{ in }B_1] - [(A_1 - A_2)\text{ in }B_2]
@@ -373,49 +407,27 @@ $$
     \text{in Condition }C_2]
 $$
 
+<br>
 ```{r}
+#  Interaction contrasts (difference-of-differences)
+#    Compare complexity effect in large vs small family)
+contrast(emm2, interaction = "pairwise", by = NULL, adjust = "holm")
+confint(contrast(emm2, interaction = c("pairwise", "pairwise")))
 
-#    Compare (complexity effect in large vs small family) across sensitivity
-(contrast(emm1, interaction = c("pairwise", "pairwise"), by = NULL, adjust = "holm"))
+# Compute the A1 - A2 difference within each combination of B × C
+(complexity_diff <- contrast(emm2, method = "revpairwise", 
+                            by = c("Orthographic_sensitivity", "family_size"), 
+                            simple = "complexity"))
 
-(contrast(emm1, interaction = c("pairwise", "pairwise"), combine = FALSE, adjust = "bonferroni"))
+# Compute how that A-effect changes across the levels of B, separately for each level of C  
+(family_size_complexity_int_within_sensitivity <- contrast(complexity_diff, 
+                                                           method = "revpairwise",
+                                                           by = "Orthographic_sensitivity", simple = "family_size"))
 
-# Optionally: get confidence intervals
-(confint(contrast(emm1, interaction = c("pairwise", "pairwise"))))
-
-all_contr <- contrast(emm1, interaction = c("pairwise", "pairwise"), combine = TRUE, adjust = "bonferroni")
-
-# 1. Summarize contrasts
-sumc <- summary(all_contr)
-
-# Construct a contrast name string
-contrast_name <- paste( sumc$Orthographic_Sensitivity_pairwise, sumc$family_size_pairwise,
-  sumc$complexity_pairwise,sep = " — ")  # or whatever separator you prefer
-
-# 2. Extract values
-est <- sumc$estimate
-se <- sumc$SE
-df_contr <- sumc$df
-
-# 3. Use the sigma you found
-lm_mod <- anova_model_n250_nonwords$full_model
-sigma_val <- sigma(lm_mod)
-
-# 4. Compute d and its SE
-d <- est / sigma_val
-se_d <- se / sigma_val
-
-# 5. Confidence intervals for d (t critical)
-alpha <- 0.05
-tcrit <- qt(1 - alpha/2, df_contr)
-ci_low <- d - tcrit * se_d
-ci_high <- d + tcrit * se_d
-
-# 6. Make table
-d_table <- data.frame( contrast = contrast_name, 
-                       d = d, se_d = se_d, df = df_contr, ci_low = ci_low, ci_high = ci_high)
-d_table
+# Get confidence intervals
+confint(family_size_complexity_int_within_sensitivity)
 ```
+
 
 Compute the effect of Complexity (Complex - Simple) within each Orthographic Sensitivity × Family Size combination.
 High Sensitivity- Large Family: `Complex - Simple = -0.495 - (-0.609) = +0.114`
@@ -454,13 +466,14 @@ In `Small families`, `High sensitivity` participants respond more negatively to 
 
 This crossover in the complexity effect is what drives the significant interaction — even though none of the simple effects are individually significant.
 
+## Plots
 
-```{r}
-# 6. Plot the interaction
+```{r, fig.height=7, fig.width=6}
+# Plot the interaction
 library(ggplot2)
 
-emm1_df <- as.data.frame(emm1)
-ggplot(emm1_df,
+emm2_df <- as.data.frame(emm2)
+p3 <- ggplot(emm2_df,
        aes(x = complexity, y = emmean,
            color = family_size, group = family_size)) +
   facet_wrap(~ Orthographic_Sensitivity) +
@@ -470,9 +483,26 @@ ggplot(emm1_df,
                 width = 0.1, position = position_dodge(0.2)) +
   labs(x = "Complexity", y = "Estimated N250 amplitude",
        color = "Family Size",
-       title = "Interaction: Orthographic Sensitivity × Family Size × Complexity") +
+       title =  "Family Size × Complexity × Orthographic Sensitivity") +
   scale_color_custom() +
   scale_fill_custom()
+
+emm2_df <- as.data.frame(emm2)
+p4 <- ggplot(emm2_df,
+       aes(x = family_size, y = emmean,
+           color = complexity, group = complexity)) +
+  facet_wrap(~ Orthographic_Sensitivity) +
+  geom_line(position = position_dodge(0.2)) +
+  geom_point(position = position_dodge(0.2)) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
+                width = 0.1, position = position_dodge(0.2)) +
+  labs(x = "Family Size", y = "Estimated N250 amplitude",
+       color = "Complexity",
+       title = "Complexity × Family Size × Orthographic Sensitivity") +
+  scale_color_custom() +
+  scale_fill_custom()
+
+plot_grid(p3, p4, nrow = 2)
 ```
 
 
@@ -486,12 +516,9 @@ The contrast is asking: “Is the effect of `complexity`, in the contrast `Large
 
  -	The `estimate = 0.5`2 is the difference in differences (i.e. the slope difference) on your response metric (N250 amplitude).
 	
-
-	
  -	Because you used adjust = "bonferroni" and combine = TRUE, this contrast is part of a “family” of interaction contrasts that have been adjusted for multiple comparisons.
 
 So in more conversational terms: you have evidence that High Orthographic readers show a different `complexity × family size` effect than Low Orthographic readers — in particular, in how the `complexity` effect (`Complex` vs. `Simple`) differs when comparing `Large` vs. `Small` family.
- 
  
 Suggests that sensitivity does influence the N250, but only in how it modulates the joint effect of family size and complexity. In other words: the way family size and complexity interact depends on whether participants are orthographically sensitive or not.
 
