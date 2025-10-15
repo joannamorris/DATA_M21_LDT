@@ -211,17 +211,43 @@ rt_words_cmpl <- rt_words_frq[complete.cases(rt_words_frq[, model_vars]), ]
 # View them
 print(incomplete_cases_words)
 
-# str(rt_words_1_cmpl)
-```
-
-
-### Standardize the predictors
-```{r}
+# Standardize the predictors
 rt_words_cmpl$Log10BF_std <- as.numeric(scale(rt_words_cmpl$Log10BF, center = TRUE, scale = TRUE))
 rt_words_cmpl$FS_std <- as.numeric(scale(rt_words_cmpl$FS, center = TRUE, scale = TRUE))
 rt_words_cmpl$Log10WF_std <- as.numeric(scale(rt_words_cmpl$Log10WF, center = TRUE, scale = TRUE))
 rt_words_cmpl$Log10FS_std <- as.numeric(scale(rt_words_cmpl$Log10FS, center = TRUE, scale = TRUE))
 rt_words_cmpl$Dim.2_std <- as.numeric(scale(rt_words_cmpl$Dim.2, center = TRUE, scale = TRUE))
+```
+
+
+```{r}
+rt_words_cmpl %>%
+  summarise(
+    n_subjects = n_distinct(SubjID),
+    n_items = n_distinct(STRING)
+  )
+
+# Count trials per subject
+rt_words_cmpl %>%
+  count(SubjID, name = "n_trials") %>%
+  summarise(
+    min_trials = min(n_trials),
+    max_trials = max(n_trials),
+    mean_trials = mean(n_trials)
+  )
+
+(trial_count_by_subj <- rt_words_cmpl %>%
+  count(SubjID, name = "n_trials") %>%
+  arrange(desc(n_trials)))
+```
+
+
+```{r}
+rt_words_cmpl %>%
+  summarise(
+    n_subjects = n_distinct(SubjID),
+    n_items = n_distinct(Item)
+  )
 ```
 
 ### Anova with Continuous Log10BF and Categorical FS
