@@ -25,12 +25,16 @@ options(width = 130)
 Load libraries
 ```{r, echo=FALSE}
 library(tidyverse)
+library(ggeffects)
+library(lme4)
 library(afex)
 library(gridExtra)
 library(emmeans)
 library(effectsize)
 library(performance)
-library(cowplot)
+library(cowplot)  # for use with `plot_grid(x,x,ncol = x)` function
+library(e1071) # for use with `skewness()` function
+library(lmerTest)
 ```
 
 
@@ -67,7 +71,7 @@ scale_fill_custom <- function() {
 ## Load Files
 ```{r}
 DIR <- "csv_files"
-rt_1 <- read_csv(file.path(DIR, "rt_data_chrt1.csv"))
+rt_1 <- read_csv(file.path(DIR, "rt_data_coh1.csv"))
 frq_w <- read_csv(file.path(DIR, "frq_cw.csv"))
 frq_nw <- read_csv(file.path(DIR, "frq_nw.csv"))
 dmg <- read_csv(file.path(DIR, "demo_lang_vsl_pca_hc.csv"))
@@ -80,54 +84,44 @@ dmg <- read_csv(file.path(DIR, "demo_lang_vsl_pca_hc.csv"))
 # rt <- bind_rows(Hampshire = rt_1, 
 #                 Providence =rt_2,
 #                 .id = "location")
-rt_dmg<- right_join(dmg, rt_1, join_by(SubjID == subject_nr))  # Join Participant Demographic and Lang Data
-rt_dmg <- rt_dmg |> mutate(target = tolower(target))
-rt_dmg_cor <- rt_dmg |> filter(correct == 1)
+rt_dmg<- right_join(dmg, rt_1, join_by(SubjID == subject_nr)) |>  # Join Participant Demographic and Lang Data
+                    mutate(target = tolower(target)) |>
+                    filter(correct == 1)
 
 # Divide into Experimental and Filler Items
-rt_fill <- rt_dmg_cor |> filter(str_detect(targ_type, "^FILL"))
-rt_exp <- rt_dmg_cor |> filter(!str_detect(targ_type, "^FILL"))
+rt_fill <- rt_dmg |> filter(str_detect(targ_type, "^FILL"))
+rt_exp <- rt_dmg |> filter(!str_detect(targ_type, "^FILL"))
 
 # Define Factors and Conditions
-rt_exp_cln <- rt_exp |>
+rt_exp_format <- rt_exp |>
   separate(targ_type, into = c("trial_type", "family_size", "complexity"), sep = "_",
-           remove = TRUE,
-           extra = "drop",
-           fill = "right")
+           remove = TRUE, extra = "drop", fill = "right") 
 
 # Divide into Words and Nonwords
-rt_words <- rt_exp_cln |> filter(trial_type == "CW") |> select(- complexity)
-rt_nwords <- rt_exp_cln |> filter(trial_type == "NW")
+rt_words <- rt_exp_format |> filter(trial_type == "CW") |> select(- complexity)
+rt_nwords <- rt_exp_format |> filter(trial_type == "NW")
 
 # Join Stimulus Frequency Data
 rt_words_frq <- left_join(rt_words, frq_w, join_by(target))|>
   select(-cond_trig.y, -word_trig.y) |>
   rename(cond_trig = cond_trig.x, word_trig = word_trig.x)  # remove duplicate columns
-
 rt_nwords_frq <-  left_join(rt_nwords, frq_nw, join_by(target==word))
 
+# Rename BF_Split and FS_Split columns
+rt_words_frq <- rt_words_frq |> rename(Base_Frequency = BF_Split, Family_Size = FS_Split) # Rename BF_Split and FS_Split columns
+rt_nwords_frq <- rt_nwords_frq |> rename(Base_Frequency = BF_Split, Family_Size = FS_Split)
 
+# Recode factor levels
+rt_words_frq <- rt_words_frq |>
+  mutate(Base_Frequency = case_match(Base_Frequency, "S" ~ "Low BF", "L" ~ "High BF"),
+         Family_Size = case_match(Family_Size, "S" ~ "Small Family", "L" ~ "Large Family"))
+rt_nwords_frq <- rt_nwords_frq |> mutate(Base_Frequency = case_match(Base_Frequency, "S" ~ "Low BF", "L" ~ "High BF"),
+                                         Family_Size = case_match(Family_Size, "S" ~ "Small Family", "L" ~ "Large Family"))
 
-# Create a median-split factor for base frequency
-rt_words_frq$BF_MedianSplit <- ifelse(rt_words_frq$Log10BF <= median(rt_words_frq$Log10BF, na.rm = TRUE),"Low", "High")
-rt_words_frq$BF_MedianSplit <- factor(rt_words_frq$BF_MedianSplit, levels = c("Low", "High"))
+rt_words_frq$Orthographic_Sensitivity[rt_words_frq$Orthographic_Sensitivity == "Low"] <- "Low Sensitivity"
+rt_words_frq$Orthographic_Sensitivity[rt_words_frq$Orthographic_Sensitivity == "High"] <- "High Sensitivity"
 
-rt_words_frq$FS_Split <- factor(rt_words_frq$FS_MedianSplit)
-rt_words_frq$FS_Split <- recode(x, a = "alpha", b = "beta")
-
-rt_nwords_frq$BF_Split <- factor(rt_nwords_frq$BF_Split)
-rt_nwords_frq$FS_Split <- factor(rt_nwords_frq$FS_Split)
-
-# Divide into cohorts
-rt_words_1 <- rt_words_frq |> filter(location == "Hampshire") |> select(- location)
-rt_words_2 <- rt_words_frq |> filter(location == "Providence") |> select(- location)
-
-rt_nwords_1 <- rt_nwords_frq |> filter(location == "Hampshire") |> select(- location)
-rt_nwords_2 <- rt_nwords_frq |> filter(location == "Providence") |> select(- location)
 # str(rt_words_1)
-
-
-
 ```
 
 # Analyse Data
@@ -135,63 +129,51 @@ rt_nwords_2 <- rt_nwords_frq |> filter(location == "Providence") |> select(- loc
 ## Plot RT distributions
 ```{r, echo = FALSE, fig.width=7}
 # RT boxplot
-p1 <- rt_words_1 |> ggplot(aes(x = SubjID, y = response_time)) +
+p1 <- rt_words_frq |> ggplot(aes(x = SubjID, y = response_time)) +
   geom_boxplot(colour = "#1F78B4", fill = "#1F78B4", alpha = .4 )+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-p2 <- rt_nwords_1 |> ggplot(aes(x = SubjID, y = response_time)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  labs(title = "Words")
+p2 <- rt_nwords_frq |> ggplot(aes(x = SubjID, y = response_time)) +
   geom_boxplot(colour = "#E31A1C", fill = "#E31A1C", alpha = .4)+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  labs(title = "Non-words")
 plot_grid(p1, p2, ncol = 2)
 
 # RT density plot
-p1 <- rt_words_1 |> ggplot(aes(x = response_time)) +
-  geom_density(colour = "#1F78B4", fill = "#1F78B4", alpha = .4) 
-p2 <- rt_nwords_1 |> ggplot(aes(x = response_time)) +
-  geom_density(colour = "#E31A1C", fill = "#E31A1C", alpha = .4)
+p1 <- rt_words_frq |> ggplot(aes(x = response_time)) +
+  geom_density(colour = "#1F78B4", fill = "#1F78B4", alpha = .4) +
+  labs(title = "Words")
+p2 <- rt_nwords_frq |> ggplot(aes(x = response_time)) +
+  geom_density(colour = "#E31A1C", fill = "#E31A1C", alpha = .4) +
+  labs(title = "Non-words")
 plot_grid(p1, p2, ncol = 2)
 
-# InvRT  boxplot
-p1 <- rt_words_1 |> ggplot(aes(x = SubjID, y = InvRT)) +
-  geom_boxplot(colour = "#1F78B4", fill = "#1F78B4", alpha = .4)+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-p2 <- rt_nwords_1 |> ggplot(aes(x = SubjID, y = InvRT)) +
-  geom_boxplot(colour = "#E31A1C", fill = "#E31A1C", alpha = .4)+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-plot_grid(p1, p2, ncol = 2)
-
-# InvRT density plot
-p1 <- rt_words_1 |> ggplot(aes(x = InvRT)) +
-  geom_density(colour = "#1F78B4", fill = "#1F78B4", alpha = .4) 
-
-p2 <- rt_nwords_1 |> ggplot(aes(x = InvRT)) +
-  geom_density(colour = "#E31A1C", fill = "#E31A1C", alpha = .4) 
-plot_grid(p1, p2, ncol = 2)
 ```
 
 ## Test for Skewness
+
 ### Base Frequency
 ... 
 
 ```{r, echo=FALSE, fig.width=7}
 # Raw BF
-p1 <- ggplot(rt_words_1, aes(x = BF)) +
+p1 <- ggplot(rt_words_frq, aes(x = BF)) +
   geom_density(colour = "#B2DF8A", fill = "#B2DF8A", alpha = .4) +
   labs(title = "Distribution of Raw Base Frequency")
 
 # Log10BF
-p2 <- ggplot(rt_words_1, aes(x = Log10BF)) +
+p2 <- ggplot(rt_words_frq, aes(x = Log10BF)) +
   geom_density(colour = "#33A02C", fill = "#33A02C", alpha = .4) +
   labs(title = "Distribution of Log10 Base Frequency")+
   scale_fill_custom() +
   scale_color_custom()
 
-library(cowplot)
 plot_grid(p1, p2, ncol = 2)
 
 library(e1071)
 # Skewness values
-skewness(rt_words_1$BF, na.rm = TRUE)
-skewness(rt_words_1$Log10BF, na.rm = TRUE)
+skewness(rt_words_frq$BF, na.rm = TRUE)
+skewness(rt_words_frq$Log10BF, na.rm = TRUE)
 ```
 
 ### Family Size
@@ -200,33 +182,34 @@ skewness(rt_words_1$Log10BF, na.rm = TRUE)
 ```{r}
 # Skewness values
 
-rt_words_1 <- rt_words_1 |> mutate(Log10FS = log10(FS))
-skewness(rt_words_1$FS, na.rm = TRUE)
-skewness(rt_words_1$Log10FS, na.rm = TRUE)
+rt_words_frq <- rt_words_frq |> mutate(Log10FS = log10(FS))
+skewness(rt_words_frq$FS, na.rm = TRUE)
+skewness(rt_words_frq$Log10FS, na.rm = TRUE)
 
 # Raw FS
-ggplot(rt_words_1, aes(x = FS)) +
+p1 <- ggplot(rt_words_frq, aes(x = FS)) +
   geom_density(colour = "#B2DF8A", fill = "#B2DF8A", alpha = .4) +
   labs(title = "Distribution of Family Size")
 # Log10 FS
-ggplot(rt_words_1, aes(x = Log10FS)) +
+p2 <- ggplot(rt_words_frq, aes(x = Log10FS)) +
   geom_density(colour = "#B2DF8A", fill = "#B2DF8A", alpha = .4) +
-  labs(title = "Distribution of Family Size")
+  labs(title = "Distribution of Log10 Family Size")
 
+plot_grid(p1, p2, ncol = 2)
 ```
 
 ## ANOVA Words
 
-Use `complete.cases()` to find which rows had missing data in the model-relevant variables:
+Use `complete.cases()` to find which rows have missing data in the model-relevant variables:
 ```{r, echo=FALSE, results = "hide"}
 # Specify only the variables used in the model
-model_vars <- c("response_time", "InvRT", "Log10BF","BF", "FS","FS_Split", "Dim.2","SubjID")
+model_vars <- c("response_time",  "Log10BF","BF", "FS","Family_Size", "Base_Frequency", "Dim.2","SubjID")
 
 # Identify incomplete rows cohort 1
-incomplete_cases_1 <- rt_words_1[!complete.cases(rt_words_1[, model_vars]), ]
-rt_words_1_cmpl <- rt_words_1[complete.cases(rt_words_1[, model_vars]), ]
+incomplete_cases_words <- rt_words_frq[!complete.cases(rt_words_frq[, model_vars]), ]
+rt_words_cmpl <- rt_words_frq[complete.cases(rt_words_frq[, model_vars]), ]
 # View them
-print(incomplete_cases_1)
+print(incomplete_cases_words)
 
 # str(rt_words_1_cmpl)
 ```
@@ -234,42 +217,45 @@ print(incomplete_cases_1)
 
 ### Standardize the predictors
 ```{r}
-
-rt_words_1_cmpl$Log10BF_std <- as.numeric(scale(rt_words_1_cmpl$Log10BF, center = TRUE, scale = TRUE))
-rt_words_1_cmpl$FS_std <- as.numeric(scale(rt_words_1_cmpl$FS, center = TRUE, scale = TRUE))
-rt_words_1_cmpl$Log10WF_std <- as.numeric(scale(rt_words_1_cmpl$Log10WF, center = TRUE, scale = TRUE))
-rt_words_1_cmpl$Log10FS_std <- as.numeric(scale(rt_words_1_cmpl$Log10FS, center = TRUE, scale = TRUE))
-rt_words_1_cmpl$Dim.2_std <- as.numeric(scale(rt_words_1_cmpl$Dim.2, center = TRUE, scale = TRUE))
+rt_words_cmpl$Log10BF_std <- as.numeric(scale(rt_words_cmpl$Log10BF, center = TRUE, scale = TRUE))
+rt_words_cmpl$FS_std <- as.numeric(scale(rt_words_cmpl$FS, center = TRUE, scale = TRUE))
+rt_words_cmpl$Log10WF_std <- as.numeric(scale(rt_words_cmpl$Log10WF, center = TRUE, scale = TRUE))
+rt_words_cmpl$Log10FS_std <- as.numeric(scale(rt_words_cmpl$Log10FS, center = TRUE, scale = TRUE))
+rt_words_cmpl$Dim.2_std <- as.numeric(scale(rt_words_cmpl$Dim.2, center = TRUE, scale = TRUE))
 ```
 
 ### Anova with Continuous Log10BF and Categorical FS
 
 ```{r}
-anova_model_1 <- mixed(
-  InvRT ~ Log10BF_std * FS_Split * lang_type_ortho + (1  | SubjID),
-  data = rt_words_1_cmpl,
-  method = "KR"
-)
-anova_model_1
-summary(anova_model_1)
+anova_model_words <- mixed(
+  response_time ~ Base_Frequency * Family_Size * Orthographic_Sensitivity + (1  | SubjID),
+  data = rt_words_cmpl,
+  method = "KR")
+anova_model_words
+
+m1 <- anova_model_words$full_model    # Extract the lmer model
+ranova(m1) # Run random effects comparison
+```
+
+```{r}
+anova_model_words_2 <- mixed(
+  response_time ~ Base_Frequency * Family_Size * Orthographic_Sensitivity +
+    (1 | SubjID) +
+    (1 | STRING),
+  data = rt_words_cmpl,
+  method = "S")
+anova_model_words_2
 ```
 
 
 #### Main Findings:
 
-|                     Effect|         df |       F |p.value |
-|---------------------------|------------|---------|--------|
-|                Log10BF_std| 1, 5792.69 |41.88 ***|   <.001|
-|                   FS_Split| 1, 5792.31 |23.20 ***|   <.001|
-|Log10BF_std:lang_type_ortho| 1, 5792.69 |   4.76 *|    .029|
+|                        Effect|         df |       F |p.value |
+|------------------------------|------------|---------|--------|
+|                Base_Frequency| 1, 5792.69 |37.15 ***|   <.001|
+|                   Family_Size| 1, 5792.31 |45.05 ***|   <.001|
+|    Base_Frequency:Family_Size| 1, 5792.69 |   6.92 *|    .009|
 	
-Data show that as Log10BF increases (e.g., more frequent or predictable words), processing becomes faster (inverse RT goes up → RT goes down). 
-
-Statistical models were fit using inverse response time (1/RT) to capture processing speed, but all reported means and figures are back-transformed to milliseconds for interpretability.
-
-
-
-
 
 #### Plots
 
