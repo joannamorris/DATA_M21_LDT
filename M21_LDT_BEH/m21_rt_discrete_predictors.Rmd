@@ -239,6 +239,8 @@ rt_words_cmpl %>%
 (trial_count_by_subj <- rt_words_cmpl %>%
   count(SubjID, name = "n_trials") %>%
   arrange(desc(n_trials)))
+
+s124 <- rt_words_cmpl |> filter(SubjID == "S124")
 ```
 
 
