@@ -1,4 +1,4 @@
-base,word,complexity,affix,Source,FS,BF,LogBF,LogLNBF,Log10BF,FS_Split,BF_Split,BaseLength,WholeFormLength,Sublist
+base,word,Complexity,affix,Source,FS,BF,LogBF,LogLNBF,Log10BF,FS_Split,BF_Split,BaseLength,WholeFormLength,Sublist
 melt,meltance,Complex,ance,Crepaldi,5,429,6.06,6.06146,2.63246,S,S,4.00,8.00,1
 happen,happenance,Complex,ance,Crepaldi,3,6982,8.85,8.85109,3.84398,S,L,6.00,10.00,1
 lid,lidary,Complex,ary,Crepaldi,3,523,6.26,6.25958,2.71850,S,S,3.00,6.00,1

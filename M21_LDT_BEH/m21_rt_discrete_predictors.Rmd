@@ -71,7 +71,7 @@ scale_fill_custom <- function() {
 ## Load Files
 ```{r}
 DIR <- "csv_files"
-rt_1 <- read_csv(file.path(DIR, "rt_data_coh1.csv"))
+rt_1 <- read_csv(file.path(DIR, "rt_data_hc.csv"))
 frq_w <- read_csv(file.path(DIR, "frq_cw.csv"))
 frq_nw <- read_csv(file.path(DIR, "frq_nw.csv"))
 dmg <- read_csv(file.path(DIR, "demo_lang_vsl_pca_hc.csv"))
@@ -105,7 +105,10 @@ rt_nwords <- rt_exp_format |> filter(trial_type == "NW")
 rt_words_frq <- left_join(rt_words, frq_w, join_by(target))|>
   select(-cond_trig.y, -word_trig.y) |>
   rename(cond_trig = cond_trig.x, word_trig = word_trig.x)  # remove duplicate columns
-rt_nwords_frq <-  left_join(rt_nwords, frq_nw, join_by(target==word))
+rt_nwords_frq <-  left_join(rt_nwords, frq_nw, join_by(target==word)) |>
+  select(-complexity.x) |>
+  rename(Complexity = complexity.y)  # remove duplicate columns and rename
+
 
 # Rename BF_Split and FS_Split columns
 rt_words_frq <- rt_words_frq |> rename(Base_Frequency = BF_Split, Family_Size = FS_Split) # Rename BF_Split and FS_Split columns
@@ -121,7 +124,6 @@ rt_nwords_frq <- rt_nwords_frq |> mutate(Base_Frequency = case_match(Base_Freque
 rt_words_frq$Orthographic_Sensitivity[rt_words_frq$Orthographic_Sensitivity == "Low"] <- "Low Sensitivity"
 rt_words_frq$Orthographic_Sensitivity[rt_words_frq$Orthographic_Sensitivity == "High"] <- "High Sensitivity"
 
-# str(rt_words_1)
 ```
 
 # Analyse Data
@@ -240,19 +242,10 @@ rt_words_cmpl %>%
   count(SubjID, name = "n_trials") %>%
   arrange(desc(n_trials)))
 
-s124 <- rt_words_cmpl |> filter(SubjID == "S124")
 ```
 
 
-```{r}
-rt_words_cmpl %>%
-  summarise(
-    n_subjects = n_distinct(SubjID),
-    n_items = n_distinct(Item)
-  )
-```
-
-### Anova with Continuous Log10BF and Categorical FS
+### Anova 
 
 ```{r}
 anova_model_words <- mixed(
@@ -261,8 +254,8 @@ anova_model_words <- mixed(
   method = "KR")
 anova_model_words
 
-m1 <- anova_model_words$full_model    # Extract the lmer model
-ranova(m1) # Run random effects comparison
+#m1 <- anova_model_words$full_model    # Extract the lmer model
+#ranova(m1) # Run random effects comparison
 ```
 
 ```{r}
@@ -275,222 +268,112 @@ anova_model_words_2 <- mixed(
 anova_model_words_2
 ```
 
+```{r}
+# Extract lmer models
+m1 <- anova_model_words$full_model      # (1 ¦ SubjID)
+m2 <- anova_model_words_2$full_model    # (1 ¦ SubjID) + (1 ¦ STRING)
+
+# Compare random effects structure
+anova(m1, m2)
+
+# Inspect variance components
+summary(m2)
+
+# compute the intra-class correlation (ICC) to see the relative contributions
+VarCorr(m2)
+performance::icc(m2)
+
+# formally test whether adding each random effect improves fit
+ranova(m2)
+```
+
+```{r}
+anova_model_words <- mixed(
+  response_time ~ Base_Frequency * Family_Size * Orthographic_Sensitivity +
+    (1 | SubjID) +
+    (1 | STRING),
+  data = rt_words_cmpl,
+  method = "S")
+anova_model_words
+
+m1 <- anova_model_words$full_model    # Extract the lmer model
+ranova(m1) # Run random effects comparison
+```
+
+Concise
+
+Models including random slopes for Base Frequency and Family Size by subject failed to converge or produced singular fits, indicating that the data did not support estimation of these additional variance components. Consequently, we report results from a simpler model with random intercepts for subjects and items (STRING), which converged cleanly and provided stable estimates.
+
+Fuller explanation 
+
+We initially attempted to fit a maximal random-effects structure following Barr et al. (2013), including random slopes for Base Frequency and Family Size by subject. However, these models yielded singular fits (zero variance estimates and perfect correlations among random effects). Because such structures can produce unreliable standard errors and inflated Type I error rates, we adopted the maximal non-singular model, containing random intercepts for both subjects and items (STRING). All reported statistics are based on this model.
+
+ Brief 
+
+(A more complex model including by-subject random slopes failed to converge; results from the non-singular intercept-only model are reported.)
 
 #### Main Findings:
 
-|                        Effect|         df |       F |p.value |
-|------------------------------|------------|---------|--------|
-|                Base_Frequency| 1, 5792.69 |37.15 ***|   <.001|
-|                   Family_Size| 1, 5792.31 |45.05 ***|   <.001|
-|    Base_Frequency:Family_Size| 1, 5792.69 |   6.92 *|    .009|
+|                        Effect|       df |      F |p.value|
+|------------------------------|----------|--------|-------|
+|                Base_Frequency| 1, 92.48 |10.10 **|   .002|
+|                   Family_Size| 1, 92.48 | 9.41 **|   .003|
+
 	
 
-#### Plots
+### Plots
 
-Plotting Processing Efficiency
-
+#### Main Effect of Base Frequency
+<br>
 ```{r, echo = FALSE}
-# Inverse RT
-ggplot(rt_words_1_cmpl, aes(x = Log10BF_std, y = InvRT, color = lang_type_ortho)) +
-  stat_smooth(method = "lm", se = TRUE) +
-  labs(title = "Interaction: Log10BF × Language Type",
-       x = "Log10BF (standardized)", y = "Inverse RT (1/RT)") +
-  scale_color_custom() 
+# Compute means for each level of Base_Frequency
+mean_df <- rt_words_cmpl %>%
+  group_by(Base_Frequency) %>%
+  summarise(mean_rt = mean(response_time, na.rm = TRUE))
 
-```
-
-#### Plotting Latency
-
-To plot predicted values in milliseconds (RT) instead of inverse RT, you must:
-
-	1.	Predict inverse RT values from the model
-	
-	2.	Back-transform to milliseconds with RT_ms = 1000 / InvRT
-	
-	3.	Plot the transformed values
-	
-When using ggeffects (or emmeans) with models fit using afex::mixed(). The mixed() function wraps lmer() from lme4, but the result isn’t always fully compatible with tools like ggeffects because of the extra layers (especially when using Kenward-Roger or parametric bootstrap methods for inference).
-
-Because we are only using mixed() for the Kenward-Roger p-values but don’t need it for prediction, refit our model with lmer():
-
-	
-##### Option 1: Collapsed across Family Size
-
-...
-
-```{r, echo = FALSE, fig.width= 3.5}
-# Refit the model with lmer() (for prediction only)
-library(lme4)
-anova_model_lmer <- lmer(
-  InvRT ~ Log10BF_std * FS_Split * lang_type_ortho + (1 | SubjID),
-  data = rt_words_1_cmpl
-)
-
-#Use emmeans with the new model
-library(emmeans)
-emm_options(pbkrtest.limit = 6000, lmerTest.limit = 6000)
-emm <- emmeans(anova_model_lmer,
-               ~ Log10BF_std | lang_type_ortho,
-               at = list(Log10BF_std = seq(-4, 3, 0.1)),
-               cov.reduce = mean  # Average over levels of FS_Split equally
-               )
-emm_df <- summary(emm, infer = c(TRUE, TRUE)) |> as.data.frame()
-
-# Back-transform to RT (in milliseconds)
-emm_df$RT_ms <- 1 / emm_df$emmean
-emm_df$lower_ms <- 1 / emm_df$upper.CL  # Remember: upper InvRT = lower RT
-emm_df$upper_ms <- 1 / emm_df$lower.CL
-
-# plot with ggplot2:
-p1 <- ggplot(emm_df, aes(x = Log10BF_std, y = RT_ms, color = lang_type_ortho)) +
-  geom_line(size = 1) +
-  geom_ribbon(aes(ymin = lower_ms, ymax = upper_ms, 
-                  fill = lang_type_ortho), alpha = 0.2, color = NA) +
-  labs(y = "Estimated RT (ms)", x = "Log10BF (standardized)",
-       title = "c",
-       subtitle = "Collapsed Across Morphological Family Size") +
-  scale_color_custom() +
-  scale_fill_custom() 
-p1
-```
-
-##### Option 2: LogBR x Language Type as a function of FS
-
-...   
-   
-```{r, echo = FALSE, fig.width=7}
-library(lme4)
-library(ggeffects)
-
-anova_model_lmer <- lmer(
-  InvRT ~ Log10BF_std * FS_Split * lang_type_ortho + (1 | SubjID),
-  data = rt_words_1_cmpl
-)
-
-
-# Get predicted inverse RTs across the range of Log10BF_std. This returns a data frame with predicted values
-#pred_df <- ggpredict(anova_model_lmer, terms = c("Log10BF_std [all]", "lang_type_ortho"))
-pred_df_L <- ggeffects::ggpredict(anova_model_lmer, terms = c("Log10BF_std", "lang_type_ortho"), condition = c(FS_Split = "L"))
-pred_df_S <- ggeffects::ggpredict(anova_model_lmer, terms = c("Log10BF_std", "lang_type_ortho"), condition = c(FS_Split = "S"))
-
-# Convert predicted inverse RT to RT in milliseconds
-# Note: When converting from inverse RT to RT, the direction of the confidence interval flips.
-
-
-pred_df_L$predicted_RT_ms <- 1 / pred_df_L$predicted
-pred_df_L$conf.low_ms <- 1 / pred_df_L$conf.high  # Inversion: upper in InvRT → lower in RT
-pred_df_L$conf.high_ms <- 1 / pred_df_L$conf.low  # Inversion: lower in InvRT → upper in RT
-
-pred_df_S$predicted_RT_ms <- 1 / pred_df_S$predicted
-pred_df_S$conf.low_ms <- 1 / pred_df_S$conf.high  # Inversion: upper in InvRT → lower in RT
-pred_df_S$conf.high_ms <- 1 / pred_df_S$conf.low  # Inversion: lower in InvRT → upper in RT
-
-
-# Plot Large Family Size using ggplot2
-p2<- ggplot(pred_df_L, aes(x = x, y = predicted_RT_ms, color = group)) +
-  geom_line(size = 1) +
-  geom_ribbon(aes(ymin = conf.low_ms, ymax = conf.high_ms, fill = group), alpha = 0.2, color = NA) +
-  labs(
-    x = "Log10BF (standardized)",
-    y = "Predicted RT (ms)",
-    color = "Language Type",
-    fill = "Language Type",
-    title = "Predicted RT by Language Type",
-    subtitle = "Large Morphological Family Size"
-  ) +
-  scale_color_custom() +
-  scale_fill_custom() 
-
-# Plot Small Family Size using ggplot2
-p3<- ggplot(pred_df_S, aes(x = x, y = predicted_RT_ms, color = group)) +
-  geom_line(size = 1) +
-  geom_ribbon(aes(ymin = conf.low_ms, ymax = conf.high_ms, fill = group), alpha = 0.2, color = NA) +
-  labs(
-    x = "Log10BF (standardized)",
-    y = "Predicted RT (ms)",
-    color = "Language Type",
-    fill = "Language Type",
-    title = "Predicted RT by Language Type",
-    subtitle = "Small Morphological Family Size"
-  ) +
-  scale_color_custom() +
-  scale_fill_custom()
-
-library(cowplot)
-plot_grid(p2, p3, ncol = 2)
-```
-
-
-##### Option 3: LogBR x Language Type as a function of FS (Faceted Plot)
-
-...
-
-```{r, echo = FALSE, fig.width=7}
-# Estimate marginal means across full range of Log10BF_std, by FS_Split and lang_type_ortho
-emm <- emmeans(
-  anova_model_lmer,
-  ~ Log10BF_std | lang_type_ortho * FS_Split,
-  at = list(Log10BF_std = seq(-4, 2.1, 0.1)),
-  weights = "equal"  # Optional: average over any remaining factors
-)
-emm_df <- summary(emm, infer = c(TRUE, TRUE)) |> as.data.frame()
-
-# Back-transform to RT
-emm_df$RT_ms <- 1 / emm_df$emmean
-emm_df$lower_ms <- 1 / emm_df$upper.CL
-emm_df$upper_ms <- 1 / emm_df$lower.CL
-
-# Plot, faceted by FS_Split
-ggplot(emm_df, aes(x = Log10BF_std, y = RT_ms, color = lang_type_ortho)) +
-  geom_line(size = 1) +
-  geom_ribbon(aes(ymin = lower_ms, ymax = upper_ms, fill = lang_type_ortho), alpha = 0.2, color = NA) +
-  facet_wrap(~ FS_Split) +
-  labs(y = "Estimated RT (ms)", x = "Log10BF (standardized)",
-       title = "Predicted RT by Language Type and FS Split") +
+rt_words_cmpl |> ggplot(aes(x = response_time, colour = Base_Frequency, fill = Base_Frequency)) +
+  geom_density( alpha = .4) +
+  geom_vline(data = mean_df,
+             aes(xintercept = mean_rt, colour = Base_Frequency),
+             linetype = "dashed", size = 1) +
+  labs(title = "Words") +
   scale_color_custom() +
   scale_fill_custom() 
 ```
 
-#### Interpret Interactions
-
-##### Contrast Slopes
+#### Main Effect of Family Size
+<br>
 ```{r}
-# Marginal trends (i.e., slopes of Log10BF for each language group)
-emtrends(anova_model_1, ~ lang_type_ortho, var = "Log10BF_std")
-# Formal contrast of slopes
-emtrends(anova_model_1, pairwise ~ lang_type_ortho, var = "Log10BF_std")
+# Compute means for each level of Base_Frequency
+mean_df <- rt_words_cmpl %>%
+  group_by(Family_Size) %>%
+  summarise(mean_rt = mean(response_time, na.rm = TRUE))
+
+rt_words_cmpl |> ggplot(aes(x = response_time, colour = Family_Size, fill = Family_Size)) +
+  geom_density( alpha = .4) +
+  geom_vline(data = mean_df,
+             aes(xintercept = mean_rt, colour = Family_Size),
+             linetype = "dashed", size = 1) +
+  labs(title = "Words") +
+  scale_color_custom() +
+  scale_fill_custom() 
 ```
 
-##### Get ms estimates
-```{r}
-library(emmeans)
-
-# Estimate inverse RT at mean frequency for each group
-emm <- emmeans(anova_model_lmer, ~ lang_type_ortho, at = list(Log10BF_std = 0))
-emm_df <- as.data.frame(emm)
-
-# Back-transform to ms
-emm_df$RT_ms <- 1 / emm_df$emmean
-
-print(emm_df)
-```
-
-
-
-
+	
 
 ## ANOVA Non-Words
 
 Use `complete.cases()` to find which rows had missing data in the model-relevant variables:
+
 ```{r, echo=FALSE, results = "hide"}
 # Specify only the variables used in the model
-model_vars <- c("response_time", "InvRT", "Dim.2","SubjID")
+model_vars <- c("response_time", "Dim.2","SubjID")
 
-# Identify incomplete rows cohort 1
-incomplete_cases_1 <- rt_nwords_1[!complete.cases(rt_nwords_1[, model_vars]), ]
-rt_nwords_1_cmpl <- rt_nwords_1[complete.cases(rt_nwords_1[, model_vars]), ]
+# Identify incomplete rows 
+incomplete_cases_nwords <- rt_nwords[!complete.cases(rt_nwords_frq[, model_vars]), ]
+rt_nwords_cmpl <- rt_nwords_frq[complete.cases(rt_nwords_frq[, model_vars]), ]
 # View them
-print(incomplete_cases_1)
+print(incomplete_cases_nwords)
 
 # str(rt_nwords_1_cmpl)
 ```
@@ -499,23 +382,26 @@ print(incomplete_cases_1)
 
 ```{r}
 
-rt_nwords_1_cmpl$LogBF_std <- as.numeric(scale(rt_nwords_1_cmpl$LogBF, center = TRUE, scale = TRUE))
-rt_nwords_1_cmpl$FS_std <- as.numeric(scale(rt_nwords_1_cmpl$FS, center = TRUE, scale = TRUE))
-rt_nwords_1_cmpl$BF_std <- as.numeric(scale(rt_nwords_1_cmpl$BF, center = TRUE, scale = TRUE))
-rt_nwords_1_cmpl$Dim.2_std <- as.numeric(scale(rt_nwords_1_cmpl$Dim.2, center = TRUE, scale = TRUE))
+rt_nwords_cmpl$LogBF_std <- as.numeric(scale(rt_nwords_cmpl$LogBF, center = TRUE, scale = TRUE))
+rt_nwords_cmpl$FS_std <- as.numeric(scale(rt_nwords_cmpl$FS, center = TRUE, scale = TRUE))
+rt_nwords_cmpl$BF_std <- as.numeric(scale(rt_nwords_cmpl$BF, center = TRUE, scale = TRUE))
+rt_nwords_cmpl$Dim.2_std <- as.numeric(scale(rt_nwords_cmpl$Dim.2, center = TRUE, scale = TRUE))
 ```
 
 
-### Anova with Continuous Log10BF
+### Anova 
 
 ```{r}
-anova_model_2 <- mixed(
-  InvRT ~ LogBF_std * FS_Split * lang_type_ortho + (1  | SubjID),
-  data = rt_nwords_1_cmpl,
-  method = "KR"
-)
-anova_model_2
-summary(anova_model_2)
+anova_model_nwords <- mixed(
+  response_time ~ Complexity * Base_Frequency * Family_Size * Orthographic_Sensitivity +
+    (1 | SubjID) +
+    (1 | target),
+  data = rt_nwords_cmpl,
+  method = "S")
+anova_model_nwords
+
+m2 <- anova_model_nwords$full_model    # Extract the lmer model
+ranova(m2) # Run random effects comparison
 ```
 
 
@@ -523,7 +409,7 @@ summary(anova_model_2)
 
 |                     Effect|         df |       F |p.value |
 |---------------------------|------------|---------|--------|
-|                Log10BF_std| 1, 4599.88 |18.20 ***|   <.001|
+|                 Complexity|  1, 176.42 |40.58 ***|   <.001|
 
 	
 Data show that as Log10BF increases (e.g., more frequent or predictable words), processing becomes faster (inverse RT goes up → RT goes down). 
