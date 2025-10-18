@@ -1,0 +1,3 @@
+M21 Nonwords
+Small FS ≤ 7 Large FS
+Low BF < 6.5 < High FS
