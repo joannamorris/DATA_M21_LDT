@@ -1,0 +1,1 @@
+All the Nonword Complex words were coded as simple for all the participants who got the BA experimental file.  The raw data files have the original incorrect codes.  The HC files for import into R have been corrected. The PC files still need to be corrected. 18 Oct 2025
