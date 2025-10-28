@@ -7,19 +7,19 @@ Critical word large family
 .{202}
 
 Bin 3 
-nonword complex small 
+nonword small complex 
 .{205}
 
 Bin 4
-nonword complex large 
+nonword large complex 
 .{206}
 
 Bin 5
-nonword simple small 
+nonword small simple 
 .{203}
 
 Bin 6
-nonword simple large 
+nonword large simple 
 .{204}
 
 Bin 7

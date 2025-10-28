@@ -76,11 +76,21 @@ sem <- function(x) sd(x)/sqrt(length(x))
 ```{r}
 dir_path <- "CSV files"
 
-erp_2 <- read_csv(file.path(dir_path, "m21_ldt_mea_200300_050050_1.csv"))
-erp_4 <- read_csv(file.path(dir_path, "m21_ldt_mea_300500_050050_1.csv"))
+erp_2A <- read_csv(file.path(dir_path, "m21_ldt_mea_200300_050050_1_AB.csv"))
+erp_2B <- read_csv(file.path(dir_path, "m21_ldt_mea_200300_050050_1_BA.csv"))
+erp_4A <- read_csv(file.path(dir_path, "m21_ldt_mea_300500_050050_1_AB.csv"))
+erp_4B <- read_csv(file.path(dir_path, "m21_ldt_mea_300500_050050_1_BA.csv"))
 dmg_lng_vsl <- read_csv(file.path(dir_path, "demo_lang_vsl_pca_hc.csv"))
 ```
 
+```{r}
+library(dplyr)
+
+erp_2i <- bind_rows(
+  erp_2A |> mutate(List = "AB"),
+  erp_2B |> mutate(List = "BA")
+)
+```
 
 Now we extract `SubjID` from the `ERPset` column
 ```{r, , echo=FALSE}
@@ -88,44 +98,44 @@ Now we extract `SubjID` from the `ERPset` column
 # Remove '_LDT_diff_waves' from each string in the ERPset column
 # This code first renames the column and then applies the `str_replace` function 
 # to the newly renamed column.
-erp_2 <- erp_2 |>
+erp_2ii <- erp_2i |>
   rename(SubjID = ERPset) |>
   mutate(SubjID = str_replace(SubjID, "_LDT_diff_waves", "")) |>
   mutate(binlabel = str_replace(binlabel, "Critical_", "")) |>
   mutate(binlabel = str_replace(binlabel, "_family", "")) |>
   select(-mlabel)
 
-erp_4 <- erp_4 |>
-  rename(SubjID = ERPset) |>
-  mutate(SubjID = str_replace(SubjID, "_LDT_diff_waves", "")) |>
-  mutate(binlabel = str_replace(binlabel, "Critical_", "")) |>
-  mutate(binlabel = str_replace(binlabel, "_family", "")) |>
-  select(-mlabel)
+# erp_4 <- erp_4 |>
+#   rename(SubjID = ERPset) |>
+#   mutate(SubjID = str_replace(SubjID, "_LDT_diff_waves", "")) |>
+#   mutate(binlabel = str_replace(binlabel, "Critical_", "")) |>
+#   mutate(binlabel = str_replace(binlabel, "_family", "")) |>
+#   select(-mlabel)
 ```
 
 We then join the ERP data and language into a single data frame
 ```{r, echo=FALSE}
 
-n250 <- erp_2 |>
+erp_2iii <- erp_2ii |>
   left_join(dmg_lng_vsl, by = "SubjID") |>
   select(SubjID, everything()) 
-n400 <- erp_4 |>
-  left_join(dmg_lng_vsl, by = "SubjID") |>
-  select(SubjID, everything()) 
+# n400 <- erp_4 |>
+#   left_join(dmg_lng_vsl, by = "SubjID") |>
+#   select(SubjID, everything()) 
 ```
 
 # Format data files 
 
 Divide into word, non-word and difference wave dataframes
 ```{r, echo=FALSE}
-n250_words <- n250 |> filter(bini %in% c(1:2))    # does not include BF data
-n250_words_b <- n250 |> filter(bini %in% c(9:12)) # includes BF data
-n250_nonwords <- n250 |> filter(bini %in% c(3:6))
+n250_words <- erp_2iii |> filter(bini %in% c(1:2))    # does not include BF data
+n250_words_b <- erp_2iii |> filter(bini %in% c(9:12)) # includes BF data
+n250_nonwords <- erp_2iii |> filter(bini %in% c(3:6))
 
 ```
 
 Then we do some more formatting and cleanup of the dataframes.We  create separate columns, one for each independent variable (anteriority, laterality, morphological family size). To do this we have to use `seperate` function from the `stringr` package. Run `vignette("programming", package = "dplyr")` to see more about `tidy-selection` and `tidy-evaluation`.
-
+<br>  
 ```{r, echo=FALSE}
 # Words
 n250_words <- n250_words |>
@@ -137,12 +147,9 @@ n250_words_b <- n250_words_b |>
 
 
 # Assuming your data frame is named 'df' and the column is named 'your_column'
-n250_words_b$Orthographic_Sensitivity[n250_words_b$Orthographic_Sensitivity == "Low"] <- "Low Sensitivity"
-n250_words_b$Orthographic_Sensitivity[n250_words_b$Orthographic_Sensitivity == "High"] <- "High Sensitivity"
-n250_words_b$base_freq[n250_words_b$base_freq == "Low"] <- "Low Base Frequency"
-n250_words_b$base_freq[n250_words_b$base_freq == "High"] <- "High Base Frequency"
-n250_words_b$family_size[n250_words_b$family_size == "large"] <- "Large Family"
-n250_words_b$family_size[n250_words_b$family_size == "small"] <- "Small Family"
+
+n250_words_b$family_size[n250_words_b$family_size == "large"] <- "Large"
+n250_words_b$family_size[n250_words_b$family_size == "small"] <- "Small"
 
 
 # Nonwords
@@ -151,17 +158,15 @@ n250_nonwords <- n250_nonwords |>
   select(-trial_type)
 
 # Assuming your data frame is named 'df' and the column is named 'your_column'
-n250_nonwords$Orthographic_Sensitivity[n250_nonwords$Orthographic_Sensitivity == "Low"] <- "Low Sensitivity"
-n250_nonwords$Orthographic_Sensitivity[n250_nonwords$Orthographic_Sensitivity == "High"] <- "High Sensitivity"
 n250_nonwords$complexity[n250_nonwords$complexity == "complex"] <- "Complex"
 n250_nonwords$complexity[n250_nonwords$complexity == "simple"] <- "Simple"
-n250_nonwords$family_size[n250_nonwords$family_size == "large"] <- "Large Family"
-n250_nonwords$family_size[n250_nonwords$family_size == "small"] <- "Small Family"
+n250_nonwords$family_size[n250_nonwords$family_size == "large"] <- "Large"
+n250_nonwords$family_size[n250_nonwords$family_size == "small"] <- "Small"
 
 ```
-
+<br>  
 Now we need to  extract just the bins and channels that we intend to analyse. For this analysis we will use 9 channels:  F3, Fz, F4, C3, Cz, C4, P3, Pz, P4 . We will use the`mutate` function from the `dplyr` package along with the `case_when` function. The `case_when` function  is a sequence of two-sided formulas. The left hand side determines which values match this case. The right hand side provides the replacement value.
-
+<br>  
 ```{r, echo=FALSE}
 
 channels_1 <-  c(3, 2, 25, 7, 20, 21, 12, 11, 16)
@@ -180,7 +185,7 @@ n250_nonwords <- n250_nonwords |>
   filter(chindex %in% channels_1) |> 
   select(-`Included VSL2`)
 ```
-
+<br>  
 
 # N250 Word Data
 
@@ -190,6 +195,7 @@ Linear mixed-effects models were fit using the afex::mixed function (method = �
 Because these follow-up contrasts were intended to interpret a significant higher-order interaction rather than to test independent hypotheses, we reported uncorrected p-values (adjust = "none") for interpretive clarity. The robustness of the overall pattern was verified using a Holm correction, which did not change the substantive conclusions.
 
 ## Nested ANOVA Model
+<br>  
 ```{r}
 #Fit ANOVA model
 anova_model_n250_words_b <- mixed(
@@ -211,7 +217,7 @@ eta_squared(anova_model_n250_words_b, partial = TRUE)
 # Compute Marginal(fixed effects only) and Conditional(fixed + random effects) R²
 r2(anova_model_n250_words_b)
 ```
-
+<br>  
 
 ## Main Effects
 
@@ -222,7 +228,7 @@ No significant main effects
 
 |                            Effect|      df|         F| p.value||eta-sqrd|  
 |----------------------------------|--------|----------|--------|---------|
-|             family_size:base_freq| 1, 1523| 35.14 ***|   <.001|6.76e-03 |
+|             family_size:base_freq| 1, 1498| 33.27 ***|   <.001|    0.02 |
 
 ### Simple Contrasts
 <br>
@@ -232,14 +238,15 @@ No significant main effects
 
 # Get all pairswise contrasts
 emm1_contrasts <- contrast(emm1,  method = "pairwise", by = NULL, adjust = "none")
+emm1_contrasts
 
 # Keep only the contrasts you want
 # Simple effects of family_size at each level of base_freq
 # Simple effects of base_freq at each level of family_size
-keep <- c("Large Family High Base Frequency - Small Family High Base Frequency",
-          "Large Family Low Base Frequency - Small Family Low Base Frequency",
-          "Large Family High Base Frequency - Large Family Low Base Frequency",
-          "Small Family High Base Frequency - Small Family Low Base Frequency")
+keep <- c("Large High - Small High",
+          "Large Low - Small Low",
+          "Large High - Large Low",
+          "Small High - Small Low")
 (emm1_contrasts_filtered <- subset(emm1_contrasts, contrast %in% keep))
 
 # Get Confidence Intervals
@@ -254,16 +261,9 @@ effs1 <- eff_size(emm1, sigma = sigma(m1), edf = df.residual(m1))
 (effs1_filtered <- subset(effs1, !contrast %in% c("Large Family High Base Frequency - Small Family Low Base Frequency",
                                                "Small Family High Base Frequency - Large Family Low Base Frequency")))
 ```
+<br>  
+For large-family words, N250 amplitude is more negative when base frequency is high (-0.86) than when it is low (-0.35). For small-family words, base frequency has little effect (-0.82 for high vs -1.01 for low). For low-frequency bases, small-family words elicit more negative amplitudes (-1.01) than large-family words (-0.35). For high-frequency bases, family size has little effect (-0.86 for large vs -0.82 for small).
 
-For large-family words, N250 amplitude is more negative when base frequency is high than when it is low. For small-family words, base frequency has little effect. For low-frequency bases, small-family words elicit more negative amplitudes than large-family words.
-
-- At **High Base Frequency**:  `Large` vs. `Small` family → no difference (*p* = .74). Family size doesn’t matter when base frequency is high.
-
-- Within **Small Family**: `High` vs. `Low` base frequency → not significant (*p* = .60). Small-family words are unaffected by base frequency.
-
-- At **Low Base Frequency**: Large vs. Small family → significant difference (*p* = .022). Small-family words yield more negative amplitudes than large-family words, but only when base frequency is low.
-
-- Within **Large Family**: High vs. Low base frequency → significant (*p* = .012). Large-family words show more negative amplitudes when their base frequency is high.
 
 ### Interaction Contrasts
 <br>
@@ -276,6 +276,8 @@ contrast(emm1, interaction = "pairwise", by = NULL, adjust = "holm")
 confint(contrast(emmeans(m1, ~ family_size | base_freq), "pairwise"))
 confint(contrast(emm1, interaction = c("pairwise", "pairwise")))
 ```
+
+There is a robust crossover interaction: the base-frequency effect is significant in opposite directions for large vs. small family words.
 
 ## Plots
 
@@ -314,9 +316,17 @@ plot_grid(p1, p2, ncol = 2)
 \newpage
 
 # N250 Nonword Data
+<br>  
+```{r, results='hide'}
+n250_nonwords %>%
+  count(family_size, complexity, Orthographic_Sensitivity)
+
+n250_nonwords |> filter(family_size == "complex")
+```
+
 
 ## Compute the ANOVA
-
+<br>  
 ```{r}
 anova_model_n250_nonwords <- mixed(
     value ~ Orthographic_Sensitivity * family_size * complexity +
@@ -339,46 +349,32 @@ r2(anova_model_n250_nonwords)
 ```
 
 
-## Main Effects
 
-No main effects.  
+## Main Effects and Interactions
 
-## Interactions
+No main effects emerged, but there are two marginal effects suggesting a subtle modulation by orthographic sensitivity:
 
-A three way interaction between
+  - A trend for `Orthographic_Sensitivity × Complexity`, $F(1,58) = 3.13$, $p = .082$
 
-  - `Sensitivity × Family Size × Complexity`: significant (*t* = 4.58, *p* =.033).
+  - A trend for `Orthographic_Sensitivity × Family_Size × Complexity`, $F(1,1498) = 3.27$, $p = .071$
 
-###  Simple Contrasts
-
-Compare High vs Low Orthographic Sensitivity within each combination of Family Size and Complexity  
-
-This gives you: 4 contrasts: one for each `Family Size × Complexity` combination. Each shows whether `High` vs `Low Orthographic Sensitivity` differs significantly
-
-If simple effects aren’t significant, try looking at interaction contrasts, which test differences in the differences. You’re now asking: Does the effect of Sensitivity change more in some complexity/family combinations than others?
-<br>
+These trends imply that the complexity effect (and perhaps its relation to family size) may differ between participants high vs. low in orthographic sensitivity.
+<br>  
 ```{r}
-# Estimated marginal means for the family_size × complexity interaction
-(emm2 <- emmeans(anova_model_n250_nonwords, ~ Orthographic_Sensitivity * family_size * complexity))
+# Estimated marginal means for the Orthographic_Sensitivity * complexity interaction
+(emm2 <- emmeans(anova_model_n250_nonwords, ~ Orthographic_Sensitivity  * complexity))
 
-# Get all pairswise contrasts
+# Get all pairwise contrasts
 emm2_contrasts <- contrast(emm2,  method = "pairwise", by = NULL, adjust = "none")
+# emm2_contrasts
 
 # Keep only the contrasts you want
 # Simple effects of family_size at each level of complexity
 # Simple effects of complexity at each level of family_size
-keep2 <- c("High Orthographic Large Family Complex - High Orthographic Large Family Simple",
-          "High Orthographic Small Family Complex - High Orthographic Small Family Simple",
-          "Low Orthographic Large Family Complex - Low Orthographic Large Family Simple",
-          "Low Orthographic Small Family Complex - Low Orthographic Small Family Simple",
-          "High Orthographic Large Family Complex - High Orthographic Small Family Complex",
-          "High Orthographic Large Family Simple - High Orthographic Small Family Simple",
-          "Low Orthographic Large Family Complex - Low Orthographic Small Family Complex",
-          "Low Orthographic Large Family Simple - Low Orthographic Small Family Simple",
-          "High Orthographic Large Family Complex - Low Orthographic Large Family Complex",
-          "High Orthographic Small Family Complex - Low Orthographic Small Family Complex",
-          "High Orthographic Large Family Simple - Low Orthographic Small Family Simple",
-          "High Orthographic Small Family Simple - Low Orthographic Small Family Simple")
+keep2 <- c("High Orthographic Complex - High Orthographic Simple",
+           "Low Orthographic Complex - Low Orthographic Simple",
+           "High Orthographic Complex - Low Orthographic Complex",
+           "High Orthographic Simple - Low Orthographic Simple")
 
 (emm2_contrasts_filtered <- subset(emm2_contrasts, contrast %in% keep2))
 
@@ -393,6 +389,63 @@ effs2 <- eff_size(emm2, sigma = sigma(m2), edf = df.residual(m2))
 # Remove the  redundant rows 
 (effs2_filtered <- subset(effs2, contrast %in% keep2))
 ```
+
+Only **low-orthographic participants** show a reliable complexity effect: N250 amplitudes are more negative for simple nonwords than for complex ones, particularly for large-family items ($d \approx 0.7$).
+
+**High-orthographic participants** show no difference, indicating greater normalization or automatic segmentation.
+
+<br>  
+<br>  
+
+```{r}
+# Estimated marginal means for the Orthographic_Sensitivity * family_size * complexity interaction
+(emm3 <- emmeans(anova_model_n250_nonwords, ~ Orthographic_Sensitivity * family_size * complexity))
+
+# Get all pairwise contrasts
+emm3_contrasts <- contrast(emm3,  method = "pairwise", by = NULL, adjust = "none")
+# emm3_contrasts
+
+# Keep only the contrasts you want
+# Simple effects of family_size at each level of complexity
+# Simple effects of complexity at each level of family_size
+keep3 <- c("High Orthographic Large Complex - High Orthographic Large Simple",
+          "High Orthographic Small Complex - High Orthographic Small Simple",
+          "Low Orthographic Large Complex - Low Orthographic Large Simple",
+          "Low Orthographic Small Complex - Low Orthographic Small Simple",
+          "High Orthographic Large Complex - High Orthographic Small Complex",
+          "High Orthographic Large Simple - High Orthographic Small Simple",
+          "Low Orthographic Large Complex - Low Orthographic Small Complex",
+          "Low Orthographic Large Simple - Low Orthographic Small Simple",
+          "High Orthographic Large Complex - Low Orthographic Large Complex",
+          "High Orthographic Small Complex - Low Orthographic Small Complex",
+          "High Orthographic Large Simple - Low Orthographic Small Simple",
+          "High Orthographic Small Simple - Low Orthographic Small Simple")
+
+(emm3_contrasts_filtered <- subset(emm3_contrasts, contrast %in% keep3))
+
+# Get Confidence Intervals
+(emm3_contrasts_filtered_ci <- confint(emm3_contrasts_filtered))
+
+
+# Get effect sizes
+# Get all pairwise effect sizes
+effs3 <- eff_size(emm3, sigma = sigma(m2), edf = df.residual(m2))
+
+# Remove the  redundant rows 
+(effs3_filtered <- subset(effs3, contrast %in% keep3))
+```
+
+  - For low-orthographic participants, the N250 is more negative overall (especially for simple items).
+<br>  
+  - For high-orthographic participants, N250 amplitudes are relatively stable across *complexity* and *family size*.
+ <br>   
+  - The trend-level `Orthographic_Sensitivity × Complexity` effect arises because low-sensitivity participants show a stronger complexity contrast (more negative for simple than complex), while high-sensitivity participants do not.
+<br>  
+<br>  
+```{r, fig.width=3.5}
+emmip(anova_model_n250_nonwords, Orthographic_Sensitivity ~ complexity)
+```
+
 
 ### Interaction Contrasts
 
@@ -429,103 +482,45 @@ confint(family_size_complexity_int_within_sensitivity)
 ```
 
 
-Compute the effect of Complexity (Complex - Simple) within each Orthographic Sensitivity × Family Size combination.
-High Sensitivity- Large Family: `Complex - Simple = -0.495 - (-0.609) = +0.114`
 
-High Sensitivity- Small Family: `Complex - Simple = -0.785 - (-0.471) = -0.314`
+	1.	Within the **high-orthographic group**, N250 amplitudes are fairly stable. There are no consistent effects of complexity or family size. All amplitudes hover around -0.5 µV to -0.6 µV.  Their responses are uniformly moderate across all conditions.
 
-Low Sensitivity - Large Family: `Complex - Simple = -0.607 - (-0.713) = +0.106`
+	2.	Within the **low-orthographic group**, there is a clear complexity effect. 
+	
+	- Large-family nonwords: Simple = -1.13 µV vs. Complex = -0.13 µV --> strong difference (~1 µV).
 
-Low Sensitivity - Small Family: `Complex - Simple = -0.632 - (-0.829) = +0.197`
+	- Small-family nonwords: Simple = -1.24 µV vs. Complex = -0.50 µV → moderate difference (~0.7 µV).
+  
+ The complexity effect (Simple < Complex) is present for both family sizes but is stronger for large-family items.
 
-Compute the difference of differences:  compare how the effect of complexity differs across sensitivity groups:`(High Sensitivity complexity effect) - (Low Sensitivity complexity effect)`
+	3.	The complexity effect depends on both family size and sensitivity: For high-orthographic participants there is essentially no complexity effect at either family size. For low-orthographic participants there is aa complexity effect, especially for large-family nonwords.
 
-For Large Family: 
-```
-High:  +0.114
-Low:   +0.106
-Difference: 0.114 - 0.106 = +0.008
-```
+That pattern—where the complexity effect appears only for low-orthographic participants and is amplified for large-family items—is what drives the marginal 3-way interaction.
 
-For Small Family: 
-```
-High: -0.314  
-Low:  +0.197  
-Difference: -0.314 - (+0.197) = -0.511
-```
+N250 amplitude (µV, more negative = larger N250)
 
-This is a reversal of the complexity effect between High and Low sensitivity participants for Small Family nonwords — and that’s the core of your significant 3-way interaction.
+|                   |  Complex  |    Simple |  Delta(Simple–Complex)|
+|-------------------|-----------|-----------|-----------------------|
+|High-Ortho Large   |  -0.62    |     -0.48 |  +0.14   ($\approx 0$)|
+|High-Ortho Small   |  -0.60    |     -0.63 |  -0.03   ($\approx 0$)|
+|Low-Ortho  Large   |  -0.13    |     -1.13 |  -1.00   (large)      |
+|Low-Ortho  Small   |  -0.50    |     -1.24 |  -0.74   (moderate)   |
 
-Now take the difference of these differences (Small - Large):  `-0.511 - 0.008 = -0.519`.  That’s the interaction contrast estimate: ` -0.52, p = .0325`
+<br>
+The marginal three-way interaction reflects that the complexity effect on the N250 (more negative for simple than complex nonwords) occurs only among participants low in orthographic sensitivity, and this effect is strongest when the nonwords are derived from large morphological families.
 
-	-	$SE = 0.243$, $df = 1523$, $t = 2.140$ --> yields $p = 0.0325$, so it is statistically significant (given Bonferroni correction, etc.).
+In contrast, high-orthographic participants show similar N250 amplitudes across all combinations of family size and complexity, indicating more uniform, automatized form processing.
 
-The three-way interaction reflects the fact that High and Low sensitivity participants show opposite complexity effects — but only in the Small Family condition. In Large families, their complexity effects are essentially the same.
-
-In `Small families`, `High sensitivity` participants respond more negatively to `complex items`, white `Low sensitivity` participants respond more negatively to `simple items`.
-
-This crossover in the complexity effect is what drives the significant interaction — even though none of the simple effects are individually significant.
+Thus, the three-way pattern suggests that individuals with weaker orthographic representations rely more heavily on morphological cues: when these cues are abundant (large family, complex form), processing is easier (less negative N250), but when such cues are sparse (large family, simple form), processing is effortful (more negative N250).
 
 ## Plots
-
-```{r, fig.height=7, fig.width=6}
-# Plot the interaction
-library(ggplot2)
-
-emm2_df <- as.data.frame(emm2)
-p3 <- ggplot(emm2_df,
-       aes(x = complexity, y = emmean,
-           color = family_size, group = family_size)) +
-  facet_wrap(~ Orthographic_Sensitivity) +
-  geom_line(position = position_dodge(0.2)) +
-  geom_point(position = position_dodge(0.2)) +
-  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
-                width = 0.1, position = position_dodge(0.2)) +
-  labs(x = "Complexity", y = "Estimated N250 amplitude",
-       color = "Family Size",
-       title =  "Family Size × Complexity × Orthographic Sensitivity") +
-  scale_color_custom() +
-  scale_fill_custom()
-
-emm2_df <- as.data.frame(emm2)
-p4 <- ggplot(emm2_df,
-       aes(x = family_size, y = emmean,
-           color = complexity, group = complexity)) +
-  facet_wrap(~ Orthographic_Sensitivity) +
-  geom_line(position = position_dodge(0.2)) +
-  geom_point(position = position_dodge(0.2)) +
-  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
-                width = 0.1, position = position_dodge(0.2)) +
-  labs(x = "Family Size", y = "Estimated N250 amplitude",
-       color = "Complexity",
-       title = "Complexity × Family Size × Orthographic Sensitivity") +
-  scale_color_custom() +
-  scale_fill_custom()
-
-plot_grid(p3, p4, nrow = 2)
+<br>  
+```{r}
+emmip(anova_model_n250_nonwords, Orthographic_Sensitivity ~ complexity | family_size)
 ```
 
 
 
-Interpretation
- -	This is an interaction contrast (a “contrast of contrasts”) across your three factors (Orthographic Sensitivity × Family Size × Complexity).
-	
- -	Specifically, it is testing whether the difference (`Complex – Simple`)  for (`Large Family` vs. `Small Family`) differs between the two levels of `Orthographic Sensitivity`. 
-	
-The contrast is asking: “Is the effect of `complexity`, in the contrast `Large` vs. `Small` family, different in `High Orthographic` vs.` Low Orthographic` participants?”
 
- -	The `estimate = 0.5`2 is the difference in differences (i.e. the slope difference) on your response metric (N250 amplitude).
-	
- -	Because you used adjust = "bonferroni" and combine = TRUE, this contrast is part of a “family” of interaction contrasts that have been adjusted for multiple comparisons.
-
-So in more conversational terms: you have evidence that High Orthographic readers show a different `complexity × family size` effect than Low Orthographic readers — in particular, in how the `complexity` effect (`Complex` vs. `Simple`) differs when comparing `Large` vs. `Small` family.
- 
-Suggests that sensitivity does influence the N250, but only in how it modulates the joint effect of family size and complexity. In other words: the way family size and complexity interact depends on whether participants are orthographically sensitive or not.
-
-  - Marginal $R^2 = 0.2%$ --> the fixed predictors (including sensitivity) account for very little variance overall.
-	
-  - Conditional $R^2 = 76%$ --> most variance is indeed explained by subjects and electrodes (as anticipated).
-
-Most of the variability in N250 amplitude reflects differences across participants and electrode sites, as expected for ERP data. Orthographic sensitivity did not produce an overall shift in N250 responses, but it did moderate the combined influence of family size and morphological complexity. This interaction was statistically significant but accounted for only a very small portion of the variance. Thus, orthographic sensitivity may play a role in how multiple lexical factors are integrated during early morphological processing, though the effect is subtle.
 
 

@@ -19,7 +19,7 @@ prompt         = {'Enter StudyID:',...
                   'Enter the name of the output file containing the measured values:'};  
 dlgtitle       = 'Input';                         
 dims           = [1 70];                          
-definput       = {'M21','LDT','hc','subjlist1_all.txt', 'diff_waves','1:15', 'm21_ldt_mea_200300_050050_1.csv'};  
+definput       = {'M21','LDT','hc','hc_subjlist_AB.txt', 'diff_waves','17:25', 'm21_ldt_mea_200300_050050_1_AB_bf.csv'};  
 my_input       = inputdlg(prompt,dlgtitle,dims,definput);  
 
 study          = my_input{1};

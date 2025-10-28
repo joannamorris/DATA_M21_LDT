@@ -4,7 +4,7 @@ author: "Joanna Morris"
 date: "`r Sys.Date()`"
 output: pdf_document
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 
@@ -127,7 +127,7 @@ rt_nwords_frq <- rt_nwords_frq |> rename(Base_Frequency = BF_Split, Family_Size 
 # rt_words_frq$Semantic_Sensitivity[rt_words_frq$Semantic_Sensitivity == "High"] <- "High Sensitivity"
 ```
 
-# Analyse Data
+# Explore Data Distribution
 
 ## Plot RT distributions
 ```{r, echo = FALSE, fig.width=7}
@@ -225,7 +225,7 @@ rt_words_cmpl$Dim.2_std <- as.numeric(scale(rt_words_cmpl$Dim.2, center = TRUE, 
 ```
 
 
-```{r}
+```{r, results='hide'}
 rt_words_cmpl %>%
   summarise(
     n_subjects = n_distinct(SubjID),
@@ -271,7 +271,7 @@ eta_squared(anova_model_words, partial = TRUE)
 r2(anova_model_words)
 ```
 
-Concise
+Concise Explanation
 
 Models including random slopes for Base Frequency and Family Size by subject failed to converge or produced singular fits, indicating that the data did not support estimation of these additional variance components. Consequently, we report results from a simpler model with random intercepts for subjects and items (STRING), which converged cleanly and provided stable estimates.
 
@@ -330,7 +330,7 @@ plot_grid(p1, p2, ncol = 2, labels = "AUTO")
 
 Use `complete.cases()` to find which rows had missing data in the model-relevant variables:
 
-```{r, echo=FALSE, results = "hide"}
+```{r,results = "hide"}
 # Specify only the variables used in the model
 # model_vars <- c("response_time", "Dim.2","SubjID")
 model_vars_nw <- c("response_time","Complexity", "Family_Size", "Base_Frequency", 
@@ -343,19 +343,24 @@ rt_nwords_cmpl <- rt_nwords_frq[complete.cases(rt_nwords_frq[, model_vars_nw]), 
 print(incomplete_cases_nwords)
 
 # str(rt_nwords_1_cmpl)
+```
 
+<br>
 
-### Standardize the predictors
+Standardize the predictors
 
+<br>
+
+```{r}
 rt_nwords_cmpl$LogBF_std <- as.numeric(scale(rt_nwords_cmpl$LogBF, center = TRUE, scale = TRUE))
 rt_nwords_cmpl$FS_std <- as.numeric(scale(rt_nwords_cmpl$FS, center = TRUE, scale = TRUE))
 rt_nwords_cmpl$BF_std <- as.numeric(scale(rt_nwords_cmpl$BF, center = TRUE, scale = TRUE))
 rt_nwords_cmpl$Dim.2_std <- as.numeric(scale(rt_nwords_cmpl$Dim.2, center = TRUE, scale = TRUE))
 ```
 
-
-
 ## Anova Family Size
+
+<br>
 
 ```{r}
 
@@ -366,6 +371,7 @@ temp <- rt_nwords_cmpl |> filter(is.na(Complexity) & is.na(Base_Frequency))
 # write_csv(temp, "temp.csv")
 ```
 
+<br>
 
 ```{r}
 anova_model_nwords_fs <- mixed(
@@ -380,6 +386,7 @@ m2 <- anova_model_nwords_fs$full_model    # Extract the lmer model
 ranova(m2) # Run random effects comparison
 ```
 
+<br>
 
 ### Main Findings
 
@@ -400,29 +407,32 @@ Compare High vs Low Semantic Sensitivity within each combination of Family Size 
 This gives you: 4 contrasts: one for each `Family Size × Complexity` combination. Each shows whether `High` vs `Low Semantic Sensitivity` differs significantly
 
 If simple effects aren’t significant, try looking at interaction contrasts, which test differences in the differences. You’re now asking: Does the effect of Sensitivity change more in some complexity/family combinations than others?
+
 <br>
+
 ```{r}
 # Estimated marginal means for the family_size × complexity interaction
-(emm2 <- emmeans(anova_model_nwords_fs, ~ Orthographic_Sensitivity * family_size * complexity))
+(emm2 <- emmeans(anova_model_nwords_fs, ~ Semantic_Sensitivity * Family_Size * Complexity))
 
 # Get all pairswise contrasts
 emm2_contrasts <- contrast(emm2,  method = "pairwise", by = NULL, adjust = "none")
+# emm2_contrasts 
 
 # Keep only the contrasts you want
 # Simple effects of family_size at each level of complexity
 # Simple effects of complexity at each level of family_size
-keep2 <- c("High Orthographic Large Family Complex - High Orthographic Large Family Simple",
-          "High Orthographic Small Family Complex - High Orthographic Small Family Simple",
-          "Low Orthographic Large Family Complex - Low Orthographic Large Family Simple",
-          "Low Orthographic Small Family Complex - Low Orthographic Small Family Simple",
-          "High Orthographic Large Family Complex - High Orthographic Small Family Complex",
-          "High Orthographic Large Family Simple - High Orthographic Small Family Simple",
-          "Low Orthographic Large Family Complex - Low Orthographic Small Family Complex",
-          "Low Orthographic Large Family Simple - Low Orthographic Small Family Simple",
-          "High Orthographic Large Family Complex - Low Orthographic Large Family Complex",
-          "High Orthographic Small Family Complex - Low Orthographic Small Family Complex",
-          "High Orthographic Large Family Simple - Low Orthographic Small Family Simple",
-          "High Orthographic Small Family Simple - Low Orthographic Small Family Simple")
+keep2 <- c("High Large Complex - High Large Simple",
+          "High Small Complex - High Small Simple",
+          "Low Large Complex - Low Large Simple",
+          "Low Small Complex - Low Small Simple",
+          "High Large Complex - High Small Complex",
+          "High Large Simple - High Small Simple",
+          "Low Large Complex - Low Small Complex",
+          "Low Large Simple - Low Small Simple",
+          "High Large Complex - Low Large Complex",
+          "High Small Complex - Low Small Complex",
+          "High Large Simple - Low Small Simple",
+          "High Small Simple - Low Small Simple")
 
 (emm2_contrasts_filtered <- subset(emm2_contrasts, contrast %in% keep2))
 
@@ -438,6 +448,8 @@ effs2 <- eff_size(emm2, sigma = sigma(m2), edf = df.residual(m2))
 (effs2_filtered <- subset(effs2, contrast %in% keep2))
 ```
 
+<br>
+
 ### Interaction Contrasts
 
 The interaction contrast tests whether the difference in the complexity effect for large vs small families differs across sensitivity?
@@ -452,6 +464,7 @@ $$
 $$
 
 <br>
+
 ```{r}
 #  Interaction contrasts (difference-of-differences)
 #    Compare complexity effect in large vs small family)
@@ -460,17 +473,51 @@ confint(contrast(emm2, interaction = c("pairwise", "pairwise")))
 
 # Compute the A1 - A2 difference within each combination of B × C
 (complexity_diff <- contrast(emm2, method = "revpairwise", 
-                            by = c("Orthographic_sensitivity", "family_size"), 
-                            simple = "complexity"))
+                            by = c("Semantic_Sensitivity", "Family_Size"), 
+                            simple = "Complexity"))
 
 # Compute how that A-effect changes across the levels of B, separately for each level of C  
 (family_size_complexity_int_within_sensitivity <- contrast(complexity_diff, 
                                                            method = "revpairwise",
-                                                           by = "Orthographic_sensitivity", simple = "family_size"))
+                                                           by = "Semantic_Sensitivity", simple = "Family_Size"))
 
 # Get confidence intervals
 confint(family_size_complexity_int_within_sensitivity)
 ```
+
+<br>
+
+Responses were slower to *Complex* than *Simple* nonwords in every condition. The *Complexity effect* (`Complex - Simple`) varied with both *Family Size* and *Semantic Sensitivity*.
+
+The Complexity effect (slower responses for complex vs. simple nonwords) is robust across all groups.
+
+However, its magnitude varies:
+
+  - Among **high-sensitivity participants**, the effect is larger for large families ($\approx 45$ ms) than small families ($\approx 27$ ms).
+
+  - Among **low-sensitivity participants**, the pattern reverses slightly ($\approx 29$ ms vs. 38 ms).
+
+<br>
+
+
+The difference in the Complexity × Family Size interaction between high- and low-sensitivity participants is about 27 ms.
+
+  - **High-sensitivity participants** showed a stronger complexity effect for large-family nonwords than for small-family ones.
+
+  - **Low-sensitivity participants** showed the opposite or no difference.
+
+This indicates that semantic sensitivity modulates how morphological family size influences the cost of morphological complexity in nonword processing. 
+
+All groups show reliable complexity effects (complex slower than simple).
+Only one cross-condition difference is significant: High-sensitivity participants respond faster to complex nonwords from small families than to complex nonwords from large-families.
+
+
+Summary interpretation (for Results section):
+
+Response times to morphologically complex nonwords were significantly slower than to simple nonwords, indicating greater processing cost for complexity. While overall family size and semantic sensitivity did not produce main effects, there was a significant `Complexity × Family Size × Semantic Sensitivity` interaction ($p = .028$).
+
+Follow-up contrasts showed that for participants with high semantic sensitivity, the complexity effect was larger for large-family nonwords ($\approx 45$ ms) than for small-family nonwords ($\approx 27$ ms). In contrast, participants with low semantic sensitivity showed little difference or the reverse pattern. This suggests that individuals with greater semantic knowledge are more sensitive to morphological family size cues when processing novel morphological structures, showing amplified complexity costs when nonwords resemble rich morphological families.
+
 
 ### Plots
 
@@ -512,6 +559,8 @@ plot_grid(p3, p4, ncol = 2)
 
 ## Anova Base Frequency
 
+<br>
+
 ```{r}
 anova_model_nwords_bf <- mixed(
   response_time ~ Complexity * Base_Frequency * Semantic_Sensitivity +
@@ -525,23 +574,22 @@ m3 <- anova_model_nwords_bf$full_model    # Extract the lmer model
 ranova(m3) # Run random effects comparison
 ```
 
+<br>
 
 ### Main Findings
 
 |                     Effect|          df |        F |p.value |
 |---------------------------|-------------|----------|--------|
-|                 Complexity|  1, 4534.35 |127.54 ***|   <.001|
-|             Base_Frequency|  1,  177.77 | 12.99  **|   <.001|
-|   Semantic_Sensitivity|  1,   63.60 |  5.32   *|    .024|
-|  Complexity:Base_Frequency|  1, 4535.47 |  4.26   *|    .039|
+|                 Complexity|  1, 4533.26 |125.15 ***|   <.001|
+|             Base_Frequency|  1,   95.24 | 12.70  **|   <.001|
+|  Complexity:Base_Frequency|  1, 4535.47 |  3.92   *|    .048|
 
-- Complexity (F = 127.5, p < .001): complex > simple non-words → slower responses.
 
-- Base Frequency (F = 13.0, p < .001): non-words derived from high-frequency bases were processed faster than those from low-frequency bases — an echo of lexical familiarity effects even though the items are illegal.
+<br>
 
-- Semantic Sensitivity (F = 5.32, p = .024): same direction as before.
+Participants responded more slowly to complex nonwords and to low-frequency-base nonwords.
 
-- Complexity × Base Frequency (F = 4.26, p = .039): The effect of complexity was larger for high-frequency bases than for low-frequency ones.
+<br>
 
 ###  Interaction Effects: `Complexity x Base_Frequency` 
 
@@ -580,8 +628,11 @@ effs1
                                                "Simple High - Complex Low")))
 ```
 
+<br>
+
 #### Interaction Contrasts
 
+<br>
 
 ```{r}
 #  Interaction contrasts (difference-of-differences)
@@ -593,25 +644,30 @@ confint(contrast(emmeans(m3, ~ Complexity | Base_Frequency), "pairwise"))
 confint(contrast(emm1, interaction = c("pairwise", "pairwise")))
 ```
 
-Table 4. Estimated Marginal Means and Pairwise Contrasts for the Complexity × Base Frequency Interaction
+<br>
 
-| Contrast ¦ Delta RT (ms) ¦ p ¦ Effect size (d) ¦ 95% CI for Delta RT (ms) ¦ Interpretation |
-|———–¦———–¦——¦——————¦———————¦––––––––|
-| Complex High (751) – Simple High (709) ¦ +42.3 ¦ < .001 ¦ 0.41 ¦ [33.1, 51.4] ¦ Strong complexity cost at high base frequency |
-| Complex Low (723) – Simple Low (694) ¦ +29.2 ¦ < .001 ¦ 0.29 ¦ [20.8, 37.5] ¦ Moderate complexity cost at low base frequency |
-| Complex High (751) – Complex Low (723) ¦ +28.0 ¦ .0001 ¦ 0.27 ¦ [14.3, 41.6] ¦ Complex items slower when based on high-frequency stems |
-| Simple High (709) – Simple Low (694) ¦ +14.9 ¦ .022 ¦ 0.15 ¦ [2.1, 27.6] ¦ Small frequency benefit among simple items |
+A small but reliable Complexity × Base Frequency interaction (p = .048) suggests that the complexity cost was smaller for nonwords derived from low-frequency bases.
 
-Table 5. Summary of Main Effects and Interactions
+Complexity|   Base Frequency | Mean RT (ms) |Interpretation               |
+----------|------------------|--------------|-----------------------------|
+Complex   |             High |        748   |slowest                      |
+Simple    |             High |        707   |41 ms faster                 |
+Complex   |             Low  |        721   |28 ms slower than Simple Low |
+Simple    |             Low  |        692   |fastest                      |
 
-| Effect ¦ Direction / Pattern ¦ Interpretation |
-|———¦––––––––––¦––––––––|
-| Complexity ¦ Complex > Simple across all conditions ¦ Morphological structure slows non-word rejection (decomposition cost). |
-| Base Frequency ¦ High > Low (faster RTs) ¦ Familiar letter sequences facilitate processing even for non-words. |
-| Complexity × Base Frequency ¦ Larger complexity cost for high-frequency bases (Delta ~ 13 ms) ¦ Morphological activation stronger for familiar bases. |
-| Family Size ¦ n.s. ¦ No measurable influence; non-words lack real morphological families. |
-| Semantic Sensitivity ¦ High > Low (faster RTs overall) ¦ Readers with higher semantic sensitivity are generally more efficient. |
+<br>
 
+Both complexity and base frequency affect RTs additively, but their combination reveals that high-frequency bases magnify the complexity cost.
+
+  - The complexity effect (`Complex – Simple`) is larger for *high-frequency* bases (41 ms) than for *low-frequency* ones (29 ms).
+  
+  - The base-frequency advantage (`High – Low`) is stronger for *complex* items (27 ms) than for *simple* ones (15 ms).
+
+  - Both effects are moderate in size (Cohen’s $d \approx 0.3–0.4$).
+
+The complexity cost increases by about 12 ms when the base is high frequency rather than low frequency, confirming the small but significant interaction.
+
+No effects involving Semantic Sensitivity were observed, indicating that this base-frequency modulation of complexity applies broadly across participants, independent of their semantic knowledge.
 
 ###  Main Effects Plots
 

@@ -18,7 +18,7 @@ prompt   = {'Enter StudyID:',...
             'Enter the part of the file names that comes after the subject and task IDs, including the underscores. If there are no filename extensions, leave the box empty:'};
 dlgtitle =  'Input';
 dims     = [1 70];
-definput = {'M21','LDT','temp_non_interp.txt','_FLT_RSP_REF_ELS_BIN_ICA'};
+definput = {'M21','LDT','subjlist1_non_interp.txt','_FLT_RSP_REF_ELS_BIN_ICA'};
 my_input   = inputdlg(prompt,dlgtitle,dims,definput);
 
 DIR            = pwd;                         % Current folder (where the script should be located)

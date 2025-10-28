@@ -39,6 +39,9 @@ library(lmerTest)
 
 
 1. Set `ggplot2` parameters
+
+<br>
+
 ```{r theme, echo = FALSE}
 theme_set(theme_classic() +  
             theme(legend.position = "bottom", 
@@ -68,9 +71,14 @@ scale_fill_custom <- function() {
 
 ```
 
+<br>
+
 # Load Files and Format Files  {-}
 
 ## Load Files
+
+<br>
+
 ```{r}
 #DIR <- "csv_files"
 df_a <- read_csv("rt_data_hc_A.csv")
@@ -80,8 +88,12 @@ frq_nw <- read_csv("frq_nw.csv")
 dmg <- read_csv("demo_lang_vsl_pca_hc.csv")
 ```
 
+<br>
 
 ## Format Files
+
+<br>
+
 ```{r}
 # Concatenate datasets
 rt <- bind_rows(AB = df_a, 
@@ -127,9 +139,14 @@ rt_nwords_frq <- rt_nwords_frq |> rename(Base_Frequency = BF_Split, Family_Size 
 # rt_words_frq$Orthographic_Sensitivity[rt_words_frq$Orthographic_Sensitivity == "High"] <- "High Sensitivity"
 ```
 
+<br>
+
 # Analyse Data
 
 ## Plot RT distributions
+
+<br>
+
 ```{r, echo = FALSE, fig.width=7}
 # RT boxplot
 p1 <- rt_words_frq |> ggplot(aes(x = SubjID, y = response_time)) +
@@ -153,10 +170,13 @@ plot_grid(p1, p2, ncol = 2, labels = "AUTO")
 
 ```
 
+<br>
+
 ## Test for Skewness
 
 ### Base Frequency
-... 
+
+<br>
 
 ```{r, echo=FALSE, fig.width=7}
 # Raw BF
@@ -179,8 +199,11 @@ skewness(rt_words_frq$BF, na.rm = TRUE)
 skewness(rt_words_frq$Log10BF, na.rm = TRUE)
 ```
 
+<br>
+
 ### Family Size
-... 
+
+<br>
 
 ```{r}
 # Skewness values
@@ -206,6 +229,9 @@ plot_grid(p1, p2, ncol = 2, labels = "AUTO")
 # Word Data
 
 Use `complete.cases()` to find which rows have missing data in the model-relevant variables:
+
+<br>
+
 ```{r, echo=FALSE, results = "hide"}
 # Specify only the variables used in the model
 model_vars_w <- c("response_time",  "Log10BF","BF", "FS","Family_Size", "Base_Frequency", "Orthographic_Sensitivity","SubjID")
@@ -224,6 +250,7 @@ rt_words_cmpl$Log10FS_std <- as.numeric(scale(rt_words_cmpl$Log10FS, center = TR
 rt_words_cmpl$Dim.2_std <- as.numeric(scale(rt_words_cmpl$Dim.2, center = TRUE, scale = TRUE))
 ```
 
+<br>
 
 ```{r}
 rt_words_cmpl %>%
@@ -249,9 +276,12 @@ rt_words_cmpl %>%
 
 ```
 
+<br>
 
 ### Anova 
+
 <br>
+
 ```{r}
 anova_model_words <- mixed(
   response_time ~ Base_Frequency * Family_Size * Orthographic_Sensitivity +
@@ -270,6 +300,8 @@ eta_squared(anova_model_words, partial = TRUE)
 # Compute Marginal(fixed effects only) and Conditional(fixed + random effects) R²
 r2(anova_model_words)
 ```
+
+<br>
 
 Concise
 
@@ -293,6 +325,7 @@ We initially attempted to fit a maximal random-effects structure following Barr 
 
 ### Plots
 
+<br>
 
 ```{r, echo = FALSE}
 #### Main Effect of Base Frequency
@@ -330,6 +363,8 @@ plot_grid(p1, p2, ncol = 2, labels = "AUTO")
 
 Use `complete.cases()` to find which rows had missing data in the model-relevant variables:
 
+<br>
+
 ```{r, echo=FALSE, results = "hide"}
 # Specify only the variables used in the model
 # model_vars <- c("response_time", "Dim.2","SubjID")
@@ -353,19 +388,11 @@ rt_nwords_cmpl$BF_std <- as.numeric(scale(rt_nwords_cmpl$BF, center = TRUE, scal
 rt_nwords_cmpl$Dim.2_std <- as.numeric(scale(rt_nwords_cmpl$Dim.2, center = TRUE, scale = TRUE))
 ```
 
-
+<br>
 
 ## Anova Family Size
 
-```{r}
-
-rt_nwords_cmpl %>%
-  count(Complexity, Base_Frequency, Orthographic_Sensitivity)
-
-temp <- rt_nwords_cmpl |> filter(is.na(Complexity) & is.na(Base_Frequency))
-# write_csv(temp, "temp.csv")
-```
-
+<br>
 
 ```{r}
 anova_model_nwords_fs <- mixed(
@@ -380,6 +407,7 @@ m2 <- anova_model_nwords_fs$full_model    # Extract the lmer model
 ranova(m2) # Run random effects comparison
 ```
 
+<br>
 
 ### Main Findings
 
@@ -391,10 +419,11 @@ ranova(m2) # Run random effects comparison
 
 **Non-word complexity** had a robust effect; complex non-words (e.g., pseudoderived forms) elicited longer response times than simple ones. Participants with higher **orthographic sensitivity** responded significantly faster overall, suggesting more efficient processing of letter patterns even in non-words. **Morphological family size** did not modulate non-word RTs, nor did it interact with complexity or orthographic sensitivity.  Interpretation: In the absence of lexical representations, apparent “family size” (based on real-word analogues) does not measurably influence non-word recognition.
 
-
+<br>
 
 ### Plots
 
+<br>
 
 ```{r, echo = FALSE}
 #### Main Effect of Complexity
@@ -434,6 +463,8 @@ plot_grid(p3, p4, ncol = 2)
 
 ## Anova Base Frequency
 
+<br>
+
 ```{r}
 anova_model_nwords_bf <- mixed(
   response_time ~ Complexity * Base_Frequency * Orthographic_Sensitivity +
@@ -447,6 +478,7 @@ m3 <- anova_model_nwords_bf$full_model    # Extract the lmer model
 ranova(m3) # Run random effects comparison
 ```
 
+<br>
 
 ### Main Findings
 
@@ -502,8 +534,11 @@ effs1
                                                "Simple High - Complex Low")))
 ```
 
+<br>
+
 #### Interaction Contrasts
 
+<br>
 
 ```{r}
 #  Interaction contrasts (difference-of-differences)
@@ -517,26 +552,30 @@ confint(contrast(emm1, interaction = c("pairwise", "pairwise")))
 
 Table 4. Estimated Marginal Means and Pairwise Contrasts for the Complexity × Base Frequency Interaction
 
-| Contrast ¦ Delta RT (ms) ¦ p ¦ Effect size (d) ¦ 95% CI for Delta RT (ms) ¦ Interpretation |
-|———–¦———–¦——¦——————¦———————¦––––––––|
-| Complex High (751) – Simple High (709) ¦ +42.3 ¦ < .001 ¦ 0.41 ¦ [33.1, 51.4] ¦ Strong complexity cost at high base frequency |
-| Complex Low (723) – Simple Low (694) ¦ +29.2 ¦ < .001 ¦ 0.29 ¦ [20.8, 37.5] ¦ Moderate complexity cost at low base frequency |
-| Complex High (751) – Complex Low (723) ¦ +28.0 ¦ .0001 ¦ 0.27 ¦ [14.3, 41.6] ¦ Complex items slower when based on high-frequency stems |
-| Simple High (709) – Simple Low (694) ¦ +14.9 ¦ .022 ¦ 0.15 ¦ [2.1, 27.6] ¦ Small frequency benefit among simple items |
+| Contrast | Delta RT (ms) | p | Effect size (d) | 95% CI for Delta RT (ms) | Interpretation |
+|----------|------|-----|----------|-----------|--------|
+| Complex High (751) - Simple High (709) | +42.3 | < .001 | 0.41 | [33.1, 51.4] | Strong complexity cost at high base frequency |
+| Complex Low (723) - Simple Low (694) | +29.2 | < .001 | 0.29 | [20.8, 37.5] | Moderate complexity cost at low base frequency |
+| Complex High (751) - Complex Low (723) | +28.0 | .0001 | 0.27 | [14.3, 41.6] | Complex items slower when based on high-frequency stems |
+| Simple High (709) - Simple Low (694) | +14.9 | .022 | 0.15 | [2.1, 27.6] | Small frequency benefit among simple items |
+
+<br>
 
 Table 5. Summary of Main Effects and Interactions
 
-| Effect ¦ Direction / Pattern ¦ Interpretation |
-|———¦––––––––––¦––––––––|
-| Complexity ¦ Complex > Simple across all conditions ¦ Morphological structure slows non-word rejection (decomposition cost). |
-| Base Frequency ¦ High > Low (faster RTs) ¦ Familiar letter sequences facilitate processing even for non-words. |
-| Complexity × Base Frequency ¦ Larger complexity cost for high-frequency bases (Delta ~ 13 ms) ¦ Morphological activation stronger for familiar bases. |
-| Family Size ¦ n.s. ¦ No measurable influence; non-words lack real morphological families. |
-| Orthographic Sensitivity ¦ High > Low (faster RTs overall) ¦ Readers with higher orthographic sensitivity are generally more efficient. |
+| Effect | Direction / Pattern | Interpretation |
+|---|----------|--------|
+| Complexity | Complex > Simple across all conditions | Morphological structure slows non-word rejection (decomposition cost). |
+| Base Frequency | High > Low (faster RTs) | Familiar letter sequences facilitate processing even for non-words. |
+| Complexity × Base Frequency | Larger complexity cost for high-frequency bases (Delta ~ 13 ms) | Morphological activation stronger for familiar bases. |
+| Family Size | n.s. | No measurable influence; non-words lack real morphological families. |
+| Orthographic Sensitivity | High > Low (faster RTs overall) | Readers with higher orthographic sensitivity are generally more efficient. |
 
+<br>
 
 ###  Main Effects Plots
 
+<br>
 
 ```{r, echo = FALSE}
 #### Main Effect of Complexity

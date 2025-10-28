@@ -76,11 +76,21 @@ sem <- function(x) sd(x)/sqrt(length(x))
 ```{r}
 dir_path <- "CSV files"
 
-erp_2 <- read_csv(file.path(dir_path, "m21_ldt_mea_200300_050050_1.csv"))
-erp_4 <- read_csv(file.path(dir_path, "m21_ldt_mea_300500_050050_1.csv"))
+erp_2A <- read_csv(file.path(dir_path, "m21_ldt_mea_200300_050050_1_AB.csv"))
+erp_2B <- read_csv(file.path(dir_path, "m21_ldt_mea_200300_050050_1_BA.csv"))
+erp_4A <- read_csv(file.path(dir_path, "m21_ldt_mea_300500_050050_1_AB.csv"))
+erp_4B <- read_csv(file.path(dir_path, "m21_ldt_mea_300500_050050_1_BA.csv"))
 dmg_lng_vsl <- read_csv(file.path(dir_path, "demo_lang_vsl_pca_hc.csv"))
 ```
 
+```{r}
+library(dplyr)
+
+erp_2i <- bind_rows(
+  erp_2A |> mutate(List = "AB"),
+  erp_2B |> mutate(List = "BA")
+)
+```
 
 Now we extract `SubjID` from the `ERPset` column
 ```{r, , echo=FALSE}
@@ -88,39 +98,39 @@ Now we extract `SubjID` from the `ERPset` column
 # Remove '_LDT_diff_waves' from each string in the ERPset column
 # This code first renames the column and then applies the `str_replace` function 
 # to the newly renamed column.
-erp_2 <- erp_2 |>
+erp_2ii <- erp_2i |>
   rename(SubjID = ERPset) |>
   mutate(SubjID = str_replace(SubjID, "_LDT_diff_waves", "")) |>
   mutate(binlabel = str_replace(binlabel, "Critical_", "")) |>
   mutate(binlabel = str_replace(binlabel, "_family", "")) |>
   select(-mlabel)
 
-erp_4 <- erp_4 |>
-  rename(SubjID = ERPset) |>
-  mutate(SubjID = str_replace(SubjID, "_LDT_diff_waves", "")) |>
-  mutate(binlabel = str_replace(binlabel, "Critical_", "")) |>
-  mutate(binlabel = str_replace(binlabel, "_family", "")) |>
-  select(-mlabel)
+# erp_4 <- erp_4 |>
+#   rename(SubjID = ERPset) |>
+#   mutate(SubjID = str_replace(SubjID, "_LDT_diff_waves", "")) |>
+#   mutate(binlabel = str_replace(binlabel, "Critical_", "")) |>
+#   mutate(binlabel = str_replace(binlabel, "_family", "")) |>
+#   select(-mlabel)
 ```
 
 We then join the ERP data and language into a single data frame
 ```{r, echo=FALSE}
 
-n250 <- erp_2 |>
+erp_2iii <- erp_2ii |>
   left_join(dmg_lng_vsl, by = "SubjID") |>
   select(SubjID, everything()) 
-n400 <- erp_4 |>
-  left_join(dmg_lng_vsl, by = "SubjID") |>
-  select(SubjID, everything()) 
+# n400 <- erp_4 |>
+#   left_join(dmg_lng_vsl, by = "SubjID") |>
+#   select(SubjID, everything()) 
 ```
 
 # Format data files 
 
 Divide into word, non-word and difference wave dataframes
 ```{r, echo=FALSE}
-n250_words <- n250 |> filter(bini %in% c(1:2))    # does not include BF data
-n250_words_b <- n250 |> filter(bini %in% c(9:12)) # includes BF data
-n250_nonwords <- n250 |> filter(bini %in% c(3:6))
+n250_words <- erp_2iii |> filter(bini %in% c(1:2))    # does not include BF data
+n250_words_b <- erp_2iii |> filter(bini %in% c(9:12)) # includes BF data
+n250_nonwords <- erp_2iii |> filter(bini %in% c(3:6))
 
 ```
 
@@ -136,12 +146,10 @@ n250_words_b <- n250_words_b |>
   select(-c(trial_type, tmp1, tmp2))
 
 
-n250_words_b$Semantic_Sensitivity[n250_words_b$Semantic_Sensitivity == "Low"] <- "Low Sensitivity"
-n250_words_b$Semantic_Sensitivity[n250_words_b$Semantic_Sensitivity == "High"] <- "High Sensitivity"
-n250_words_b$base_freq[n250_words_b$base_freq == "Low"] <- "Low Base Frequency"
-n250_words_b$base_freq[n250_words_b$base_freq == "High"] <- "High Base Frequency"
-n250_words_b$family_size[n250_words_b$family_size == "large"] <- "Large Family"
-n250_words_b$family_size[n250_words_b$family_size == "small"] <- "Small Family"
+# Assuming your data frame is named 'df' and the column is named 'your_column'
+
+n250_words_b$family_size[n250_words_b$family_size == "large"] <- "Large"
+n250_words_b$family_size[n250_words_b$family_size == "small"] <- "Small"
 
 
 # Nonwords
@@ -150,12 +158,10 @@ n250_nonwords <- n250_nonwords |>
   select(-trial_type)
 
 # Assuming your data frame is named 'df' and the column is named 'your_column'
-n250_nonwords$Semantic_Sensitivity[n250_nonwords$Semantic_Sensitivity == "Low"] <- "Low Sensitivity"
-n250_nonwords$Semantic_Sensitivity[n250_nonwords$Semantic_Sensitivity == "High"] <- "High Sensitivity"
 n250_nonwords$complexity[n250_nonwords$complexity == "complex"] <- "Complex"
 n250_nonwords$complexity[n250_nonwords$complexity == "simple"] <- "Simple"
-n250_nonwords$family_size[n250_nonwords$family_size == "large"] <- "Large Family"
-n250_nonwords$family_size[n250_nonwords$family_size == "small"] <- "Small Family"
+n250_nonwords$family_size[n250_nonwords$family_size == "large"] <- "Large"
+n250_nonwords$family_size[n250_nonwords$family_size == "small"] <- "Small"
 
 ```
 
@@ -189,7 +195,6 @@ Linear mixed-effects models were fit using the afex::mixed function (method = �
 Because these follow-up contrasts were intended to interpret a significant higher-order interaction rather than to test independent hypotheses, we reported uncorrected p-values (adjust = "none") for interpretive clarity. The robustness of the overall pattern was verified using a Holm correction, which did not change the substantive conclusions.
 
 ## Nested ANOVA Model
-<br>
 ```{r}
 #Fit ANOVA model
 anova_model_n250_words_b <- mixed(
@@ -212,191 +217,65 @@ eta_squared(anova_model_n250_words_b, partial = TRUE)
 r2(anova_model_n250_words_b)
 ```
 
-
-## Main Effects
-
-Model Fit:  Including subject-specific slopes and electrode nesting substantially improves model fit. All partial $\eta^2$ values are small ($\leq .02$). This is expected given the large random variance typical of ERP data.
-
-There are no main effects of any single factor.
-
-## Interactions
-
-A robust `family_size × base_freq` interaction that further depends on `Semantic_Sensitivity`. The relationship between `family size` and `base frequency` changes shape depending on whether participants are semantically sensitive or not.  Even though the three-way interaction is statistically significant, it explains only a small portion of the variance—typical for ERP component amplitude data.
-
-|                                     Effect|      df|         F| p.value||eta-sqrd|  
-|-------------------------------------------|--------|----------|--------|---------|
-|                      family_size:base_freq| 1, 1523| 35.00 ***|   <.001|     0.02|
-| Semantic_Sensitivity:family_size:base_freq| 1, 1523| 11.99 ***|   <.001| 7.81e-03|
-
-
-### `family_size × base_freq` Simple Contrasts
+### Simple Contrasts
 <br>
 ```{r}
 # Estimated marginal means for the family_size × base frequency interaction
-(emm1a <- emmeans(anova_model_n250_words_b, ~ family_size * base_freq))
+(emm1 <- emmeans(anova_model_n250_words_b, ~ family_size * base_freq))
 
 # Get all pairswise contrasts
-emm1a_contrasts <- contrast(emm1a,  method = "pairwise", by = NULL, adjust = "none")
+emm1_contrasts <- contrast(emm1,  method = "pairwise", by = NULL, adjust = "none")
+emm1_contrasts
 
 # Keep only the contrasts you want
 # Simple effects of family_size at each level of base_freq
 # Simple effects of base_freq at each level of family_size
-keep <- c("Large Family High Base Frequency - Small Family High Base Frequency",
-          "Large Family Low Base Frequency - Small Family Low Base Frequency",
-          "Large Family High Base Frequency - Large Family Low Base Frequency",
-          "Small Family High Base Frequency - Small Family Low Base Frequency")
-(emm1a_contrasts_filtered <- subset(emm1a_contrasts, contrast %in% keep))
+keep <- c("Large High - Small High",
+          "Large Low - Small Low",
+          "Large High - Large Low",
+          "Small High - Small Low")
+(emm1_contrasts_filtered <- subset(emm1_contrasts, contrast %in% keep))
 
 # Get Confidence Intervals
-(emm1a_contrasts_filtered_ci <- confint(emm1a_contrasts_filtered))
+(emm1_contrasts_filtered_ci <- confint(emm1_contrasts_filtered))
 
 
 # Get effect sizes
 # Get all pairwise effect sizes
-effs1a <- eff_size(emm1a, sigma = sigma(m1), edf = df.residual(m1))
+effs1 <- eff_size(emm1, sigma = sigma(m1), edf = df.residual(m1))
 
 # Remove the two redundant rows (rows 3 and 4)
-(effs1a_filtered <- subset(effs1a, !contrast %in% c("Large Family High Base Frequency - Small Family Low Base Frequency",
+(effs1_filtered <- subset(effs1, !contrast %in% c("Large Family High Base Frequency - Small Family Low Base Frequency",
                                                "Small Family High Base Frequency - Large Family Low Base Frequency")))
 ```
 
 For large-family words, N250 amplitude is more negative when base frequency is high than when it is low. For small-family words, base frequency has little effect. For low-frequency bases, small-family words elicit more negative amplitudes than large-family words.
 
-- At **High Base Frequency**:  `Large` vs. `Small` family → no difference (*p* = .781). Family size doesn’t matter when base frequency is high.
+- At **High Base Frequency**:  `Large` vs. `Small` family → no difference (*p* = .87). Family size doesn’t matter when base frequency is high.
 
-- Within **Small Family**: `High` vs. `Low` base frequency → not significant (*p* = .581). Small-family words are unaffected by base frequency.
+- Within **Small Family**: `High` vs. `Low` base frequency → not significant (*p* = .42). Small-family words are unaffected by base frequency.
 
-- At **Low Base Frequency**: Large vs. Small family → significant difference (*p* = .0194). Small-family words yield more negative amplitudes than large-family words, but only when base frequency is low.
+- At **Low Base Frequency**: Large vs. Small family → significant difference (*p* = .017). Small-family words yield more negative amplitudes than large-family words, but only when base frequency is low.
 
-- Within **Large Family**: High vs. Low base frequency → significant (*p* = .0136). Large-family words show more negative amplitudes when their base frequency is high.
+- Within **Large Family**: High vs. Low base frequency → significant (*p* = .028). Large-family words show more negative amplitudes when their base frequency is high.
 
-### `family_size × base_freq` Interaction Contrasts
+### Interaction Contrasts
 <br>
 ```{r}
 #  Interaction contrasts (difference-of-differences)
 #    Compare base frequency effect in large vs small family)
-contrast(emm1a, interaction = "pairwise", by = NULL, adjust = "holm")
+contrast(emm1, interaction = "pairwise", by = NULL, adjust = "holm")
 
 # Get confidence intervals, for each base frequency effect for each family size and then for interaction effect
 confint(contrast(emmeans(m1, ~ family_size | base_freq), "pairwise"))
-confint(contrast(emm1a, interaction = c("pairwise", "pairwise")))
+confint(contrast(emm1, interaction = c("pairwise", "pairwise")))
 ```
 
-### `Sensitivity × family_size × base_freq` Simple Contrasts
-<br>
+## Plots
+
 ```{r}
-# Estimated marginal means for the family_size × base_freq interaction
-(emm1b <- emmeans(anova_model_n250_words_b, ~ Semantic_Sensitivity * family_size * base_freq))
-
-# Get all pairswise contrasts
-emm1b_contrasts <- contrast(emm1b,  method = "pairwise", by = NULL, adjust = "none")
-
-# Keep only the contrasts you want
-# Simple effects of family_size at each level of base_freq
-# Simple effects of base_freq at each level of family_size
-keep1b <- c("High Semantic Large Family High Base Frequency - High Semantic Large Family Low Base Frequency",
-          "High Semantic Small Family High Base Frequency - High Semantic Small Family Low Base Frequency",
-          "Low Semantic Large Family High Base Frequency - Low Semantic Large Family Low Base Frequency",
-          "Low Semantic Small Family High Base Frequency - Low Semantic Small Family Low Base Frequency",
-          "High Semantic Large Family High Base Frequency - High Semantic Small Family High Base Frequency",
-          "High Semantic Large Family Low Base Frequency - High Semantic Small Family Low Base Frequency",
-          "Low Semantic Large Family High Base Frequency - Low Semantic Small Family High Base Frequency",
-          "Low Semantic Large Family Low Base Frequency - Low Semantic Small Family Low Base Frequency",
-          "High Semantic Large Family High Base Frequency - Low Semantic Large Family High Base Frequency",
-          "High Semantic Small Family High Base Frequency - Low Semantic Small Family High Base Frequency",
-          "High Semantic Large Family Low Base Frequency - Low Semantic Small Family Low Base Frequency",
-          "High Semantic Small Family Low Base Frequency - Low Semantic Small Family Low Base Frequency")
-
-(emm1b_contrasts_filtered <- subset(emm1b_contrasts, contrast %in% keep1b))
-
-# Get Confidence Intervals
-(emm1b_contrasts_filtered_ci <- confint(emm1b_contrasts_filtered))
-
-
-# Get effect sizes
-# Get all pairwise effect sizes
-effs1b <- eff_size(emm1b, sigma = sigma(m1), edf = df.residual(m1))
-
-# Remove the  redundant rows 
-(effs1b_filtered <- subset(effs1b, contrast %in% keep1b))
-```
-
-### `Sensitivity × family_size × base_freq` Interaction Contrasts
-
-The interaction contrast tests whether the difference in the *base frequency* effect for large vs small families differs across semantic sensitivity?
-
-
-$$
- [ [(A_1 - A_2)\text{ in }B_1] - [(A_1 - A_2)\text{ in }B_2]
-    \text{ in Condition }C_1]
-  -
-  [[(A_1 - A_2) in B_1] - [(A_1 - A_2) in B_2]
-    \text{in Condition }C_2]
-$$
-<br>
-```{r}
-#  Interaction contrasts (difference-of-differences)
-#    Compare base_freq effect in large vs small family)
-contrast(emm1b, interaction = "pairwise", by = NULL, adjust = "holm")
-confint(contrast(emm1b, interaction = c("pairwise", "pairwise")))
-
-# Compute the A1 - A2 difference within each combination of B × C
-(base_freq_diff <- contrast(emm1b, method = "revpairwise", 
-                            by = c("Semantic_sensitivity", "family_size"), 
-                            simple = "base_freq"))
-
-# Compute how that A-effect changes across the levels of B, separately for each level of C  
-(family_size_base_freq_int_within_sensitivity <- contrast(base_freq_diff, 
-                                                           method = "revpairwise",
-                                                           by = "Semantic_sensitivity", simple = "family_size"))
-
-# Get confidence intervals
-confint(family_size_base_freq_int_within_sensitivity)
-```
-
-Compute the effect of Base Frequency (Low - High) within each *Semantic Sensitivity × Family Size* combination.
-
-High Sensitivity- Large Family: `Low Base Frequency - High Base Frequency = -0.515 - (-1.309)  = 0.794`
-
-High Sensitivity- Small Family: `Low Base Frequency - High Base Frequency = -1.206 - (-0.882) = -0.324`
-
-Low Sensitivity - Large Family: `Low Base Frequency - High Base Frequency = -0.144 - (-0.508) =  0.364`
-
-Low Sensitivity - Small Family: `Low Base Frequency - High Base Frequency = -0.717 - (-0.788) =  0.071`
-
-Compute the difference of differences:  compare how the effect of base frequency differs across sensitivity groups:`(High Sensitivity base frequency effect) - (Low Sensitivity base frequency effect)`
-
-For Large Family: 
-```
-High:  0.794
-Low:   0.364
-Difference: 0.794 - 0.364 = 0.43
-```
-
-For Small Family: 
-```
-High: -0.324  
-Low:  +0.071  
-Difference: -0.324 - 0.071 = -0.395
-```
-
-This is a reversal of the *base frequency effect* between High and Low sensitivity participants for Small Family nonwords — and that’s the core of your significant 3-way interaction.
-
-Now take the difference of these differences (Small - Large):  `-0.395 - 0.43 = -0.825`.  That’s the interaction contrast estimate: `$-0.826$, $SE = 0.238$, $t(1523) = -3.463$,  $p = 0.0005$
-
-Only High-Sensitivity participants responding to  words from Large morphological familes show a clear base-frequency effect. When responding to low-base frequency words they show a clear family size effect.
-
-In high-semantic-sensitivity readers, the N250 shows a selective interaction: Low vs. high base frequency matters only for large-family words. This dependency disappears in low-sensitivity readers.
-
-
-
-##  Plots
-
-### `family_size × base_freq` 
-<br>
-```{r}
-emm1a_df <- as.data.frame(emm1a)
-p1 <- ggplot(emm1a_df,
+emm1_df <- as.data.frame(emm1)
+p1<- ggplot(emm1_df,
        aes(x = base_freq, y = emmean,
            color = family_size, group = family_size)) +
   geom_line(position = position_dodge(0.2)) +
@@ -409,8 +288,7 @@ p1 <- ggplot(emm1a_df,
   scale_color_custom() +
   scale_fill_custom() 
 
-
-p2 <- ggplot(emm1a_df,
+p2 <- ggplot(emm1_df,
        aes(x = family_size, y = emmean,
            color = base_freq, group = base_freq)) +
   geom_line(position = position_dodge(0.2)) +
@@ -426,54 +304,20 @@ p2 <- ggplot(emm1a_df,
 plot_grid(p1, p2, ncol = 2)
 ```
 
-### `Sensitivity × family_size × base_freq`
-<br>
-```{r, fig.height=7, fig.width=6}
-# Plot the interaction
-library(ggplot2)
-
-emm1b_df <- as.data.frame(emm1b)
-p3 <- ggplot(emm1b_df,
-       aes(x = base_freq, y = emmean,
-           color = family_size, group = family_size)) +
-  facet_wrap(~ Semantic_Sensitivity) +
-  geom_line(position = position_dodge(0.2)) +
-  geom_point(position = position_dodge(0.2)) +
-  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
-                width = 0.1, position = position_dodge(0.2)) +
-  labs(x = "Base Frequency", y = "Estimated N250 amplitude",
-       color = "Family Size",
-       title =  "Family Size × Base Frequency × Semantic Sensitivity") +
-  scale_color_custom() +
-  scale_fill_custom()
-
-
-p4 <- ggplot(emm1b_df,
-       aes(x = family_size, y = emmean,
-           color = base_freq, group = base_freq)) +
-  facet_wrap(~ Semantic_Sensitivity) +
-  geom_line(position = position_dodge(0.2)) +
-  geom_point(position = position_dodge(0.2)) +
-  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
-                width = 0.1, position = position_dodge(0.2)) +
-  labs(x = "Family Size", y = "Estimated N250 amplitude",
-       color = "Base Frequency",
-       title = "Base Frequency × Family Size × Semantic Sensitivity") +
-  scale_color_custom() +
-  scale_fill_custom()
-
-plot_grid(p3, p4, nrow = 2)
-```
 
 \newpage
-
-
 
 # N250 Nonword Data
 
 ## Compute the ANOVA
-<br>
+
 ```{r}
+
+n250_nonwords %>%
+  count(family_size, complexity, Semantic_Sensitivity)
+
+n250_nonwords |> filter(family_size == "complex")
+
 anova_model_n250_nonwords <- mixed(
     value ~ Semantic_Sensitivity * family_size * complexity +
     (1 + family_size + complexity | SubjID) +     # by-subject intercept + slopes
@@ -495,6 +339,194 @@ r2(anova_model_n250_nonwords)
 ```
 
 
-## Main Effects and Interactions
+## Main Effects
 
-The random structure is well supported; most variance lies in subject- and electrode-specific fluctuations. None of the effects reach conventional significance.  Nearly all systematic variance is due to subject/electrode differences, not the fixed experimental factors. There is no evidence that Semantic Sensitivity modulates N250 responses to non-words. Semantically sensitive and insensitive participants behave alike for non-word stimuli. Family size and morphological complexity do not affect the N250 when there is no real morphological or semantic content to activate. There is at most a weak family_size × complexity trend ( *p* = .097) ); perhaps more “complex” pseudowords elicit slightly different early orthographic responses, but not reliably.
+No main effects.  
+
+## Interactions
+
+A three way interaction between
+
+  - `Sensitivity × Family Size × Complexity`: significant (*t* = 4.58, *p* =.033).
+
+###  Simple Contrasts
+
+Compare High vs Low Semantic Sensitivity within each combination of Family Size and Complexity  
+
+This gives you: 4 contrasts: one for each `Family Size × Complexity` combination. Each shows whether `High` vs `Low Semantic Sensitivity` differs significantly
+
+If simple effects aren’t significant, try looking at interaction contrasts, which test differences in the differences. You’re now asking: Does the effect of Sensitivity change more in some complexity/family combinations than others?
+<br>
+```{r}
+# Estimated marginal means for the family_size × complexity interaction
+(emm2 <- emmeans(anova_model_n250_nonwords, ~ Semantic_Sensitivity * family_size * complexity))
+
+# Get all pairswise contrasts
+emm2_contrasts <- contrast(emm2,  method = "pairwise", by = NULL, adjust = "none")
+# emm2_contrasts
+
+# Keep only the contrasts you want
+# Simple effects of family_size at each level of complexity
+# Simple effects of complexity at each level of family_size
+keep2 <- c("High Semantic Large Complex - High Semantic Large Simple",
+          "High Semantic Small Complex - High Semantic Small Simple",
+          "Low Semantic Large Complex - Low Semantic Large Simple",
+          "Low Semantic Small Complex - Low Semantic Small Simple",
+          "High Semantic Large Complex - High Semantic Small Complex",
+          "High Semantic Large Simple - High Semantic Small Simple",
+          "Low Semantic Large Complex - Low Semantic Small Complex",
+          "Low Semantic Large Simple - Low Semantic Small Simple",
+          "High Semantic Large Complex - Low Semantic Large Complex",
+          "High Semantic Small Complex - Low Semantic Small Complex",
+          "High Semantic Large Simple - Low Semantic Small Simple",
+          "High Semantic Small Simple - Low Semantic Small Simple")
+
+(emm2_contrasts_filtered <- subset(emm2_contrasts, contrast %in% keep2))
+
+# Get Confidence Intervals
+(emm2_contrasts_filtered_ci <- confint(emm2_contrasts_filtered))
+
+
+# Get effect sizes
+# Get all pairwise effect sizes
+effs2 <- eff_size(emm2, sigma = sigma(m2), edf = df.residual(m2))
+
+# Remove the  redundant rows 
+(effs2_filtered <- subset(effs2, contrast %in% keep2))
+```
+
+### Interaction Contrasts
+
+The interaction contrast tests whether the difference in the complexity effect for large vs small families differs across sensitivity?
+
+
+$$
+ [ [(A_1 - A_2)\text{ in }B_1] - [(A_1 - A_2)\text{ in }B_2]
+    \text{ in Condition }C_1]
+  -
+  [[(A_1 - A_2) in B_1] - [(A_1 - A_2) in B_2]
+    \text{in Condition }C_2]
+$$
+
+<br>
+```{r}
+#  Interaction contrasts (difference-of-differences)
+#    Compare complexity effect in large vs small family)
+contrast(emm2, interaction = "pairwise", by = NULL, adjust = "holm")
+confint(contrast(emm2, interaction = c("pairwise", "pairwise")))
+
+# Compute the A1 - A2 difference within each combination of B × C
+(complexity_diff <- contrast(emm2, method = "revpairwise", 
+                            by = c("Semantic_sensitivity", "family_size"), 
+                            simple = "complexity"))
+
+# Compute how that A-effect changes across the levels of B, separately for each level of C  
+(family_size_complexity_int_within_sensitivity <- contrast(complexity_diff, 
+                                                           method = "revpairwise",
+                                                           by = "Semantic_sensitivity", simple = "family_size"))
+
+# Get confidence intervals
+confint(family_size_complexity_int_within_sensitivity)
+```
+
+
+Compute the effect of Complexity (Complex - Simple) within each Semantic Sensitivity × Family Size combination.
+High Sensitivity- Large Family: `Complex - Simple = -0.495 - (-0.609) = +0.114`
+
+High Sensitivity- Small Family: `Complex - Simple = -0.785 - (-0.471) = -0.314`
+
+Low Sensitivity - Large Family: `Complex - Simple = -0.607 - (-0.713) = +0.106`
+
+Low Sensitivity - Small Family: `Complex - Simple = -0.632 - (-0.829) = +0.197`
+
+Compute the difference of differences:  compare how the effect of complexity differs across sensitivity groups:`(High Sensitivity complexity effect) - (Low Sensitivity complexity effect)`
+
+For Large Family: 
+```
+High:  +0.114
+Low:   +0.106
+Difference: 0.114 - 0.106 = +0.008
+```
+
+For Small Family: 
+```
+High: -0.314  
+Low:  +0.197  
+Difference: -0.314 - (+0.197) = -0.511
+```
+
+This is a reversal of the complexity effect between High and Low sensitivity participants for Small Family nonwords — and that’s the core of your significant 3-way interaction.
+
+Now take the difference of these differences (Small - Large):  `-0.511 - 0.008 = -0.519`.  That’s the interaction contrast estimate: ` -0.52, p = .0325`
+
+	-	$SE = 0.243$, $df = 1523$, $t = 2.140$ --> yields $p = 0.0325$, so it is statistically significant (given Bonferroni correction, etc.).
+
+The three-way interaction reflects the fact that High and Low sensitivity participants show opposite complexity effects — but only in the Small Family condition. In Large families, their complexity effects are essentially the same.
+
+In `Small families`, `High sensitivity` participants respond more negatively to `complex items`, white `Low sensitivity` participants respond more negatively to `simple items`.
+
+This crossover in the complexity effect is what drives the significant interaction — even though none of the simple effects are individually significant.
+
+## Plots
+
+```{r, fig.height=7, fig.width=6}
+# Plot the interaction
+library(ggplot2)
+
+emm2_df <- as.data.frame(emm2)
+p3 <- ggplot(emm2_df,
+       aes(x = complexity, y = emmean,
+           color = family_size, group = family_size)) +
+  facet_wrap(~ Semantic_Sensitivity) +
+  geom_line(position = position_dodge(0.2)) +
+  geom_point(position = position_dodge(0.2)) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
+                width = 0.1, position = position_dodge(0.2)) +
+  labs(x = "Complexity", y = "Estimated N250 amplitude",
+       color = "Family Size",
+       title =  "Family Size × Complexity × Semantic Sensitivity") +
+  scale_color_custom() +
+  scale_fill_custom()
+
+emm2_df <- as.data.frame(emm2)
+p4 <- ggplot(emm2_df,
+       aes(x = family_size, y = emmean,
+           color = complexity, group = complexity)) +
+  facet_wrap(~ Semantic_Sensitivity) +
+  geom_line(position = position_dodge(0.2)) +
+  geom_point(position = position_dodge(0.2)) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
+                width = 0.1, position = position_dodge(0.2)) +
+  labs(x = "Family Size", y = "Estimated N250 amplitude",
+       color = "Complexity",
+       title = "Complexity × Family Size × Semantic Sensitivity") +
+  scale_color_custom() +
+  scale_fill_custom()
+
+plot_grid(p3, p4, nrow = 2)
+```
+
+
+
+Interpretation
+ -	This is an interaction contrast (a “contrast of contrasts”) across your three factors (Semantic Sensitivity × Family Size × Complexity).
+	
+ -	Specifically, it is testing whether the difference (`Complex – Simple`)  for (`Large Family` vs. `Small Family`) differs between the two levels of `Semantic Sensitivity`. 
+	
+The contrast is asking: “Is the effect of `complexity`, in the contrast `Large` vs. `Small` family, different in `High Semantic` vs.` Low Semantic` participants?”
+
+ -	The `estimate = 0.5`2 is the difference in differences (i.e. the slope difference) on your response metric (N250 amplitude).
+	
+ -	Because you used adjust = "bonferroni" and combine = TRUE, this contrast is part of a “family” of interaction contrasts that have been adjusted for multiple comparisons.
+
+So in more conversational terms: you have evidence that High Semantic readers show a different `complexity × family size` effect than Low Semantic readers — in particular, in how the `complexity` effect (`Complex` vs. `Simple`) differs when comparing `Large` vs. `Small` family.
+ 
+Suggests that sensitivity does influence the N250, but only in how it modulates the joint effect of family size and complexity. In other words: the way family size and complexity interact depends on whether participants are semantically sensitive or not.
+
+  - Marginal $R^2 = 0.2%$ --> the fixed predictors (including sensitivity) account for very little variance overall.
+	
+  - Conditional $R^2 = 76%$ --> most variance is indeed explained by subjects and electrodes (as anticipated).
+
+Most of the variability in N250 amplitude reflects differences across participants and electrode sites, as expected for ERP data. Semantic sensitivity did not produce an overall shift in N250 responses, but it did moderate the combined influence of family size and morphological complexity. This interaction was statistically significant but accounted for only a very small portion of the variance. Thus, semantic sensitivity may play a role in how multiple lexical factors are integrated during early morphological processing, though the effect is subtle.
+
+
