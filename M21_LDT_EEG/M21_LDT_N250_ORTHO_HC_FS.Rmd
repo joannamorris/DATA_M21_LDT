@@ -1,5 +1,5 @@
 ---
-title: "M21 LDT ERP HC ORTHOGRAPIC SENSITIVITY N250"
+title: "M21 LDT ERP HC ORTHOGRAPIC SENSITIVITY N250 Family Size"
 author: "Joanna Morris"
 date: "`r Sys.Date()`"
 output:
@@ -7,7 +7,7 @@ output:
     toc: true
     toc_depth: 4
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 \scriptsize
@@ -76,10 +76,9 @@ sem <- function(x) sd(x)/sqrt(length(x))
 ```{r}
 dir_path <- "CSV files"
 
-erp_2A <- read_csv(file.path(dir_path, "m21_ldt_mea_200300_050050_1_AB.csv"))
-erp_2B <- read_csv(file.path(dir_path, "m21_ldt_mea_200300_050050_1_BA.csv"))
-erp_4A <- read_csv(file.path(dir_path, "m21_ldt_mea_300500_050050_1_AB.csv"))
-erp_4B <- read_csv(file.path(dir_path, "m21_ldt_mea_300500_050050_1_BA.csv"))
+erp_2A <- read_csv(file.path(dir_path, "fs_m21_ldt_mea_200300_050050_1_AB.csv"))
+erp_2B <- read_csv(file.path(dir_path, "fs_m21_ldt_mea_200300_050050_1_BA.csv"))
+
 dmg_lng_vsl <- read_csv(file.path(dir_path, "demo_lang_vsl_pca_hc.csv"))
 ```
 
@@ -145,9 +144,6 @@ n250_words_b <- n250_words_b |>
   separate(binlabel, into = c("trial_type", "family_size","tmp1", "base_freq", "tmp2"), sep = "_", remove = TRUE) |>
   select(-c(trial_type, tmp1, tmp2))
 
-
-# Assuming your data frame is named 'df' and the column is named 'your_column'
-
 n250_words_b$family_size[n250_words_b$family_size == "large"] <- "Large"
 n250_words_b$family_size[n250_words_b$family_size == "small"] <- "Small"
 
@@ -157,11 +153,19 @@ n250_nonwords <- n250_nonwords |>
   separate(binlabel, into = c("trial_type", "family_size", "complexity"), sep = "_", remove = TRUE) |>
   select(-trial_type)
 
-# Assuming your data frame is named 'df' and the column is named 'your_column'
 n250_nonwords$complexity[n250_nonwords$complexity == "complex"] <- "Complex"
 n250_nonwords$complexity[n250_nonwords$complexity == "simple"] <- "Simple"
 n250_nonwords$family_size[n250_nonwords$family_size == "large"] <- "Large"
 n250_nonwords$family_size[n250_nonwords$family_size == "small"] <- "Small"
+
+# Format as factors
+n250_nonwords <- n250_nonwords |>
+  mutate(complexity = fct_relevel(complexity, "Simple", "Complex"))
+
+n250_nonwords <- n250_nonwords |>
+  mutate(family_size = fct_relevel(family_size, "Small", "Large"))
+
+# str(n250_nonwords)
 
 ```
 <br>  
@@ -408,18 +412,18 @@ emm3_contrasts <- contrast(emm3,  method = "pairwise", by = NULL, adjust = "none
 # Keep only the contrasts you want
 # Simple effects of family_size at each level of complexity
 # Simple effects of complexity at each level of family_size
-keep3 <- c("High Orthographic Large Complex - High Orthographic Large Simple",
-          "High Orthographic Small Complex - High Orthographic Small Simple",
-          "Low Orthographic Large Complex - Low Orthographic Large Simple",
-          "Low Orthographic Small Complex - Low Orthographic Small Simple",
-          "High Orthographic Large Complex - High Orthographic Small Complex",
-          "High Orthographic Large Simple - High Orthographic Small Simple",
-          "Low Orthographic Large Complex - Low Orthographic Small Complex",
-          "Low Orthographic Large Simple - Low Orthographic Small Simple",
-          "High Orthographic Large Complex - Low Orthographic Large Complex",
-          "High Orthographic Small Complex - Low Orthographic Small Complex",
-          "High Orthographic Large Simple - Low Orthographic Small Simple",
-          "High Orthographic Small Simple - Low Orthographic Small Simple")
+keep2 <- c("High Orthographic Large Simple - High Orthographic Large Complex",
+           "High Orthographic Small Simple - High Orthographic Small Complex",
+           "Low Orthographic Large Simple - Low Orthographic Large Complex",
+           "Low Orthographic Small Simple - Low Orthographic Small Complex",
+           "High Orthographic Small Simple - High Orthographic Large Simple",
+           "High Orthographic Small Complex - High Orthographic Large Complex",
+           "Low Orthographic Small Simple - High Orthographic Large Simple",
+           "Low Orthographic Small Complex - Low Orthographic Large Complex",
+           "High Orthographic Large Simple - Low Orthographic Large Simple",
+           "High Orthographic Large Complex - Low Orthographic Large Complex",
+           "High Orthographic Small Simple - Low Orthographic Small Simple",
+           "High Orthographic Small Complex - Low Orthographic Small Complex")
 
 (emm3_contrasts_filtered <- subset(emm3_contrasts, contrast %in% keep3))
 

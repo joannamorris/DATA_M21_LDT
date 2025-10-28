@@ -1,5 +1,5 @@
 ---
-title: "M21 LDT ERP HC ORTHOGRAPIC SENSITIVITY N400"
+title: "M21 LDT ERP HC ORTHOGRAPIC SENSITIVITY N400 Family Size"
 author: "Joanna Morris"
 date: "`r Sys.Date()`"
 output:
@@ -7,7 +7,7 @@ output:
     toc: true
     toc_depth: 4
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 \scriptsize
@@ -76,11 +76,19 @@ sem <- function(x) sd(x)/sqrt(length(x))
 ```{r}
 dir_path <- "CSV files"
 
-erp_2 <- read_csv(file.path(dir_path, "m21_ldt_mea_200300_050050_1.csv"))
-erp_4 <- read_csv(file.path(dir_path, "m21_ldt_mea_300500_050050_1.csv"))
+erp_4A <- read_csv(file.path(dir_path, "fs_m21_ldt_mea_300500_050050_1_AB.csv"))
+erp_4B <- read_csv(file.path(dir_path, "fs_m21_ldt_mea_300500_050050_1_BA.csv"))
 dmg_lng_vsl <- read_csv(file.path(dir_path, "demo_lang_vsl_pca_hc.csv"))
 ```
 
+```{r}
+library(dplyr)
+
+erp_4i <- bind_rows(
+  erp_4A |> mutate(List = "AB"),
+  erp_4B |> mutate(List = "BA")
+)
+```
 
 Now we extract `SubjID` from the `ERPset` column
 ```{r, , echo=FALSE}
@@ -88,14 +96,14 @@ Now we extract `SubjID` from the `ERPset` column
 # Remove '_LDT_diff_waves' from each string in the ERPset column
 # This code first renames the column and then applies the `str_replace` function 
 # to the newly renamed column.
-erp_2 <- erp_2 |>
-  rename(SubjID = ERPset) |>
-  mutate(SubjID = str_replace(SubjID, "_LDT_diff_waves", "")) |>
-  mutate(binlabel = str_replace(binlabel, "Critical_", "")) |>
-  mutate(binlabel = str_replace(binlabel, "_family", "")) |>
-  select(-mlabel)
+# erp_2 <- erp_2 |>
+#   rename(SubjID = ERPset) |>
+#   mutate(SubjID = str_replace(SubjID, "_LDT_diff_waves", "")) |>
+#   mutate(binlabel = str_replace(binlabel, "Critical_", "")) |>
+#   mutate(binlabel = str_replace(binlabel, "_family", "")) |>
+#   select(-mlabel)
 
-erp_4 <- erp_4 |>
+erp_4ii <- erp_4i |>
   rename(SubjID = ERPset) |>
   mutate(SubjID = str_replace(SubjID, "_LDT_diff_waves", "")) |>
   mutate(binlabel = str_replace(binlabel, "Critical_", "")) |>
@@ -106,10 +114,10 @@ erp_4 <- erp_4 |>
 We then join the ERP data and language into a single data frame
 ```{r, echo=FALSE}
 
-n250 <- erp_2 |>
-  left_join(dmg_lng_vsl, by = "SubjID") |>
-  select(SubjID, everything()) 
-n400 <- erp_4 |>
+# n250 <- erp_2 |>
+#   left_join(dmg_lng_vsl, by = "SubjID") |>
+#   select(SubjID, everything()) 
+erp_4iii <- erp_4ii |>
   left_join(dmg_lng_vsl, by = "SubjID") |>
   select(SubjID, everything()) 
 ```
@@ -119,9 +127,9 @@ n400 <- erp_4 |>
 Divide into word, non-word and difference wave dataframes
 ```{r, echo=FALSE}
 
-n400_words <- n400 |> filter(bini %in% c(1:2))    # does not include BF data
-n400_words_b <- n400 |> filter(bini %in% c(9:12)) # includes BF data
-n400_nonwords <- n400 |> filter(bini %in% c(3:6))
+n400_words <- erp_4iii |> filter(bini %in% c(1:2))    # does not include BF data
+n400_words_b <- erp_4iii |> filter(bini %in% c(9:12)) # includes BF data
+n400_nonwords <- erp_4iii |> filter(bini %in% c(3:6))
 ```
 
 Then we do some more formatting and cleanup of the dataframes.We  create separate columns, one for each independent variable (anteriority, laterality, morphological family size). To do this we have to use `seperate` function from the `stringr` package. Run `vignette("programming", package = "dplyr")` to see more about `tidy-selection` and `tidy-evaluation`.
@@ -136,28 +144,27 @@ n400_words_b <- n400_words_b |>
   separate(binlabel, into = c("trial_type", "family_size","tmp1", "base_freq", "tmp2"), sep = "_", remove = TRUE) |>
   select(-c(trial_type, tmp1, tmp2))
 
-# Assuming your data frame is named 'df' and the column is named 'your_column'
-
-n400_words_b$Orthographic_Sensitivity[n400_words_b$Orthographic_Sensitivity == "Low"] <- "Low Sensitivity"
-n400_words_b$Orthographic_Sensitivity[n400_words_b$Orthographic_Sensitivity == "High"] <- "High Sensitivity"
-n400_words_b$base_freq[n400_words_b$base_freq == "Low"] <- "Low Base Frequency"
-n400_words_b$base_freq[n400_words_b$base_freq == "High"] <- "High Base Frequency"
-n400_words_b$family_size[n400_words_b$family_size == "large"] <- "Large Family"
-n400_words_b$family_size[n400_words_b$family_size == "small"] <- "Small Family"
+n400_words_b$family_size[n400_words_b$family_size == "large"] <- "Large"
+n400_words_b$family_size[n400_words_b$family_size == "small"] <- "Small"
 
 # Nonwords
 n400_nonwords <- n400_nonwords |>
   separate(binlabel, into = c("trial_type", "family_size", "complexity"), sep = "_", remove = TRUE) |>
   select(-trial_type)
 
-# Assuming your data frame is named 'df' and the column is named 'your_column'
-
-n400_nonwords$Orthographic_Sensitivity[n400_nonwords$Orthographic_Sensitivity == "Low"] <- "Low Sensitivity"
-n400_nonwords$Orthographic_Sensitivity[n400_nonwords$Orthographic_Sensitivity == "High"] <- "High Sensitivity"
 n400_nonwords$complexity[n400_nonwords$complexity == "complex"] <- "Complex"
 n400_nonwords$complexity[n400_nonwords$complexity == "simple"] <- "Simple"
-n400_nonwords$family_size[n400_nonwords$family_size == "large"] <- "Large Family"
-n400_nonwords$family_size[n400_nonwords$family_size == "small"] <- "Small Family"
+n400_nonwords$family_size[n400_nonwords$family_size == "large"] <- "Large"
+n400_nonwords$family_size[n400_nonwords$family_size == "small"] <- "Small"
+
+# Format as factors
+n400_nonwords <- n400_nonwords |>
+  mutate(complexity = fct_relevel(complexity, "Simple", "Complex"))
+
+n400_nonwords <- n400_nonwords |>
+  mutate(family_size = fct_relevel(family_size, "Small", "Large"))
+
+# str(n400_nonwords)
 ```
 
 Now we need to  extract just the bins and channels that we intend to analyse. For this analysis we will use 9 channels:  F3, Fz, F4, C3, Cz, C4, P3, Pz, P4 . We will use the`mutate` function from the `dplyr` package along with the `case_when` function. The `case_when` function  is a sequence of two-sided formulas. The left hand side determines which values match this case. The right hand side provides the replacement value.
@@ -216,9 +223,9 @@ No significant main effects
 A two-way interaction betweeen Family Size and Base Frequency
 
 
-|                            Effect|      df|         F| p.value||eta-sqrd|  
-|----------------------------------|--------|----------|--------|---------|
-|             family_size:base_freq| 1, 1523| 61.18 ***|   <.001|    0.04 |
+|                            Effect|         df|         F| p.value||eta-sqrd|  
+|----------------------------------|-----------|----------|--------|---------|
+|             family_size:base_freq| 1, 4738.00| 87.28 ***|   <.001|    0.02 |
 
 
 ### Simple Contrasts
@@ -228,16 +235,17 @@ A two-way interaction betweeen Family Size and Base Frequency
 (emm1 <- emmeans(anova_model_n400_words_b, ~ family_size * base_freq))
 
 # Get all pairswise contrasts
-(emm1_contrasts <- contrast(emm1,  method = "pairwise", by = NULL, adjust = "none"))
+emm1_contrasts <- contrast(emm1,  method = "pairwise", by = NULL, adjust = "none")
 
 # Keep only the contrasts you want
 # Simple effects of family_size at each level of base_freq
 # Simple effects of base_freq at each level of family_size
-keep <- c("Large Family High Base Frequency - Small Family High Base Frequency",
-          "Large Family Low Base Frequency - Small Family Low Base Frequency",
-          "Large Family High Base Frequency - Large Family Low Base Frequency",
-          "Small Family High Base Frequency - Small Family Low Base Frequency")
+keep <- c("Large High - Small High",
+          "Large Low - Small Low",
+          "Large High - Large Low",
+          "Small High - Small Low")
 (emm1_contrasts_filtered <- subset(emm1_contrasts, contrast %in% keep))
+
 
 # Get Confidence Intervals
 (emm1_contrasts_filtered_ci <- confint(emm1_contrasts_filtered))
@@ -250,23 +258,22 @@ effs1 <- eff_size(emm1, sigma = sigma(m1), edf = df.residual(m1))
 # Remove the two redundant rows (rows 3 and 4)
 (effs1_filtered <- subset(effs1, contrast %in% keep))
 ```
+For low-frequency bases, small-family words elicit more negative amplitudes than large-family words. When base frequency is high, family size has no effect.
+ 
+ - Low base frequency: $\text{Large - Small } = \; 0.9381 \; SE = 0.250; z = 3.747; p = 0.0002$. This difference is statistically significant.
+
+ - High base frequency: $\text{Large - Small }= \; 0.0395 \; SE = 0.272; z = 0.158; p = 0.8748$.  This difference is NS.
+ 
+ <br>
+
+For small-family words, low base frequency bases elicit more negative responses than high base frequency bases; when family_size is large, the difference is marginal.
 
 
-For large-family words, n400 amplitude is more negative when base frequency is high than when it is low. For small-family words, base frequency has little effect. For low-frequency bases, small-family words elicit more negative amplitudes than large-family words.
+ - Small family_size: $\text{High - Low }= \; 0.5495; SE = 0.188; z = 2.926; p = 0.0034$. Significant difference
+ 
+ - Large family_size: $\text{High - Low }= \; -0.3491; SE = 0.188; z = -1.859; p = 0.0631$. This is a trend but not significant.
 
-- At High base frequency: $\text{Large - Small }= \; -0.136; SE = 0.272; t = -0.501; p = 0.6184$.  This difference is not statistically significant ($p > .05$).
 
-- At Low base frequency: $\text{Large - Small } = 0.866 \; SE = 0.272; t = 3.179; p = 0.0023$. This difference is statistically significant ($p = 0.0023$ after adjustment.
-
-Thus: when base frequency is low, large vs small family_size differ significantly in predicted N400; but when base frequency is high, they do not differ significantly.
-
-Next, contrasting High vs Low base_freq within each family_size: 
-
-- Large family_size: $\text{High - Low }= \; -0.339; SE = 0.196; t = -1.726; p = 0.0886$. This is a trend ($p \sim .09$), but not conventionally significant.
-
-- Small family_size: $\text{High - Low }= \; 0.663; SE = 0.196; t = 3.381; p = 0.0012$. Significant difference: base_freq level matters when family_size is small.
-
-So: when family_size is small, high vs low base frequency yields a significant difference; when family_size is large, the difference is marginal / not strong.
 
 ### Interaction Contrasts
 <br>
@@ -280,7 +287,9 @@ confint(contrast(emmeans(m1, ~ family_size | base_freq), "pairwise"))
 confint(contrast(emm1, interaction = c("pairwise", "pairwise")))
 ```
 
-The final contrast tests whether the difference between Large vs Small family_size is itself different between High vs Low base_freq: $\text{Estimate }= \; -1.000$; $SE = 0.128$; $t = -7.821$; $p < .0001$
+The final contrast tests whether the difference between Large vs Small family_size is itself different between High vs Low base_freq: 
+
+$\text{Estimate }= \; -0.899$; $SE = 0.0962$; $z = -9.342$; $p < .0001$
 
 That is, the slope or effect of `family_size` depends strongly on the level of `base_freq` (consistent with your ANOVA). Put differently: the family size difference (Large - Small) is much more positive in the low base frequency condition than it is in the high base frequency condition. That difference of differences is highly significant.
 
@@ -345,18 +354,17 @@ eta_squared(anova_model_n400_nonwords, partial = TRUE)
 r2(anova_model_n400_nonwords)
 ```
 
-All partial $\eta^2$ values are extremely small (all < .01),; the observed family_size × complexity interaction, although statistically significant, explains a very small proportion of variance.
 
 ## Main Effects
 
-No main effects. The N400 responses to nonwords were largely unaffected by orthographic sensitivity, family size, or complexity considered separately. 
-
-
-
+No significant main effects
 
 ## Interactions
 
-A small but reliable `family_size` × `complexity` interaction ($t = 5.87$, $p =.016$) suggests the effect of family size (large vs. small) reversed or changed in magnitude depending on whether the nonwords were simple or complex, but this effect is weak and not influenced by reader sensitivity. Overall, the nonword data show minimal systematic structure, consistent with the idea that participants did not engage lexical-semantic processing for these stimuli in a meaningful way.
+
+|                            Effec|      df|         F| p.value||eta-sqrd|  
+|---------------------------------|--------|----------|--------|---------|
+|           family_size:complexity| 2, 4736| 18.31 ***|   <.001| 7.67e-03|
 
 
 ###  Simple Contrasts
