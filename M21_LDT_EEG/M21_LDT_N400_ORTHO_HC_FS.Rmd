@@ -48,6 +48,11 @@ theme_set(theme_classic() +
                   axis.text=element_text(size=8.5),
                   axis.title=element_text(size=9)))
 
+my_theme <- theme(strip.text = element_text(size = 7),
+                  axis.text.x = element_text(size = 7),
+                  legend.text = element_text(size = 6),
+                  legend.title = element_blank())
+
 # Define a custom color palette
 my_palette <- c("#A6CEE3",  "#FB9A99")
 my_palette_2 <- c( "#1F78B4","#E31A1C" )
@@ -62,6 +67,9 @@ scale_color_custom <- function() {
 scale_fill_custom <- function() {
   scale_fill_manual(values = my_palette_2)
 }
+
+# Combine theme and scales
+my_style <- list(my_theme,scale_color_custom(),scale_fill_custom())
 ```
 
 
@@ -193,6 +201,9 @@ n400_nonwords <- n400_nonwords  |>
 ## Nested ANOVA Model
 <br>
 ```{r}
+n400_words_b %>%
+  count(family_size, base_freq, Orthographic_Sensitivity)
+
 #Fit ANOVA model
 anova_model_n400_words_b <- mixed(
     value ~ Orthographic_Sensitivity * family_size * base_freq +
@@ -296,33 +307,9 @@ That is, the slope or effect of `family_size` depends strongly on the level of `
 
 ## Plots
 
-```{r}
-emm_df <- as.data.frame(emm1)
-p1<- ggplot(emm_df,
-       aes(x = family_size, y = emmean,
-           color = base_freq, group = base_freq)) +
-  geom_line(position = position_dodge(0.2)) +
-  geom_point(position = position_dodge(0.2)) +
-  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
-                width = 0.1, position = position_dodge(0.2)) +
-  labs(x = "Family Size", y = "Estimated N400 amplitude",
-       color = "Base Frequency",
-       title = "Base Frequency × Family Size") +
-  scale_color_custom() +
-  scale_fill_custom() 
-
-p2 <- ggplot(emm_df,
-       aes(x = base_freq, y = emmean,
-           color = family_size, group = family_size)) +
-  geom_line(position = position_dodge(0.2)) +
-  geom_point(position = position_dodge(0.2)) +
-  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
-                width = 0.1, position = position_dodge(0.2)) +
-  labs(x = "Base Frequency", y = "Estimated N400 amplitude",
-       color = "Family Size",
-       title = "Family Size × Base Frequency") +
-  scale_color_custom() +
-  scale_fill_custom() 
+```{r, fig.width = 5.5, fig.height= 3}
+p1 <- emmip(anova_model_n400_words_b, family_size ~ base_freq) + my_style
+p2 <- emmip(anova_model_n400_words_b, base_freq ~  family_size) + my_style
 
 plot_grid(p1, p2, ncol = 2)
 ```
@@ -334,6 +321,10 @@ plot_grid(p1, p2, ncol = 2)
 ## Compute the ANOVA
 <br>
 ```{r}
+
+# n400_nonwords %>%
+#   count(family_size, complexity, Orthographic_Sensitivity)
+
 anova_model_n400_nonwords <- mixed(
     value ~ Orthographic_Sensitivity * family_size * complexity +
     (1 + family_size + complexity | SubjID) +     # by-subject intercept + slopes
@@ -357,14 +348,15 @@ r2(anova_model_n400_nonwords)
 
 ## Main Effects
 
-No significant main effects
+Main effect of Complexity. Simple words elicit more negative responses than complex ones.
 
 ## Interactions
 
 
-|                            Effec|      df|         F| p.value||eta-sqrd|  
-|---------------------------------|--------|----------|--------|---------|
-|           family_size:complexity| 2, 4736| 18.31 ***|   <.001| 7.67e-03|
+|                            Effec|      df|        F| p.value||eta-sqrd|  
+|---------------------------------|--------|---------|--------|---------|
+|                       complexity|   1, 58|  4.64 * |    .035|     0.07|
+|           family_size:complexity| 2, 4736| 7.28 ** |   <.001| 7.67e-03|
 
 
 ###  Simple Contrasts
@@ -384,10 +376,10 @@ emm2_contrasts <- contrast(emm2,  method = "pairwise", by = NULL, adjust = "none
 # Keep only the contrasts you want
 # Simple effects of family_size at each level of complexity
 # Simple effects of complexity at each level of family_size
-keep2 <- c("Large Family Complex - Small Family Complex",
-          "Large Family Simple - Small Family Simple",
-          "Large Family Complex - Large Family Simple",
-          "Small Family Complex - Small Family Simple")
+keep2 <- c("Small Simple - Small Complex",
+           "Large Simple - Large Complex",
+           "Small Simple - Large Simple",
+           "Small Complex - Large Complex")
 (emm2_contrasts_filtered <- subset(emm2_contrasts, contrast %in% keep2))
 
 # Get Confidence Intervals
@@ -421,47 +413,27 @@ $$
 contrast(emm2, interaction = "pairwise", by = NULL, adjust = "holm")
 
 # Get confidence intervals, for each complexity effect for each family size and then for interaction effect
-confint(contrast(emmeans(m2, ~ family_size | complexity), "pairwise"))
+confint(contrast(emmeans(m2, ~ complexity | family_size), "pairwise"))
 confint(contrast(emm2, interaction = c("pairwise", "pairwise")))
 ```
 
 
 ## Plots
 <br>
-```{r}
-# Plot the interaction
-library(ggplot2)
 
-emm2_df <- as.data.frame(emm2)
+```{r, fig.width=8, fig.height=3.5}
 
-p3<- ggplot(emm2_df,
-       aes(x = family_size, y = emmean,
-           color = complexity, group = complexity)) +
-  geom_line(position = position_dodge(0.2)) +
-  geom_point(position = position_dodge(0.2)) +
-  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
-                width = 0.1, position = position_dodge(0.2)) +
-  labs(x = "Family Size", y = "Estimated N400 amplitude",
-       color = "Complexity",
-       title = "Complexity × Family Size") +
-  scale_color_custom() +
-  scale_fill_custom() 
 
-p4 <- ggplot(emm2_df,
-       aes(x = complexity, y = emmean,
-           color = family_size, group = family_size)) +
-  geom_line(position = position_dodge(0.2)) +
-  geom_point(position = position_dodge(0.2)) +
-  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
-                width = 0.1, position = position_dodge(0.2)) +
-  labs(x = "Complexity", y = "Estimated N400 amplitude",
-       color = "Family Size",
-       title = "Family Size × Complexity") +
-  scale_color_custom() +
-  scale_fill_custom() 
 
-plot_grid(p3, p4, ncol = 2)
+p3 <- emmip(anova_model_n400_nonwords, Orthographic_Sensitivity ~ complexity | family_size) + my_style
+p4 <- emmip(anova_model_n400_nonwords, family_size ~ complexity | Orthographic_Sensitivity) + my_style
+p5 <- emmip(anova_model_n400_nonwords, Orthographic_Sensitivity ~ family_size | complexity) + my_style
+
+plot_grid(p3, p4, p5, ncol = 3)
+
 ```
+
+
 
 
 

@@ -48,6 +48,11 @@ theme_set(theme_classic() +
                   axis.text=element_text(size=8.5),
                   axis.title=element_text(size=9)))
 
+my_theme <- theme(strip.text = element_text(size = 7),
+                  axis.text.x = element_text(size = 7),
+                  legend.text = element_text(size = 6),
+                  legend.title = element_blank())
+
 # Define a custom color palette
 my_palette <- c("#A6CEE3",  "#FB9A99")
 my_palette_2 <- c( "#1F78B4","#E31A1C" )
@@ -62,10 +67,13 @@ scale_color_custom <- function() {
 scale_fill_custom <- function() {
   scale_fill_manual(values = my_palette_2)
 }
+
+# Combine theme and scales
+my_style <- list(my_theme,scale_color_custom(),scale_fill_custom())
 ```
 
-
 Define standard error of the mean function
+
 ```{r, echo=FALSE}
 sem <- function(x) sd(x)/sqrt(length(x))
 ```
@@ -285,33 +293,9 @@ There is a robust crossover interaction: the base-frequency effect is significan
 
 ## Plots
 
-```{r}
-emm1_df <- as.data.frame(emm1)
-p1<- ggplot(emm1_df,
-       aes(x = base_freq, y = emmean,
-           color = family_size, group = family_size)) +
-  geom_line(position = position_dodge(0.2)) +
-  geom_point(position = position_dodge(0.2)) +
-  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
-                width = 0.1, position = position_dodge(0.2)) +
-  labs(x = "Base Frequency", y = "Estimated N250 amplitude",
-       color = "Family Size",
-       title = "Family Size × Base Frequency") +
-  scale_color_custom() +
-  scale_fill_custom() 
-
-p2 <- ggplot(emm1_df,
-       aes(x = family_size, y = emmean,
-           color = base_freq, group = base_freq)) +
-  geom_line(position = position_dodge(0.2)) +
-  geom_point(position = position_dodge(0.2)) +
-  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
-                width = 0.1, position = position_dodge(0.2)) +
-  labs(x = "Family Size", y = "Estimated N250 amplitude",
-       color = "Base Frequency",
-       title = "Base Frequency × Family Size") +
-  scale_color_custom() +
-  scale_fill_custom() 
+```{r, fig.width = 5.5, fig.height= 2.5}
+p1 <- emmip(anova_model_n250_words_b, family_size ~ base_freq) + my_style
+p2 <- emmip(anova_model_n250_words_b, base_freq ~  family_size) + my_style
 
 plot_grid(p1, p2, ncol = 2)
 ```
@@ -412,7 +396,7 @@ emm3_contrasts <- contrast(emm3,  method = "pairwise", by = NULL, adjust = "none
 # Keep only the contrasts you want
 # Simple effects of family_size at each level of complexity
 # Simple effects of complexity at each level of family_size
-keep2 <- c("High Orthographic Large Simple - High Orthographic Large Complex",
+keep3 <- c("High Orthographic Large Simple - High Orthographic Large Complex",
            "High Orthographic Small Simple - High Orthographic Small Complex",
            "Low Orthographic Large Simple - Low Orthographic Large Complex",
            "Low Orthographic Small Simple - Low Orthographic Small Complex",
@@ -445,10 +429,6 @@ effs3 <- eff_size(emm3, sigma = sigma(m2), edf = df.residual(m2))
  <br>   
   - The trend-level `Orthographic_Sensitivity × Complexity` effect arises because low-sensitivity participants show a stronger complexity contrast (more negative for simple than complex), while high-sensitivity participants do not.
 <br>  
-<br>  
-```{r, fig.width=3.5}
-emmip(anova_model_n250_nonwords, Orthographic_Sensitivity ~ complexity)
-```
 
 
 ### Interaction Contrasts
@@ -519,8 +499,13 @@ Thus, the three-way pattern suggests that individuals with weaker orthographic r
 
 ## Plots
 <br>  
-```{r}
-emmip(anova_model_n250_nonwords, Orthographic_Sensitivity ~ complexity | family_size)
+```{r, fig.width=8, fig.height=3}
+
+p3 <- emmip(anova_model_n250_nonwords, Orthographic_Sensitivity ~ complexity | family_size) + my_style
+p4 <- emmip(anova_model_n250_nonwords, family_size  ~ complexity | Orthographic_Sensitivity) + my_style
+p5 <- emmip(anova_model_n250_nonwords, Orthographic_Sensitivity ~ family_size | complexity) + my_style
+
+plot_grid(p3, p4, p5, ncol = 3)
 ```
 
 
