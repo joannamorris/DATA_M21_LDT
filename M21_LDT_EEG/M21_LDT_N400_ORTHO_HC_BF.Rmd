@@ -1,0 +1,189 @@
+---
+title: "M21 LDT ERP HC ORTHOGRAPIC SENSITIVITY N400 Base Frequency"
+author: "Joanna Morris"
+date: "`r Sys.Date()`"
+output:
+  bookdown::pdf_document2:
+    toc: true
+    toc_depth: 4
+editor_options: 
+  chunk_output_type: inline
+---
+
+\scriptsize
+
+# Set parameters {-}
+Set chunk parameters
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      error = FALSE,
+                      comment = "||")
+options(width = 140)
+```
+
+
+
+Load libraries
+```{r, echo=FALSE}
+library(tidyverse)
+library(ggeffects)
+library(lme4)
+library(afex)
+library(gridExtra)
+library(emmeans)
+library(effectsize)
+library(performance)
+library(cowplot)  # for use with `plot_grid(x,x,ncol = x)` function
+library(e1071) # for use with `skewness()` function
+library(lmerTest)
+```
+
+
+Set ggplot parameters
+```{r, echo=FALSE}
+theme_set(theme_classic() +  
+            theme(legend.position = "bottom", 
+                  axis.text=element_text(size=8.5),
+                  axis.title=element_text(size=9)))
+
+my_theme <- theme(strip.text = element_text(size = 7),
+                  axis.text.x = element_text(size = 7),
+                  legend.text = element_text(size = 6),
+                  legend.title = element_blank())
+
+# Define a custom color palette
+my_palette <- c("#A6CEE3",  "#FB9A99")
+my_palette_2 <- c( "#1F78B4","#E31A1C" )
+my_palette_3 <- c("#A6CEE3","#1F78B4","#FB9A99","#E31A1C")
+
+
+# Create a function to apply this palette
+scale_color_custom <- function() {
+  scale_color_manual(values = my_palette_2)
+}
+
+scale_fill_custom <- function() {
+  scale_fill_manual(values = my_palette_2)
+}
+
+# Combine theme and scales
+my_style <- list(my_theme,scale_color_custom(),scale_fill_custom())
+```
+
+
+Define standard error of the mean function
+```{r, echo=FALSE}
+sem <- function(x) sd(x)/sqrt(length(x))
+```
+
+
+# Load data files 
+
+```{r}
+dir_path <- "CSV files"
+
+erp_4A <- read_csv(file.path(dir_path, "bf_m21_ldt_mea_300500_050050_1_AB.csv"))
+erp_4B <- read_csv(file.path(dir_path, "bf_m21_ldt_mea_300500_050050_1_BA.csv"))
+dmg_lng_vsl <- read_csv(file.path(dir_path, "demo_lang_vsl_pca_hc.csv"))
+```
+
+```{r}
+library(dplyr)
+
+erp_4i <- bind_rows(
+  erp_4A |> mutate(List = "AB"),
+  erp_4B |> mutate(List = "BA")
+)
+```
+
+Now we extract `SubjID` from the `ERPset` column
+```{r, , echo=FALSE}
+
+erp_4ii <- erp_4i |>
+  rename(SubjID = ERPset) |>
+  mutate(SubjID = str_replace(SubjID, "_LDT_diff_waves", "")) |>
+  mutate(binlabel = str_replace(binlabel, "Critical_", "")) |>
+  mutate(binlabel = str_replace(binlabel, "_family", "")) |>
+  select(-mlabel)
+```
+
+We then join the ERP data and language into a single data frame
+```{r, echo=FALSE}
+
+erp_4iii <- erp_4ii |>
+  left_join(dmg_lng_vsl, by = "SubjID") |>
+  select(SubjID, everything()) 
+```
+
+# Format data files 
+
+Divide into word, non-word and difference wave dataframes
+```{r, echo=FALSE}
+n400_nonwords <- erp_4iii |> filter(bini %in% c(19:22))
+```
+
+Then we do some more formatting and cleanup of the dataframes.We  create separate columns, one for each independent variable (anteriority, laterality, morphological family size). To do this we have to use `seperate` function from the `stringr` package. Run `vignette("programming", package = "dplyr")` to see more about `tidy-selection` and `tidy-evaluation`.
+
+```{r, echo=FALSE}
+# Nonwords
+n400_nonwords <- n400_nonwords |>
+  separate_wider_delim(
+    binlabel,
+    delim = "_",
+    names = c("Lexicality", "Complexity", "Base_Frequency"),
+    too_many = "drop")
+
+# Format as factors
+n400_nonwords <- n400_nonwords |>
+  mutate(complexity = fct_relevel(Complexity, "Simple", "Complex"))
+
+n400_nonwords <- n400_nonwords |>
+  mutate(family_size = fct_relevel(Base_Frequency, "Low", "High"))
+```
+
+Now we need to  extract just the bins and channels that we intend to analyse. For this analysis we will use 9 channels:  F3, Fz, F4, C3, Cz, C4, P3, Pz, P4 . We will use the`mutate` function from the `dplyr` package along with the `case_when` function. The `case_when` function  is a sequence of two-sided formulas. The left hand side determines which values match this case. The right hand side provides the replacement value.
+
+```{r, echo=FALSE}
+channels_1 <-  c(3, 2, 25, 7, 20, 21, 12, 11, 16)
+
+# Nonwords
+n400_nonwords <- n400_nonwords  |>
+  filter(chindex %in% channels_1) |> 
+  select(-`Included VSL2`)
+```
+
+# N400 Nonword Data
+
+## Compute the ANOVA
+<br>
+```{r}
+
+# n400_nonwords %>%
+#   count(family_size, complexity, Orthographic_Sensitivity)
+
+anova_model_n400_nonwords <- mixed(
+    value ~ Orthographic_Sensitivity * Base_Frequency * Complexity +
+    (1 + family_size + complexity | SubjID) +     # by-subject intercept + slopes
+    (1 | SubjID:chlabel),                        # electrode nested within subject
+  data   = n400_nonwords,
+  method = "KR"
+)
+anova_model_n400_nonwords 
+
+m2 <- anova_model_n400_nonwords$full_model    # Extract the lmer model
+ranova(m2)    # Run random effects comparison
+
+
+# Extract effect sizes from your ANOVA model
+eta_squared(anova_model_n400_nonwords, partial = TRUE)
+
+# Compute Marginal(fixed effects only) and Conditional(fixed + random effects) R²
+r2(anova_model_n400_nonwords)
+```
+
+
+## Main Effects
+
+No Main Effects or Interactions

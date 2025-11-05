@@ -199,10 +199,15 @@ n400_nonwords <- n400_nonwords  |>
 # N400 Word Data
 
 ## Nested ANOVA Model
-<br>
+
+
 ```{r}
 n400_words_b %>%
   count(family_size, base_freq, Orthographic_Sensitivity)
+```
+
+<br>
+```{r}
 
 #Fit ANOVA model
 anova_model_n400_words_b <- mixed(
@@ -419,18 +424,13 @@ confint(contrast(emm2, interaction = c("pairwise", "pairwise")))
 
 
 ## Plots
+
 <br>
 
 ```{r, fig.width=8, fig.height=3.5}
-
-
-
-p3 <- emmip(anova_model_n400_nonwords, Orthographic_Sensitivity ~ complexity | family_size) + my_style
-p4 <- emmip(anova_model_n400_nonwords, family_size ~ complexity | Orthographic_Sensitivity) + my_style
-p5 <- emmip(anova_model_n400_nonwords, Orthographic_Sensitivity ~ family_size | complexity) + my_style
-
-plot_grid(p3, p4, p5, ncol = 3)
-
+p3 <- emmip(anova_model_n400_nonwords, complexity ~ family_size)  + my_style
+p4 <- emmip(anova_model_n400_nonwords, family_size ~ complexity)  + my_style
+plot_grid(p3, p4, ncol = 3)
 ```
 
 
