@@ -4,7 +4,7 @@ author: "Joanna Morris"
 date: "`r Sys.Date()`"
 output: pdf_document
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 
@@ -316,19 +316,44 @@ ranova(m2) # Run random effects comparison
 
 <br>
 
-### Main Findings
+### Main Effects
 
 |                                     Effect|          df |        F |p.value |
 |-------------------------------------------|-------------|----------|--------|
 |                                 Complexity|  1, 4528.29 |122.09 ***|   <.001|
-|                                Family_Size|  1,   94.56 |  0.96    |    .329|
-|                       Semantic_Sensitivity|  1,   63.44 |  0.00    |    .954|
-|Complexity:Family_Size:Semantic_Sensitivity|  1, 4442.85 |  4.84   *|    .028|
-	
+
+
+
+#### Main Effects Plots
+
+```{r, echo = FALSE, fig.height=3, fig.width=3.5}
+#### Main Effect of Complexity
+# Compute means for each level of Complexity
+(emm_nw_fs_cmp_df <- as.data.frame(emmeans(anova_model_nwords_fs, ~  Complexity )))
+
+p3<- emm_nw_fs_cmp_df |> ggplot(aes(y = emmean, x = Complexity, 
+                                   colour = Complexity, 
+                                   fill = Complexity)) +
+  geom_col( alpha = .4)  +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
+                width = 0.1, position = position_dodge(0.2)) +
+  coord_cartesian(ylim = c(650, 800)) +
+  labs(title = "Complexity Effect (Non-Words)", y = "RT in milliseconds") +
+  scale_color_custom() +
+  scale_fill_custom() 
+
+p3
+```
+
 
 ### Interaction Effects
 
-###  Simple Contrasts
+|                                     Effect|          df |        F |p.value |
+|-------------------------------------------|-------------|----------|--------|
+|Complexity:Family_Size:Semantic_Sensitivity|  1, 4442.85 |  4.84   *|    .028|
+	
+	
+####  Simple Contrasts
 
 Compare High vs Low Semantic Sensitivity within each combination of Family Size and Complexity  
 
@@ -378,7 +403,7 @@ effs2 <- eff_size(emm2, sigma = sigma(m2), edf = df.residual(m2))
 
 <br>
 
-### Interaction Contrasts
+#### Interaction Contrasts
 
 The interaction contrast tests whether the difference in the complexity effect for large vs small families differs across sensitivity?
 
@@ -415,6 +440,14 @@ confint(family_size_complexity_int_within_sensitivity)
 
 <br>
 
+###  Interaction Plots
+
+```{r, fig.height=3, fig.width=8}
+p4 <- emmip(anova_model_nwords_fs, Complexity ~ Family_Size | Semantic_Sensitivity) + my_style
+p5 <- emmip(anova_model_nwords_fs, Family_Size ~ Complexity | Semantic_Sensitivity) + my_style
+
+plot_grid(p4, p5, ncol = 2)
+```
 Responses were slower to *Complex* than *Simple* nonwords in every condition. The *Complexity effect* (`Complex - Simple`) varied with both *Family Size* and *Semantic Sensitivity*.
 
 The Complexity effect (slower responses for complex vs. simple nonwords) is robust across all groups.
@@ -446,42 +479,6 @@ Response times to morphologically complex nonwords were significantly slower tha
 
 Follow-up contrasts showed that for participants with high semantic sensitivity, the complexity effect was larger for large-family nonwords ($\approx 45$ ms) than for small-family nonwords ($\approx 27$ ms). In contrast, participants with low semantic sensitivity showed little difference or the reverse pattern. This suggests that individuals with greater semantic knowledge are more sensitive to morphological family size cues when processing novel morphological structures, showing amplified complexity costs when nonwords resemble rich morphological families.
 
-
-### Plots
-
-```{r, echo = FALSE, fig.height=3}
-#### Main Effect of Complexity
-# Compute means for each level of Complexity
-(emm_nw_fs_cmp_df <- as.data.frame(emmeans(anova_model_nwords_fs, ~  Complexity )))
-
-p3<- emm_nw_fs_cmp_df |> ggplot(aes(y = emmean, x = Complexity, 
-                                   colour = Complexity, 
-                                   fill = Complexity)) +
-  geom_col( alpha = .4)  +
-  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
-                width = 0.1, position = position_dodge(0.2)) +
-  coord_cartesian(ylim = c(650, 800)) +
-  labs(title = "Complexity Effect (Non-Words)", y = "RT in milliseconds") +
-  scale_color_custom() +
-  scale_fill_custom() 
-
-#### Main Effect of Semantic_Sensitivity
-# Compute means for each level of Semantic_Sensitivity
-(emm_nw_fs_os_df <- as.data.frame(emmeans(anova_model_nwords_fs, ~  Semantic_Sensitivity )))
-
-p4 <- emm_nw_fs_os_df |> ggplot(aes(y = emmean, x = Semantic_Sensitivity, 
-                              colour = Semantic_Sensitivity, 
-                              fill = Semantic_Sensitivity)) +
-  geom_col( alpha = .4)  +
-  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE),
-                width = 0.1, position = position_dodge(0.2)) +
-  coord_cartesian(ylim = c(650, 800)) +
-  labs(title = "Semantic Sensitivity Effect (Non-Words)", y = "RT in milliseconds") +
-  scale_color_custom() +
-  scale_fill_custom() 
-
-plot_grid(p3, p4, ncol = 2)
-```
 
 \newpage
 
@@ -605,7 +602,7 @@ No effects involving Semantic Sensitivity were observed, indicating that this ba
 # Compute means for each level of Complexity
 (emm_nw_bf_cmp_df <- as.data.frame(emmeans(anova_model_nwords_bf, ~  Complexity )))
 
-p5<- emm_nw_bf_cmp_df |> ggplot(aes(y = emmean, x = Complexity, 
+p6<- emm_nw_bf_cmp_df |> ggplot(aes(y = emmean, x = Complexity, 
                                    colour = Complexity, 
                                    fill = Complexity)) +
   geom_col( alpha = .4, show.legend = FALSE)  +
@@ -622,7 +619,7 @@ p5<- emm_nw_bf_cmp_df |> ggplot(aes(y = emmean, x = Complexity,
 # Compute means for each level of Base_Frequency
 (emm_nw_bf_bf_df <- as.data.frame(emmeans(anova_model_nwords_bf, ~  Base_Frequency )))
 
-p6<- emm_nw_bf_bf_df |> ggplot(aes(y = emmean, x = Base_Frequency, 
+p7<- emm_nw_bf_bf_df |> ggplot(aes(y = emmean, x = Base_Frequency, 
                                    colour = Base_Frequency, 
                                    fill = Base_Frequency)) +
   geom_col( alpha = .4, show.legend = FALSE)  +
@@ -637,9 +634,9 @@ p6<- emm_nw_bf_bf_df |> ggplot(aes(y = emmean, x = Base_Frequency,
 
 #### Main Effect of Semantic_Sensitivity
 # Compute means for each level of Semantic_Sensitivity
-(emm_nw_bf_os_df <- as.data.frame(emmeans(anova_model_nwords_bf, ~  Semantic_Sensitivity )))
+(emm_nw_bf_bf_df <- as.data.frame(emmeans(anova_model_nwords_bf, ~  Semantic_Sensitivity )))
 
-p7 <- emm_nw_fs_os_df |> ggplot(aes(y = emmean, x = Semantic_Sensitivity, 
+p8 <- emm_nw_bf_bf_df |> ggplot(aes(y = emmean, x = Semantic_Sensitivity, 
                               colour = Semantic_Sensitivity, 
                               fill = Semantic_Sensitivity)) +
   geom_col( alpha = .4, show.legend = FALSE)  +
@@ -652,14 +649,14 @@ p7 <- emm_nw_fs_os_df |> ggplot(aes(y = emmean, x = Semantic_Sensitivity,
   theme(legend.position = "none")
 # p7
 
-plot_grid(p5, p6, p7, ncol = 3, labels = "AUTO")
+plot_grid(p6, p7, p8, ncol = 3, labels = "AUTO")
 ```
 
 ###  Interaction Plots
 
 ```{r, fig.height=3}
-p8 <- emmip(anova_model_nwords_bf, Complexity ~ Base_Frequency) + my_style
-p9 <- emmip(anova_model_nwords_bf, Base_Frequency ~ Complexity) + my_style
+p9 <- emmip(anova_model_nwords_bf, Complexity ~ Base_Frequency) + my_style
+p10 <- emmip(anova_model_nwords_bf, Base_Frequency ~ Complexity) + my_style
 
-plot_grid(p8, p8, ncol = 2)
+plot_grid(p9, p10, ncol = 2)
 ```
