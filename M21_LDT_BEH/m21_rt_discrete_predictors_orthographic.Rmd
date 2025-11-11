@@ -211,42 +211,30 @@ rt_words_cmpl %>%
 ```{r anova_words}
 anova_model_words <- mixed(
   response_time ~ Base_Frequency * Family_Size * Orthographic_Sensitivity +
-    (1 | SubjID) +
+    (1 + Base_Frequency + Family_Size | SubjID) +
     (1 | STRING),
   data = rt_words_cmpl,
   method = "S")
 anova_model_words
 
-m1 <- anova_model_words$full_model    # Extract the lmer model
+m1 <- anova_model_words$full_model    # Extract the lmer model 
 ranova(m1) # formally test whether adding each random effect improves fit
 
 # Extract effect sizes from your ANOVA model
 eta_squared(anova_model_words, partial = TRUE)
 
 # Compute Marginal(fixed effects only) and Conditional(fixed + random effects) R²
-r2(anova_model_words)
+r2(m1)
 ```
 
-<br>
-
-Concise
-
-Models including random slopes for Base Frequency and Family Size by subject failed to converge or produced singular fits, indicating that the data did not support estimation of these additional variance components. Consequently, we report results from a simpler model with random intercepts for subjects and items (STRING), which converged cleanly and provided stable estimates.
-
-Fuller explanation 
-
-We initially attempted to fit a maximal random-effects structure following Barr et al. (2013), including random slopes for Base Frequency and Family Size by subject. However, these models yielded singular fits (zero variance estimates and perfect correlations among random effects). Because such structures can produce unreliable standard errors and inflated Type I error rates, we adopted the maximal non-singular model, containing random intercepts for both subjects and items (STRING). All reported statistics are based on this model.
-
- Brief 
-
-(A more complex model including by-subject random slopes failed to converge; results from the non-singular intercept-only model are reported.)
+&nbsp;
 
 ### Main Effects
 
 |                        Effect|       df |      F |p.value|
 |------------------------------|----------|--------|-------|
-|                Base_Frequency| 1, 92.45 |10.29 **|   .002|
-|                   Family_Size| 1, 92.44 | 9.41 **|   .003|
+|                Base_Frequency| 1, 93.84 |10.22 **|   .002|
+|                   Family_Size| 1, 92.69 | 9.12 **|   .003|
 
 #### Means
 
@@ -333,7 +321,7 @@ rt_nwords_cmpl$Dim.2_std <- as.numeric(scale(rt_nwords_cmpl$Dim.2, center = TRUE
 ```{r anova_nwords_fs}
 anova_model_nwords_fs <- mixed(
   response_time ~ Complexity * Family_Size * Orthographic_Sensitivity +
-    (1 | SubjID) +
+    (1 + Complexity + Family_Size | SubjID) +
     (1 | ItemID),
   data = rt_nwords_cmpl,
   method = "S")
@@ -355,8 +343,8 @@ r2(anova_model_nwords_fs)
 
 |                     Effect|          df |        F |p.value |
 |---------------------------|-------------|----------|--------|
-|                 Complexity|  1, 4529.58 |124.76 ***|   <.001|
-|   Orthographic_Sensitivity|  1,   63.59 |  5.37   *|    .024|
+|                 Complexity|  1,   61.93 | 89.98 ***|   <.001|
+|   Orthographic_Sensitivity|  1,   63.58 |  5.33   *|    .024|
 	
 	
 #### Main Effects Means
@@ -416,7 +404,7 @@ plot_grid(p3, p4, ncol = 2)
 ```{r anova_nwords_bf}
 anova_model_nwords_bf <- mixed(
   response_time ~ Complexity * Base_Frequency * Orthographic_Sensitivity +
-    (1 | SubjID) +
+    (1 + Base_Frequency + Complexity | SubjID) +
     (1 | ItemID),
   data = rt_nwords_cmpl,
   method = "S")
@@ -438,18 +426,18 @@ r2(anova_model_nwords_bf)
 
 |                     Effect|          df |        F |p.value |
 |---------------------------|-------------|----------|--------|
-|                 Complexity|  1, 4534.35 |127.54 ***|   <.001|
-|             Base_Frequency|  1,  177.77 | 12.99  **|   <.001|
-|   Orthographic_Sensitivity|  1,   63.60 |  5.32   *|    .024|
-|  Complexity:Base_Frequency|  1, 4535.47 |  4.26   *|    .039|
+|                 Complexity|  1,   60.94 | 90.90 ***|   <.001|
+|             Base_Frequency|  1,   93.14 | 11.47  **|   <.001|
+|   Orthographic_Sensitivity|  1,   63.60 |  5.24   *|    .025|
+|  Complexity:Base_Frequency|  1,  425.13 |  3.40    |    .066|
 
-- Complexity (F = 127.5, p < .001): complex > simple non-words → slower responses.
+- Complexity: complex > simple non-words → slower responses.
 
-- Base Frequency (F = 13.0, p < .001): non-words derived from high-frequency bases were processed faster than those from low-frequency bases — an echo of lexical familiarity effects even though the items are illegal.
+- Base Frequency (: non-words derived from high-frequency bases were processed faster than those from low-frequency bases — an echo of lexical familiarity effects even though the items are illegal.
 
-- Orthographic Sensitivity (F = 5.32, p = .024): same direction as before.
+- Orthographic Sensitivity : same direction as before.
 
-- Complexity × Base Frequency (F = 4.26, p = .039): The effect of complexity was larger for high-frequency bases than for low-frequency ones.
+- Complexity × Base Frequency (marginal effect): The effect of complexity was larger for high-frequency bases than for low-frequency ones.
 
 
 ```{r means_nwords_bf}
@@ -480,61 +468,7 @@ keep <- c("Complex High - Simple High",
           "Complex High - Complex Low",
           "Simple High - Simple Low")
 (emm1_contrasts_filtered <- subset(emm1_contrasts, contrast %in% keep))
-
-# Get Confidence Intervals
-(emm1_contrasts_filtered_ci <- confint(emm1_contrasts_filtered))
-
-
-# Get effect sizes
-# Get all pairwise effect sizes
-effs1 <- eff_size(emm1, sigma = sigma(m3), edf = df.residual(m3))
-effs1
-
-# Remove the two redundant rows (rows 3 and 4)
-(effs1_filtered <- subset(effs1, !contrast %in% c("Complex High - Simple Low",
-                                               "Simple High - Complex Low")))
 ```
-
-<br>
-
-#### Interaction Contrasts
-
-<br>
-
-```{r nwords_bf_interaction_contrasts}
-#  Interaction contrasts (difference-of-differences)
-#    Compare base frequency effect in large vs small family)
-contrast(emm1, interaction = "pairwise", by = NULL, adjust = "holm")
-confint(contrast(emm1, interaction = c("pairwise", "pairwise")))
-
-# Get confidence intervals, for each base frequency effect for each family size and then for interaction effect
-confint(contrast(emmeans(m3, ~ Complexity | Base_Frequency), "pairwise"))
-confint(contrast(emmeans(m3, ~ Base_Frequency | Complexity), "pairwise"))
-
-```
-
-Table 4. Estimated Marginal Means and Pairwise Contrasts for the Complexity × Base Frequency Interaction
-
-| Contrast | Delta RT (ms) | p | Effect size (d) | 95% CI for Delta RT (ms) | Interpretation |
-|----------|------|-----|----------|-----------|--------|
-| Complex High (751) - Simple High (709) | +42.3 | < .001 | 0.41 | [33.1, 51.4] | Strong complexity cost at high base frequency |
-| Complex Low (723) - Simple Low (694) | +29.2 | < .001 | 0.29 | [20.8, 37.5] | Moderate complexity cost at low base frequency |
-| Complex High (751) - Complex Low (723) | +28.0 | .0001 | 0.27 | [14.3, 41.6] | Complex items slower when based on high-frequency stems |
-| Simple High (709) - Simple Low (694) | +14.9 | .022 | 0.15 | [2.1, 27.6] | Small frequency benefit among simple items |
-
-<br>
-
-Table 5. Summary of Main Effects and Interactions
-
-| Effect | Direction / Pattern | Interpretation |
-|---|----------|--------|
-| Complexity | Complex > Simple across all conditions | Morphological structure slows non-word rejection (decomposition cost). |
-| Base Frequency | High > Low (faster RTs) | Familiar letter sequences facilitate processing even for non-words. |
-| Complexity × Base Frequency | Larger complexity cost for high-frequency bases (Delta ~ 13 ms) | Morphological activation stronger for familiar bases. |
-| Family Size | n.s. | No measurable influence; non-words lack real morphological families. |
-| Orthographic Sensitivity | High > Low (faster RTs overall) | Readers with higher orthographic sensitivity are generally more efficient. |
-
-<br>
 
 ###  Main Effects Plots
 
@@ -597,7 +531,7 @@ plot_grid(p5, p6, p7, ncol = 3, labels = "AUTO")
 
 ###  Interaction Plots
 
-```{r nwords_bf_interaction_plots, fig.height=3, fig.width=8}
+```{r nwords_bf_interaction_plots, fig.height=3, fig.width=8, echo=FALSE}
 p8 <- emmip(anova_model_nwords_bf, Complexity ~ Base_Frequency) + my_style
 p9 <- emmip(anova_model_nwords_bf, Base_Frequency ~ Complexity) + my_style
 
