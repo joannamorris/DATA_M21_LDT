@@ -23,7 +23,7 @@ options(width = 150)
 
 
 Load libraries
-```{r, echo=FALSE}
+```{r load_libraries, echo=FALSE}
 library(tidyverse)
 library(ggeffects)
 library(lme4)
@@ -80,7 +80,7 @@ my_style <- list(my_theme,scale_color_custom(),scale_fill_custom())
 
 <br>
 
-```{r}
+```{r load_files}
 #DIR <- "csv_files"
 df_a <- read_csv("rt_data_hc_A.csv")
 df_b <- read_csv( "rt_data_hc_B_fixed.csv")
@@ -95,7 +95,7 @@ dmg <- read_csv("demo_lang_vsl_pca_hc.csv")
 
 <br>
 
-```{r}
+```{r format_files}
 # Concatenate datasets
 rt <- bind_rows(AB = df_a, 
                 BA = df_b,
@@ -156,7 +156,7 @@ Use `complete.cases()` to find which rows have missing data in the model-relevan
 
 <br>
 
-```{r}
+```{r remove_NA_words}
 # Specify only the variables used in the model
 model_vars_w <- c("response_time",  "Log10BF","BF", "FS","Family_Size", "Base_Frequency", "Orthographic_Sensitivity","SubjID")
 
@@ -165,7 +165,9 @@ incomplete_cases_words <- rt_words_frq[!complete.cases(rt_words_frq[, model_vars
 rt_words_cmpl <- rt_words_frq[complete.cases(rt_words_frq[, model_vars_w]), ]
 # View them
 # print(incomplete_cases_words)
+```
 
+```{r standardize_predictors_words}
 # Standardize the predictors
 rt_words_cmpl$Log10BF_std <- as.numeric(scale(rt_words_cmpl$Log10BF, center = TRUE, scale = TRUE))
 rt_words_cmpl$FS_std <- as.numeric(scale(rt_words_cmpl$FS, center = TRUE, scale = TRUE))
@@ -176,7 +178,7 @@ rt_words_cmpl$Dim.2_std <- as.numeric(scale(rt_words_cmpl$Dim.2, center = TRUE, 
 
 <br>
 
-```{r, echo=FALSE, results = "hide"}
+```{r get_condition_counts, echo=FALSE, results = "hide"}
 rt_words_cmpl %>%
   summarise(
     n_subjects = n_distinct(SubjID),
@@ -206,7 +208,7 @@ rt_words_cmpl %>%
 
 <br>
 
-```{r}
+```{r anova_words}
 anova_model_words <- mixed(
   response_time ~ Base_Frequency * Family_Size * Orthographic_Sensitivity +
     (1 | SubjID) +
@@ -239,20 +241,28 @@ We initially attempted to fit a maximal random-effects structure following Barr 
 
 (A more complex model including by-subject random slopes failed to converge; results from the non-singular intercept-only model are reported.)
 
-### Main Findings
+### Main Effects
 
 |                        Effect|       df |      F |p.value|
 |------------------------------|----------|--------|-------|
 |                Base_Frequency| 1, 92.45 |10.29 **|   .002|
 |                   Family_Size| 1, 92.44 | 9.41 **|   .003|
 
+#### Means
+
+
+```{r words_means}
+emmeans(anova_model_words, ~ Family_Size)
+emmeans(anova_model_words, ~ Base_Frequency)
+emmeans(anova_model_words, ~ Orthographic_Sensitivity)
+```
+
 
 ### Plots
 
-
 <br>
 
-```{r, echo = FALSE, fig.height=3.5, fig.width=8}
+```{r words_main_effects_plots, echo = FALSE, fig.height=3.5, fig.width=8}
 #### Main Effect of Base Frequency
 # Compute means for each level of Base_Frequency
 (emm_wd_bf_df <- as.data.frame(emmeans(anova_model_words, ~  Base_Frequency )))
@@ -290,7 +300,7 @@ Use `complete.cases()` to find which rows had missing data in the model-relevant
 
 <br>
 
-```{r, echo=FALSE, results = "hide"}
+```{r remove_NA_nwords, echo=FALSE, results = "hide"}
 # Specify only the variables used in the model
 # model_vars <- c("response_time", "Dim.2","SubjID")
 model_vars_nw <- c("response_time","Complexity", "Family_Size", "Base_Frequency", 
@@ -303,8 +313,9 @@ rt_nwords_cmpl <- rt_nwords_frq[complete.cases(rt_nwords_frq[, model_vars_nw]), 
 print(incomplete_cases_nwords)
 
 # str(rt_nwords_1_cmpl)
+```
 
-
+```{r standardize_predictors_nwords}
 ### Standardize the predictors
 
 rt_nwords_cmpl$LogBF_std <- as.numeric(scale(rt_nwords_cmpl$LogBF, center = TRUE, scale = TRUE))
@@ -319,7 +330,7 @@ rt_nwords_cmpl$Dim.2_std <- as.numeric(scale(rt_nwords_cmpl$Dim.2, center = TRUE
 
 <br>
 
-```{r}
+```{r anova_nwords_fs}
 anova_model_nwords_fs <- mixed(
   response_time ~ Complexity * Family_Size * Orthographic_Sensitivity +
     (1 | SubjID) +
@@ -330,30 +341,42 @@ anova_model_nwords_fs
 
 m2 <- anova_model_nwords_fs$full_model    # Extract the lmer model
 ranova(m2) # Run random effects comparison
+
+# Extract effect sizes from your ANOVA model
+eta_squared(anova_model_nwords_fs, partial = TRUE)
+
+# Compute Marginal(fixed effects only) and Conditional(fixed + random effects) R²
+r2(anova_model_nwords_fs)
 ```
 
 <br>
 
-### Main Findings
+### Main Effects
 
 |                     Effect|          df |        F |p.value |
 |---------------------------|-------------|----------|--------|
 |                 Complexity|  1, 4529.58 |124.76 ***|   <.001|
 |   Orthographic_Sensitivity|  1,   63.59 |  5.37   *|    .024|
 	
+	
+#### Main Effects Means
+```{r nwords_fs_means}
+emmeans(anova_model_nwords_fs, ~ Complexity)
+emmeans(anova_model_nwords_fs, ~ Family_Size)
+emmeans(anova_model_nwords_fs, ~ Orthographic_Sensitivity)
+```
+	
 
 **Non-word complexity** had a robust effect; complex non-words (e.g., pseudoderived forms) elicited longer response times than simple ones. Participants with higher **orthographic sensitivity** responded significantly faster overall, suggesting more efficient processing of letter patterns even in non-words. **Morphological family size** did not modulate non-word RTs, nor did it interact with complexity or orthographic sensitivity.  Interpretation: In the absence of lexical representations, apparent “family size” (based on real-word analogues) does not measurably influence non-word recognition.
 
-<br>
+#### Main Effects Plots
 
-### Plots
+...
 
-<br>
-
-```{r, echo = FALSE, fig.height=3.5, fig.width=8}
+```{r nwords_fs_main_effects_plots, echo = FALSE, fig.height=3.5, fig.width=8}
 #### Main Effect of Complexity
 # Compute means for each level of Complexity
-(emm_nw_fs_cmp_df <- as.data.frame(emmeans(anova_model_nwords_fs, ~  Complexity )))
+emm_nw_fs_cmp_df <- as.data.frame(emmeans(anova_model_nwords_fs, ~  Complexity ))
 
 p3<- emm_nw_fs_cmp_df |> ggplot(aes(y = emmean, x = Complexity, 
                                    colour = Complexity, 
@@ -368,7 +391,7 @@ p3<- emm_nw_fs_cmp_df |> ggplot(aes(y = emmean, x = Complexity,
 
 #### Main Effect of Orthographic_Sensitivity
 # Compute means for each level of Orthographic_Sensitivity
-(emm_nw_fs_os_df <- as.data.frame(emmeans(anova_model_nwords_fs, ~  Orthographic_Sensitivity )))
+emm_nw_fs_os_df <- as.data.frame(emmeans(anova_model_nwords_fs, ~  Orthographic_Sensitivity ))
 
 p4 <- emm_nw_fs_os_df |> ggplot(aes(y = emmean, x = Orthographic_Sensitivity, 
                               colour = Orthographic_Sensitivity, 
@@ -390,7 +413,7 @@ plot_grid(p3, p4, ncol = 2)
 
 <br>
 
-```{r}
+```{r anova_nwords_bf}
 anova_model_nwords_bf <- mixed(
   response_time ~ Complexity * Base_Frequency * Orthographic_Sensitivity +
     (1 | SubjID) +
@@ -401,6 +424,12 @@ anova_model_nwords_bf
 
 m3 <- anova_model_nwords_bf$full_model    # Extract the lmer model
 ranova(m3) # Run random effects comparison
+
+# Extract effect sizes from your ANOVA model
+eta_squared(anova_model_nwords_bf, partial = TRUE)
+
+# Compute Marginal(fixed effects only) and Conditional(fixed + random effects) R²
+r2(anova_model_nwords_bf)
 ```
 
 <br>
@@ -422,13 +451,20 @@ ranova(m3) # Run random effects comparison
 
 - Complexity × Base Frequency (F = 4.26, p = .039): The effect of complexity was larger for high-frequency bases than for low-frequency ones.
 
+
+```{r means_nwords_bf}
+emmeans(anova_model_nwords_bf, ~ Complexity)
+emmeans(anova_model_nwords_bf, ~ Base_Frequency)
+emmeans(anova_model_nwords_bf, ~ Orthographic_Sensitivity)
+```
+
 ###  Interaction Effects: `Complexity x Base_Frequency` 
 
 #### Simple Contrasts
 
 <br>
 
-```{r}
+```{r nwords_bf_simple_contrasts}
 # Estimated marginal means for the family_size × base frequency interaction
 (emm1 <- emmeans(anova_model_nwords_bf, ~ Complexity * Base_Frequency))
 
@@ -465,7 +501,7 @@ effs1
 
 <br>
 
-```{r}
+```{r nwords_bf_interaction_contrasts}
 #  Interaction contrasts (difference-of-differences)
 #    Compare base frequency effect in large vs small family)
 contrast(emm1, interaction = "pairwise", by = NULL, adjust = "holm")
@@ -504,7 +540,7 @@ Table 5. Summary of Main Effects and Interactions
 
 <br>
 
-```{r, echo = FALSE, fig.height=3.5, fig.width=8}
+```{r nwords_bf_main_effects_plots, echo = FALSE, fig.height=3.5, fig.width=8}
 #### Main Effect of Complexity
 # Compute means for each level of Complexity
 (emm_nw_bf_cmp_df <- as.data.frame(emmeans(anova_model_nwords_bf, ~  Complexity )))
@@ -561,7 +597,7 @@ plot_grid(p5, p6, p7, ncol = 3, labels = "AUTO")
 
 ###  Interaction Plots
 
-```{r, fig.height=3, fig.width=8}
+```{r nwords_bf_interaction_plots, fig.height=3, fig.width=8}
 p8 <- emmip(anova_model_nwords_bf, Complexity ~ Base_Frequency) + my_style
 p9 <- emmip(anova_model_nwords_bf, Base_Frequency ~ Complexity) + my_style
 

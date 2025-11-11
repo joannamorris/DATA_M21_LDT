@@ -23,7 +23,7 @@ options(width = 150)
 
 
 Load libraries
-```{r, echo=FALSE}
+```{r load_libraries, echo=FALSE}
 library(tidyverse)
 library(ggeffects)
 library(lme4)
@@ -72,7 +72,7 @@ my_style <- list(my_theme,scale_color_custom(),scale_fill_custom())
 # Load Files and Format Files  {-}
 
 ## Load Files
-```{r}
+```{r load_files}
 #DIR <- "csv_files"
 df_a <- read_csv("rt_data_hc_A.csv")
 df_b <- read_csv( "rt_data_hc_B_fixed.csv")
@@ -83,7 +83,7 @@ dmg <- read_csv("demo_lang_vsl_pca_hc.csv")
 
 
 ## Format Files
-```{r}
+```{r format_files}
 # Concatenate datasets
 rt <- bind_rows(AB = df_a, 
                 BA = df_b,
@@ -136,7 +136,7 @@ rt_nwords_frq <- rt_nwords_frq |> rename(Base_Frequency = BF_Split, Family_Size 
 # Word Data
 
 Use `complete.cases()` to find which rows have missing data in the model-relevant variables:
-```{r, results = "hide"}
+```{r remove_NA_words, results = "hide"}
 # Specify only the variables used in the model
 model_vars_w <- c("response_time",  "Log10BF","BF", "FS","Family_Size", "Base_Frequency", "Semantic_Sensitivity","SubjID")
 
@@ -145,7 +145,9 @@ incomplete_cases_words <- rt_words_frq[!complete.cases(rt_words_frq[, model_vars
 rt_words_cmpl <- rt_words_frq[complete.cases(rt_words_frq[, model_vars_w]), ]
 # View them
 print(incomplete_cases_words)
+```
 
+```{r standardize_predictors_words }
 # Standardize the predictors
 rt_words_cmpl$Log10BF_std <- as.numeric(scale(rt_words_cmpl$Log10BF, center = TRUE, scale = TRUE))
 rt_words_cmpl$FS_std <- as.numeric(scale(rt_words_cmpl$FS, center = TRUE, scale = TRUE))
@@ -155,7 +157,7 @@ rt_words_cmpl$Dim.2_std <- as.numeric(scale(rt_words_cmpl$Dim.2, center = TRUE, 
 ```
 
 
-```{r, echo=FALSE, results = "hide"}
+```{r get_condition_counts_words, echo=FALSE, results = "hide"}
 rt_words_cmpl %>%
   summarise(
     n_subjects = n_distinct(SubjID),
@@ -179,8 +181,8 @@ rt_words_cmpl %>%
 
 
 ### Anova 
-<br>
-```{r}
+&nbsp;
+```{r anova_words}
 anova_model_words <- mixed(
   response_time ~ Base_Frequency * Family_Size * Semantic_Sensitivity +
     (1 | SubjID) +
@@ -211,7 +213,7 @@ We initially attempted to fit a maximal random-effects structure following Barr 
 
 (A more complex model including by-subject random slopes failed to converge; results from the non-singular intercept-only model are reported.)
 
-### Main Findings
+### Main Effects
 
 |                        Effect|       df |      F |p.value|
 |------------------------------|----------|--------|-------|
@@ -219,10 +221,19 @@ We initially attempted to fit a maximal random-effects structure following Barr 
 |                   Family_Size| 1, 92.30 | 9.28 **|   .003|
 
 
+#### Means
+
+
+```{r words_means}
+emmeans(anova_model_words, ~ Family_Size)
+emmeans(anova_model_words, ~ Base_Frequency)
+emmeans(anova_model_words, ~ Semantic_Sensitivity)
+```
+
 ### Plots
 
 
-```{r, echo = FALSE, fig.height=3}
+```{r words_main_effects_plots, echo = FALSE, fig.height=3}
 #### Main Effect of Base Frequency
 # Compute means for each level of Base_Frequency
 (emm_wd_bf_df <- as.data.frame(emmeans(anova_model_words, ~  Base_Frequency)))
@@ -258,7 +269,7 @@ plot_grid(p1, p2, ncol = 2, labels = "AUTO")
 
 Use `complete.cases()` to find which rows had missing data in the model-relevant variables:
 
-```{r, results = "hide"}
+```{r remove_NA_nwords, results = "hide"}
 # Specify only the variables used in the model
 # model_vars <- c("response_time", "Dim.2","SubjID")
 model_vars_nw <- c("response_time","Complexity", "Family_Size", "Base_Frequency", 
@@ -273,13 +284,9 @@ print(incomplete_cases_nwords)
 # str(rt_nwords_1_cmpl)
 ```
 
-<br>
-
 Standardize the predictors
 
-<br>
-
-```{r}
+```{r standardize_predictors_nwords}
 rt_nwords_cmpl$LogBF_std <- as.numeric(scale(rt_nwords_cmpl$LogBF, center = TRUE, scale = TRUE))
 rt_nwords_cmpl$FS_std <- as.numeric(scale(rt_nwords_cmpl$FS, center = TRUE, scale = TRUE))
 rt_nwords_cmpl$BF_std <- as.numeric(scale(rt_nwords_cmpl$BF, center = TRUE, scale = TRUE))
@@ -288,10 +295,7 @@ rt_nwords_cmpl$Dim.2_std <- as.numeric(scale(rt_nwords_cmpl$Dim.2, center = TRUE
 
 ## Anova Family Size
 
-<br>
-
-```{r}
-
+```{r get_condition_counts_nwords, echo=FALSE, results = "hide"}
 rt_nwords_cmpl %>%
   count(Complexity, Base_Frequency, Semantic_Sensitivity)
 
@@ -299,9 +303,9 @@ temp <- rt_nwords_cmpl |> filter(is.na(Complexity) & is.na(Base_Frequency))
 # write_csv(temp, "temp.csv")
 ```
 
-<br>
+&nbsp;
 
-```{r}
+```{r anova_nwords_fs}
 anova_model_nwords_fs <- mixed(
   response_time ~ Complexity * Family_Size * Semantic_Sensitivity +
     (1 | SubjID) +
@@ -312,9 +316,15 @@ anova_model_nwords_fs
 
 m2 <- anova_model_nwords_fs$full_model    # Extract the lmer model
 ranova(m2) # Run random effects comparison
+
+# Extract effect sizes from your ANOVA model
+eta_squared(anova_model_nwords_fs, partial = TRUE)
+
+# Compute Marginal(fixed effects only) and Conditional(fixed + random effects) R²
+r2(anova_model_nwords_fs)
 ```
 
-<br>
+&nbsp;
 
 ### Main Effects
 
@@ -322,14 +332,23 @@ ranova(m2) # Run random effects comparison
 |-------------------------------------------|-------------|----------|--------|
 |                                 Complexity|  1, 4528.29 |122.09 ***|   <.001|
 
-
+	
+#### Main Effects Means
+```{r means_nwords_fs}
+emmeans(anova_model_nwords_fs, ~ Complexity)
+emmeans(anova_model_nwords_fs, ~ Family_Size)
+emmeans(anova_model_nwords_fs, ~ Semantic_Sensitivity)
+```
+	
 
 #### Main Effects Plots
 
-```{r, echo = FALSE, fig.height=3, fig.width=3.5}
+...
+
+```{r main_effects_plots_nwords_fs, echo = FALSE, fig.height=3, fig.width=3.5}
 #### Main Effect of Complexity
 # Compute means for each level of Complexity
-(emm_nw_fs_cmp_df <- as.data.frame(emmeans(anova_model_nwords_fs, ~  Complexity )))
+emm_nw_fs_cmp_df <- as.data.frame(emmeans(anova_model_nwords_fs, ~  Complexity ))
 
 p3<- emm_nw_fs_cmp_df |> ggplot(aes(y = emmean, x = Complexity, 
                                    colour = Complexity, 
@@ -345,6 +364,9 @@ p3<- emm_nw_fs_cmp_df |> ggplot(aes(y = emmean, x = Complexity,
 p3
 ```
 
+&nbsp;
+
+&nbsp;
 
 ### Interaction Effects
 
@@ -361,9 +383,9 @@ This gives you: 4 contrasts: one for each `Family Size × Complexity` combinatio
 
 If simple effects aren’t significant, try looking at interaction contrasts, which test differences in the differences. You’re now asking: Does the effect of Sensitivity change more in some complexity/family combinations than others?
 
-<br>
+&nbsp;
 
-```{r}
+```{r nwords_fs_simple_contrasts}
 # Estimated marginal means for the family_size × complexity interaction
 (emm2 <- emmeans(anova_model_nwords_fs, ~ Semantic_Sensitivity * Family_Size * Complexity))
 
@@ -401,7 +423,7 @@ effs2 <- eff_size(emm2, sigma = sigma(m2), edf = df.residual(m2))
 (effs2_filtered <- subset(effs2, contrast %in% keep2))
 ```
 
-<br>
+&nbsp;
 
 #### Interaction Contrasts
 
@@ -416,9 +438,9 @@ $$
     \text{in Condition }C_2]
 $$
 
-<br>
+&nbsp;
 
-```{r}
+```{r nwords_fs_interaction_contrasts}
 #  Interaction contrasts (difference-of-differences)
 #    Compare complexity effect in large vs small family)
 contrast(emm2, interaction = "pairwise", by = NULL, adjust = "holm")
@@ -438,16 +460,20 @@ confint(contrast(emm2, interaction = c("pairwise", "pairwise")))
 confint(family_size_complexity_int_within_sensitivity)
 ```
 
-<br>
+&nbsp;
 
 ###  Interaction Plots
 
-```{r, fig.height=3, fig.width=8}
+```{r nwords_fs_interaction_plots, fig.height=3, fig.width=8}
 p4 <- emmip(anova_model_nwords_fs, Complexity ~ Family_Size | Semantic_Sensitivity) + my_style
 p5 <- emmip(anova_model_nwords_fs, Family_Size ~ Complexity | Semantic_Sensitivity) + my_style
 
 plot_grid(p4, p5, ncol = 2)
 ```
+
+
+&nbsp;
+
 Responses were slower to *Complex* than *Simple* nonwords in every condition. The *Complexity effect* (`Complex - Simple`) varied with both *Family Size* and *Semantic Sensitivity*.
 
 The Complexity effect (slower responses for complex vs. simple nonwords) is robust across all groups.
@@ -458,7 +484,7 @@ However, its magnitude varies:
 
   - Among **low-sensitivity participants**, the pattern reverses slightly ($\approx 29$ ms vs. 38 ms).
 
-<br>
+&nbsp;
 
 
 The difference in the Complexity × Family Size interaction between high- and low-sensitivity participants is about 27 ms.
@@ -484,9 +510,9 @@ Follow-up contrasts showed that for participants with high semantic sensitivity,
 
 ## Anova Base Frequency
 
-<br>
+&nbsp;
 
-```{r}
+```{r anova_nwords_bf}
 anova_model_nwords_bf <- mixed(
   response_time ~ Complexity * Base_Frequency * Semantic_Sensitivity +
     (1 | SubjID) +
@@ -497,32 +523,52 @@ anova_model_nwords_bf
 
 m3 <- anova_model_nwords_bf$full_model    # Extract the lmer model
 ranova(m3) # Run random effects comparison
+
+# Extract effect sizes from your ANOVA model
+eta_squared(anova_model_nwords_bf, partial = TRUE)
+
+# Compute Marginal(fixed effects only) and Conditional(fixed + random effects) R²
+r2(anova_model_nwords_bf)
 ```
 
-<br>
+&nbsp;
 
-### Main Findings
+### Main Effects
 
 |                     Effect|          df |        F |p.value |
 |---------------------------|-------------|----------|--------|
 |                 Complexity|  1, 4533.26 |125.15 ***|   <.001|
 |             Base_Frequency|  1,   95.24 | 12.70  **|   <.001|
-|  Complexity:Base_Frequency|  1, 4535.47 |  3.92   *|    .048|
-
-
-<br>
 
 Participants responded more slowly to complex nonwords and to low-frequency-base nonwords.
 
-<br>
+&nbsp;
+
+#### Means
+
+
+```{r means_nwords_bf}
+emmeans(anova_model_nwords_bf, ~ Complexity)
+emmeans(anova_model_nwords_bf, ~ Base_Frequency)
+emmeans(anova_model_nwords_bf, ~ Semantic_Sensitivity)
+```
+
+
+&nbsp;
 
 ###  Interaction Effects: `Complexity x Base_Frequency` 
 
+&nbsp;
+
+|                     Effect|          df |        F |p.value |
+|---------------------------|-------------|----------|--------|
+|  Complexity:Base_Frequency|  1, 4535.47 |  3.92   *|    .048|
+
 #### Simple Contrasts
 
-<br>
+&nbsp;
 
-```{r}
+```{r nwords_bf_simple_contrasts}
 # Estimated marginal means for the family_size × base frequency interaction
 (emm1 <- emmeans(anova_model_nwords_bf, ~ Complexity * Base_Frequency))
 
@@ -553,13 +599,13 @@ effs1
                                                "Simple High - Complex Low")))
 ```
 
-<br>
+&nbsp;
 
 #### Interaction Contrasts
 
-<br>
+&nbsp;
 
-```{r}
+```{r nwords_bf_interaction_contrasts}
 #  Interaction contrasts (difference-of-differences)
 #    Compare base frequency effect in large vs small family)
 contrast(emm1, interaction = "pairwise", by = NULL, adjust = "holm")
@@ -569,7 +615,7 @@ confint(contrast(emmeans(m3, ~ Complexity | Base_Frequency), "pairwise"))
 confint(contrast(emm1, interaction = c("pairwise", "pairwise")))
 ```
 
-<br>
+&nbsp;
 
 A small but reliable Complexity × Base Frequency interaction (p = .048) suggests that the complexity cost was smaller for nonwords derived from low-frequency bases.
 
@@ -580,7 +626,7 @@ Simple    |             High |        707   |41 ms faster                 |
 Complex   |             Low  |        721   |28 ms slower than Simple Low |
 Simple    |             Low  |        692   |fastest                      |
 
-<br>
+&nbsp;
 
 Both complexity and base frequency affect RTs additively, but their combination reveals that high-frequency bases magnify the complexity cost.
 
@@ -597,7 +643,7 @@ No effects involving Semantic Sensitivity were observed, indicating that this ba
 ###  Main Effects Plots
 
 
-```{r, echo = FALSE, fig.height=3}
+```{r nwords_bf_main_effects_plots, echo = FALSE, fig.height=3}
 #### Main Effect of Complexity
 # Compute means for each level of Complexity
 (emm_nw_bf_cmp_df <- as.data.frame(emmeans(anova_model_nwords_bf, ~  Complexity )))
@@ -654,7 +700,7 @@ plot_grid(p6, p7, p8, ncol = 3, labels = "AUTO")
 
 ###  Interaction Plots
 
-```{r, fig.height=3}
+```{r nwords_bf_interaction_plots, fig.height=3}
 p9 <- emmip(anova_model_nwords_bf, Complexity ~ Base_Frequency) + my_style
 p10 <- emmip(anova_model_nwords_bf, Base_Frequency ~ Complexity) + my_style
 
