@@ -357,7 +357,7 @@ effs1b <- eff_size(emm1b, sigma = sigma(m1), edf = df.residual(m1))
 
 #### `Sensitivity × family_size × base_freq` Interaction Contrasts
 
-The interaction contrast tests whether the difference in the *base frequency* effect for large vs small families differs across semantic sensitivity?
+The interaction contrast tests whether the difference in the *base frequency* effect for large vs small families differs across language proficiency?
 
 
 $$
@@ -389,7 +389,7 @@ confint(family_size_base_freq_int_within_sensitivity)
 ```
 (a) Base-frequency effect within each Family Size × Sensitivity cell
 
-| Semantic Sensitivity  | Family Size   | Low - High  Base Freq  | *t*   | *p*           |    Interpretation |
+| Language Proficiency  | Family Size   | Low - High  Base Freq  | *t*   | *p*           |    Interpretation |
 |-----------------------|---------------|------------------------|-------|---------------|-------------------|
 | High Sensitivity      | Large Family  |  0.7831 µV             | 2.465 |  0.0163       |                   |
 | Low Sensitivity       | Large Family  |  0.2358 µV             | 0.718 |  0.4754 (n.s.)|   |
@@ -397,22 +397,21 @@ confint(family_size_base_freq_int_within_sensitivity)
 | Low Sensitivity       | Small Family  |  0.0424 µV             | 1.401 |  0.1654 (n.s.)|   |
 
 **Pattern**:
-Only high-sensitivity readers show a pronounced base-frequency effect—and only for small-family words, where high-frequency bases elicit larger (more negative) N250s.
+Only high-sensitivity readers show a pronounced base-frequency effect—and only for large-family words; for these large-family words,  where high-frequency bases elicit larger (more negative) N250s.
 
 
 (b) Difference of those frequency effects across family size (within each group)
 
-| Semantic Sensitivity | (Small – Large Family)            | 95% CI           | *p*     | Interpretation |
-|                      |  difference in base-freq effect   |                  |         |                |
-|----------------------|-----------------------------------|------------------|---------|----------------|
-| High Sensitivity     | –1.188 µV  (-0.4049 - 0.7831)     | [-1.517  -0.859] | <0.0001 | the base-freq effect flips between large- and small-family words. |
-| Low Sensitivity      | -0.193 µV  ( 0.0424 - 0.2358)     | [-0.534   0.147] |  0.2655 | No difference in the base frequency effect |
+| Language Proficiency | (Small – Large Family) $\Delta$ in BF effect | 95% CI           | *p*     | Interpretation |
+|----------------------|----------------------------------------------|------------------|---------|----------------|
+| High Sensitivity     | –1.188 µV  (-0.4049 - 0.7831)                | [-1.517  -0.859] | <0.0001 | the base-freq effect flips between large- and small-family words. |
+| Low Sensitivity      | -0.193 µV  ( 0.0424 - 0.2358)                | [-0.534   0.147] |  0.2655 | No difference in the base frequency effect |
 
 
 **Interpretation**:
 
- - High-semantic participants show a large reversal of the frequency effect between large- and small-family words ($\approx 1.2 \; \mu V$).
- - Low-semantic participants show none.
+ - High-proficiency participants show a large reversal of the frequency effect between large- and small-family words ($\approx 1.2 \; \mu V$).
+ - Low-proficiency participants show none.
 
 #### Plots `Sensitivity × family_size × base_freq`
 <br> 
@@ -469,9 +468,9 @@ r2(anova_model_n250_nonwords)
 
 ###  `Semantic_Sensitivity x family_size x complexity` Simple Contrasts
 
-Compare High vs Low Semantic Sensitivity within each combination of Family Size and Complexity  
+Compare High vs Low Language Proficiency within each combination of Family Size and Complexity  
 
-This gives you: 4 contrasts: one for each `Family Size × Complexity` combination. Each shows whether `High` vs `Low Semantic Sensitivity` differs significantly
+This gives you: 4 contrasts: one for each `Family Size × Complexity` combination. Each shows whether `High` vs `Low Language Proficiency` differs significantly
 
 If simple effects aren’t significant, try looking at interaction contrasts, which test differences in the differences. You’re now asking: Does the effect of Sensitivity change more in some complexity/family combinations than others?
 <br>
@@ -552,14 +551,14 @@ confint(familysize_complexity_int_within_sensitivity)
 ###  `Semantic_Sensitivity x family_size x complexity`  Plots
 <br>  
 ```{r, fig.width=8, fig.height=3.5}
-p5 <- emmip(anova_model_n250_nonwords, family_size ~   complexity|   Semantic_Sensitivity)  + my_style
+p5 <- emmip(anova_model_n250_nonwords, family_size ~   complexity| Semantic_Sensitivity)  + my_style
 p6 <- emmip(anova_model_n250_nonwords, complexity ~ family_size  | Semantic_Sensitivity)  + my_style
 plot_grid(p5, p6, ncol = 2)
 ```
 
 
- - The interaction arises because for high-semantic participants, there is essentially no difference in N250 amplitude between complex and simple nonwords across either family size.
- - For low-semantic participants, however, large-family complex nonwords elicit more negative N250s than simple ones, hinting that increased morphological complexity only affects processing when the participant’s semantic sensitivity is low and the item belongs to a large morphological family.
+ - The interaction arises because for high-proficiency participants, there is essentially no difference in N250 amplitude between complex and simple nonwords across either family size.
+ - For low-proficiency participants, however, large-family complex nonwords elicit more negative N250s than simple ones, hinting that increased morphological complexity only affects processing when the participant’s language proficiency is low and the item belongs to a large morphological family.
 
 
-Because these effects were obtained for nonwords in a lexical decision task, we interpret the N250 and N400 modulations as reflecting morpho-orthographic parsing and semantic co-activation from morphemic constituents and morphological families, rather than retrieval of lexical entries. The robust three-way interaction in the N400 indicates that semantic sensitivity alters how family size modulates the semantic co-activation elicited by morphologically complex nonwords—amplifying complexity benefits for low-semantic readers (especially in large families) but attenuating them for high-semantic readers, consistent with differences in reliance on semantic co-activation vs. rapid mismatch detection during nonword rejection.
+Because these effects were obtained for nonwords in a lexical decision task, we interpret the N250 and N400 modulations as reflecting morpho-orthographic parsing and semantic co-activation from morphemic constituents and morphological families, rather than retrieval of lexical entries. The robust three-way interaction in the N400 indicates that language proficiency alters how family size modulates the semantic co-activation elicited by morphologically complex nonwords—amplifying complexity benefits for low-proficiency readers (especially in large families) but attenuating them for high-proficiency readers, consistent with differences in reliance on semantic co-activation vs. rapid mismatch detection during nonword rejection.
