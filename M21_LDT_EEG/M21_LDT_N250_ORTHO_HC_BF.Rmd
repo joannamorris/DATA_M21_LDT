@@ -209,61 +209,10 @@ r2(anova_model_n250_nonwords)
 
 ## Main Effects and Interactions
 
-|                     Effect|        df|      F|       p|Eta2 (partial) | 
-|---------------------------|----------|-------|--------|---------------|
-|  Base_Frequency:Complexity|1, 4738.00|8.33 **|   .004 |       1.76e-03|
+No Main Effects or Interaction
 
 
-```{r}
-# Estimated marginal means for the Base_Frequency x Complexity interaction
-(emm2 <- emmeans(anova_model_n250_nonwords, ~ Base_Frequency  * Complexity))
 
-# Get all pairwise contrasts
-emm2_contrasts <- contrast(emm2,  method = "pairwise", by = NULL, adjust = "none")
-# emm2_contrasts
-
-# Keep only the contrasts you want
-# Simple effects of family_size at each level of complexity
-# Simple effects of complexity at each level of family_size
-keep2 <- c("High Complex - Low Complex",
-           "High Simple - Low Simple",
-           "High Complex - High Simple",
-           "Low Complex - Low Simple")
-
-(emm2_contrasts_filtered <- subset(emm2_contrasts, contrast %in% keep2))
-
-# Get Confidence Intervals
-(emm2_contrasts_filtered_ci <- confint(emm2_contrasts_filtered))
-
-
-# Get effect sizes
-# Get all pairwise effect sizes
-effs2 <- eff_size(emm2, sigma = sigma(m2), edf = df.residual(m2))
-
-# Remove the  redundant rows 
-(effs2_filtered <- subset(effs2, contrast %in% keep2))
-```
-
-### Interaction Contrasts
-<br>
-```{r}
-#  Interaction contrasts (difference-of-differences)
-
-contrast(emm2, interaction = "pairwise", by = NULL, adjust = "holm")
-confint(contrast(emm2, interaction = c("pairwise", "pairwise")))
-
-# Get confidence intervals, for each base frequency effect for each family size and then for interaction effect
-confint(contrast(emmeans(m2, ~ Base_Frequency | Complexity), "pairwise"))
-```
-
-## Plots
-<br>  
-```{r, fig.width=8, fig.height=3.5}
-p1 <- emmip(anova_model_n250_nonwords, Base_Frequency  ~ Complexity) + my_style
-p2 <- emmip(anova_model_n250_nonwords, Complexity  ~ Base_Frequency) + my_style
-
-plot_grid(p1, p2, ncol = 2)
-```
 
 
 
