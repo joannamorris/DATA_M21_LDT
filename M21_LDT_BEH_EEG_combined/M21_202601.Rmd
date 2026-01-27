@@ -77,8 +77,6 @@ my_style <- list(my_theme,scale_color_custom(),scale_fill_custom())
 ```
 
 
-
-
 ## A. RT — Words (primary behavioral model)
 
 **Question:**
@@ -109,7 +107,8 @@ m_rt_words <- lmer(
   control = lmerControl(optimizer = "bobyqa")
 )
 
-anova(m_rt_words)
+summary(m_rt_words)
+
 ```
 
 **Report:** main effects + OS moderation only.
@@ -145,7 +144,7 @@ m_rt_nw <- lmer(
   control = lmerControl(optimizer = "bobyqa")
 )
 
-anova(m_rt_nw)
+summary(m_rt_nw)
 ```
 
 ---
@@ -181,7 +180,7 @@ m_w_N250 <- lmer(
   control = lmerControl(optimizer = "bobyqa")
 )
 
-anova(m_w_N250)
+summary(m_w_N250)
 ```
 
 **Follow-up (only if interaction significant):**
@@ -208,18 +207,7 @@ m_w_N400 <- lmer(
   control = lmerControl(optimizer = "bobyqa")
 )
 
-anova(m_w_N400)
-```
-
-**Follow-up (core result):**
-
-```{r}
-emmeans(m_w_N400, ~ family_size | LP,
-        at = list(LP = c(-1, 0, 1)))
-```
-```{r}
-emmeans(m_w_N400, ~ family_size | OS,
-        at = list(OS = c(-1, 0, 1)))
+summary(m_w_N400)
 ```
 
 ---
@@ -256,12 +244,82 @@ m_nw_N250 <- lmer(
   data = subset(erp_nw, time_window == "N250"),
   control = lmerControl(optimizer = "bobyqa")
 )
-anova(m_nw_N250)
+summary(m_nw_N250)
 ```
+
+####  Complexity × OS collapsed over Family Size (N250 nonwords)
+
+```{r}
+# Confirm factor levels (optional but good)
+with(subset(erp_nw, time_window == "N250"), table(complexity, family_size))
+
+# Estimated marginal means of complexity at OS = -1, 0, +1
+emm_cx_by_OS <- emmeans(
+  m_nw_N250,
+  ~ complexity | OS,
+  at = list(OS = c(-1, 0, 1)),
+  # This is the key: average over family_size
+  weights = "proportional"
+)
+emm_cx_by_OS
+
+
+# “Slopes”: complexity effect (Complex - Simple) at OS = -1, 0, +1
+slopes_cx_OS <- contrast(emm_cx_by_OS, method = "pairwise")  # Complex - Simple within each OS
+slopes_cx_OS
+
+# Plot the EMMs (collapsed over family size)
+df_emm_OS <- as.data.frame(emm_cx_by_OS)
+
+p_OS <- ggplot(df_emm_OS, aes(x = OS, y = emmean, group = complexity)) +
+  geom_line() +
+  geom_point() +
+  geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL), width = 0.08) +
+  labs(
+    x = "Orthographic Sensitivity (OS; SD units)",
+    y = "Estimated mean N250 amplitude (µV)",
+    title = "N250 Nonwords: Complexity effect across OS (averaged over family size)"
+  )
+p_OS
+```
+
+#### Complexity × LP collapsed over Family Size (N250 nonwords)
+
+```{r}
+# Estimated marginal means of complexity at LP = -1, 0, +1
+emm_cx_by_LP <- emmeans(
+  m_nw_N250,
+  ~ complexity | LP,
+  at = list(LP = c(-1, 0, 1)),
+  weights = "proportional"
+)
+emm_cx_by_LP
+
+# “Slopes”: complexity effect (Complex - Simple) at LP = -1, 0, +1
+slopes_cx_LP <- contrast(emm_cx_by_LP, method = "pairwise")  # Complex - Simple within each LP
+slopes_cx_LP
+
+# Plot the EMMs (collapsed over family size)
+df_emm_LP <- as.data.frame(emm_cx_by_LP)
+
+p_LP <- ggplot(df_emm_LP, aes(x = LP, y = emmean, group = complexity)) +
+  geom_line() +
+  geom_point() +
+  geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL), width = 0.08) +
+  labs(
+    x = "Language Proficiency (LP; SD units)",
+    y = "Estimated mean N250 amplitude (µV)",
+    title = "N250 Nonwords: Complexity effect across LP (averaged over family size)"
+  )
+
+p_LP
+```
+
 
 ---
 
-### D2. N400 — Nonwords (your strongest ERP result)
+
+### D2. N400 — Nonwords (strongest ERP result)
 
 **Question:**
 Does language proficiency determine how familiarity modulates complexity costs?
@@ -275,7 +333,7 @@ m_nw_N400 <- lmer(
   control = lmerControl(optimizer = "bobyqa")
 )
 
-anova(m_nw_N400)
+summary(m_nw_N400)
 ```
 
 **Critical follow-up:**
@@ -301,6 +359,45 @@ contrast(
           at = list(LP = c(-1, 1))),
   interaction = "pairwise"
 )
+```
+#### N400 (nonwords): (Complex - Simple) difference scores as a function of continuous Language Proficiency (LP), averaged over Family Size
+
+.
+
+
+```{r}
+# Generate complexity differences across LP
+
+lp_grid <- seq(-2, 2, by = 0.25)
+
+emm_lp <- emmeans(
+  m_nw_N400,
+  ~ complexity | LP,
+  at = list(LP = lp_grid),
+  weights = "proportional"
+)
+
+# Compute Complex - Simple difference at each LP
+diff_lp <- contrast(emm_lp, method = "pairwise")
+df_diff_lp <- as.data.frame(summary(diff_lp, infer = c(TRUE, TRUE)))
+
+
+# Plot difference scores vs LP
+ggplot(df_diff_lp, aes(x = LP, y = estimate)) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_line(size = 1) +
+  geom_ribbon(
+    aes(ymin = asymp.LCL, ymax = asymp.UCL),
+    alpha = 0.25
+  ) +
+  labs(
+    x = "Language Proficiency (LP; SD units)",
+    y = "N400 Complexity Effect (Complex - Simple, µV)",
+    title = "N400 Nonwords: Morphological Complexity Effect as a Function of Language Proficiency",
+    subtitle = "Model-estimated difference scores averaged over family size"
+  ) +
+  theme_classic()
+
 ```
 
 ---
