@@ -1,0 +1,306 @@
+---
+title: "M21_202601"
+date: "`r Sys.Date()`"
+output:
+  bookdown::pdf_document2:
+    toc: true
+    toc_depth: 4
+editor_options: 
+  chunk_output_type: inline
+---
+
+
+\scriptsize
+# Setup  {-}
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      error = FALSE,
+                      comment = "||",
+                      fig.height = 4,
+                      fig.width = 7)
+options(width = 150)
+```
+
+
+Load libraries
+```{r load_libraries, echo=FALSE}
+library(tidyverse)
+library(ggeffects)
+library(lme4)
+library(afex)
+library(gridExtra)
+library(emmeans)
+library(effectsize)
+library(performance)
+library(cowplot)  # for use with `plot_grid(x,x,ncol = x)` function
+library(e1071) # for use with `skewness()` function
+library(lmerTest)
+```
+
+
+1. Set `ggplot2` parameters
+```{r theme, echo = FALSE}
+theme_set(theme_classic() +  
+            theme(legend.position = "bottom", 
+                  axis.text=element_text(size=8),
+                  axis.title=element_text(size=9),
+                  plot.title = element_text(size = 9),
+                  plot.subtitle = element_text(size = 8)))
+
+my_theme <- theme(strip.text = element_text(size = 7),
+                  axis.text.x = element_text(size = 7),
+                  legend.text = element_text(size = 6),
+                  legend.title = element_blank())
+
+# Define a custom color palette
+my_palette <- c("#1F78B4","#E31A1C", "#33A02C")
+my_palette_1 <- c("#A6CEE3",  "#FB9A99")
+my_palette_2 <- c( "#1F78B4","#E31A1C" )
+my_palette_3 <- c("#A6CEE3","#1F78B4","#FB9A99","#E31A1C")
+
+# Create a function to apply this palette
+scale_color_custom <- function() {
+  scale_color_manual(values = my_palette_2)
+}
+
+scale_fill_custom <- function() {
+  scale_fill_manual(values = my_palette_2)
+}
+
+# set emm options
+emm_options(pbkrtest.limit = 4671)
+
+# Combine theme and scales
+my_style <- list(my_theme,scale_color_custom(),scale_fill_custom())
+```
+
+
+
+
+## A. RT — Words (primary behavioral model)
+
+**Question:**
+Does orthographic sensitivity predict efficiency, controlling lexical familiarity?
+
+```{r}
+library(lme4)
+
+rt_w <- read.csv("rt_words_frq.csv") %>%
+  filter(correct == 1) %>%
+  mutate(
+    SubjID = factor(SubjID),
+    Item   = factor(target),
+    logRT  = log(response_time),
+    OS     = as.numeric(Dim.2),
+    LP     = as.numeric(Dim.1),
+    zLogBF = as.numeric(scale(LogBF)),
+    zLogFS = as.numeric(scale(LogFS))
+  )
+
+
+m_rt_words <- lmer(
+  logRT ~ zLogBF + zLogFS + OS + LP +
+    zLogBF:OS + zLogFS:OS +
+    (1 + zLogBF + zLogFS | SubjID) +
+    (1 | Item),
+  data = rt_w,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+anova(m_rt_words)
+```
+
+**Report:** main effects + OS moderation only.
+LP is included but not emphasized.
+
+---
+
+## B. RT — Nonwords (primary behavioral model)
+
+**Question:**
+Does morphological complexity slow decisions, and is this cost modulated by OS?
+
+```{r}
+rt_nw <- read.csv("rt_nwords_frq.csv") %>%
+  filter(correct == 1) %>%
+  mutate(
+    SubjID = factor(SubjID),
+    ItemID = factor(ItemID),
+    complexity = factor(complexity),  # SIMP / COMP
+    logRT  = log(response_time),
+    OS     = as.numeric(Dim.2),
+    LP     = as.numeric(Dim.1),
+    zLogBF = as.numeric(scale(LogBF)),
+    zLogFS = as.numeric(scale(LogFS))
+  )
+
+m_rt_nw <- lmer(
+  logRT ~ complexity + zLogBF + zLogFS + OS + LP +
+    complexity:OS +
+    (1 + complexity | SubjID) +
+    (1 | ItemID),
+  data = rt_nw,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+anova(m_rt_nw)
+```
+
+---
+
+## C. ERP — Words
+
+Run **separately by time window** (this is important).
+
+### C1. N250 — Words
+
+**Question:**
+Does orthographic sensitivity modulate early sensitivity to morphological family structure?
+
+```{r}
+erp_w <- read.csv("erp_dmg_words.csv") %>%
+  mutate(
+    SubjID = factor(SubjID),
+    chlabel = factor(chlabel),
+    family_size = factor(family_size),
+    time_window = factor(time_window),
+    OS = as.numeric(Dim.2),
+    LP = as.numeric(Dim.1)
+  )
+
+# ERP words
+contrasts(erp_w$family_size) <- contr.sum(2)
+
+m_w_N250 <- lmer(
+  value ~ family_size*OS + family_size*LP +
+    (1 | SubjID) +
+    (1 | SubjID:chlabel),
+  data = subset(erp_w, time_window == "N250"),
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+anova(m_w_N250)
+```
+
+**Follow-up (only if interaction significant):**
+
+```{r}
+library(emmeans)
+emmeans(m_w_N250, ~ family_size | OS,
+        at = list(OS = c(-1, 0, 1)))
+```
+
+---
+
+### C2. N400 — Words
+
+**Question:**
+Does language proficiency shape semantic integration of family structure?
+
+```{r}
+m_w_N400 <- lmer(
+  value ~ family_size*LP + family_size*OS +
+    (1 | SubjID) +
+    (1 | SubjID:chlabel),
+  data = subset(erp_w, time_window == "N400"),
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+anova(m_w_N400)
+```
+
+**Follow-up (core result):**
+
+```{r}
+emmeans(m_w_N400, ~ family_size | LP,
+        at = list(LP = c(-1, 0, 1)))
+```
+```{r}
+emmeans(m_w_N400, ~ family_size | OS,
+        at = list(OS = c(-1, 0, 1)))
+```
+
+---
+
+## D. ERP — Nonwords
+
+Again, **separate by time window**.
+
+### D1. N250 — Nonwords
+
+**Question:**
+Is early morpho-orthographic parsing sensitive to complexity and family size?
+
+```{r}
+erp_nw <- read.csv("erp_dmg_nonwords.csv") %>%
+  mutate(
+    SubjID = factor(SubjID),
+    chlabel = factor(chlabel),
+    family_size = factor(family_size),
+    complexity = factor(complexity),
+    time_window = factor(time_window),
+    OS = as.numeric(Dim.2),
+    LP = as.numeric(Dim.1)
+  )
+
+# ERP nonwords
+contrasts(erp_nw$complexity)  <- contr.sum(2)
+contrasts(erp_nw$family_size) <- contr.sum(2)
+
+m_nw_N250 <- lmer(
+  value ~ complexity*family_size*OS + complexity*family_size*LP +
+    (1 | SubjID) +
+    (1 | SubjID:chlabel),
+  data = subset(erp_nw, time_window == "N250"),
+  control = lmerControl(optimizer = "bobyqa")
+)
+anova(m_nw_N250)
+```
+
+---
+
+### D2. N400 — Nonwords (your strongest ERP result)
+
+**Question:**
+Does language proficiency determine how familiarity modulates complexity costs?
+
+```{r}
+m_nw_N400 <- lmer(
+  value ~ complexity*family_size*LP + complexity*family_size*OS +
+    (1 | SubjID) +
+    (1 | SubjID:chlabel),
+  data = subset(erp_nw, time_window == "N400"),
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+anova(m_nw_N400)
+```
+
+**Critical follow-up:**
+
+```{r}
+emmeans(
+  m_nw_N400,
+  ~ complexity*family_size | LP,
+  at = list(LP = c(-1, 0, 1))
+)
+```
+```{r}
+emmeans(
+  m_nw_N400,
+  ~ complexity*family_size | OS,
+  at = list(OS = c(-1, 0, 1))
+)
+```
+
+```{r}
+contrast(
+  emmeans(m_nw_N400, ~ complexity*family_size | LP,
+          at = list(LP = c(-1, 1))),
+  interaction = "pairwise"
+)
+```
+
+---

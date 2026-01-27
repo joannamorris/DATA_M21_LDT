@@ -1,0 +1,124 @@
+M21 LDT New Analytic Strategy
+
+2. Reframing the study around three core questions
+
+Your entire paper can be defended around three questions—everything else should be subordinate.
+
+⸻
+
+Core Question 1 (Behavioral):
+
+Does Orthographic Sensitivity influence overall efficiency in lexical decision, independent of semantic proficiency?
+
+A. Reaction times: simplify aggressively
+
+Keep:
+	•	Words:
+RT ~ Lexical Familiarity + Orthographic Sensitivity
+	•	Nonwords:
+RT ~ Complexity + Orthographic Sensitivity
+
+Treat RTs as indexing efficiency, not morphology per se. RTs establish who is faster, not how morphology is represented.
+
+---------
+
+Core Question 2 (Early neural processing):
+
+Does Orthographic Sensitivity modulate early morpho-orthographic parsing (N250), particularly for morphologically structured forms?
+
+Recommended structure:
+	•	Primary factor: Orthographic Sensitivity
+	•	Primary contrast: Morphological structure (complex vs simple; family size if theoretically justified)
+	•	Analyze words and nonwords separately but symmetrically
+	
+Is early morphological parsing more effortful or more efficient depending on orthographic skill?
+
+---------
+
+Core Question 3 (Late neural processing):
+
+Does Language Proficiency shape how morphological and lexical information is integrated at the semantic level (N400)?
+
+Keep:
+	•	Family Size × Base Frequency interactions for words
+	•	Complexity × Family Size for nonwords
+	•	Language Proficiency as a moderator
+
+“Language proficiency determines whether morphological familiarity amplifies or attenuates semantic processing demands.”
+
+---------
+
+How to collapse Base Frequency / Family Size cleanly?
+
+Option 1 (simplest): pick one 
+	•	Use Base Frequency as the single “lexical familiarity” index.
+	
+---------
+
+Option 2 (principled composite): standardize then average (a “Lexical Familiarity” index)
+
+If you want to treat them as two indicators of a shared construct (familiarity/availability), do this:
+	1.	Transform as needed (usually log)
+	2.	z-score each across items
+	3.	Average them (or weighted average)
+
+Definition (item-level):
+	•	BFz = z(log(BaseFreq))
+	•	FSz = z(log(FamilySize + 1)) (the +1 avoids log(0))
+	•	LexFam = (BFz + FSz) / 2
+
+Then use LexFam as your single predictor.
+
+---------
+
+Option 3 (most defensible statistically): PCA on the item predictors
+
+This is the “you can’t accuse me of arbitrariness” route.
+
+Run PCA (or a single-factor model) on item-level predictors:
+	•	log(Base Frequency)
+	•	log(Family Size + 1)
+
+If the first component captures most variance and both load positively, use PC1 as “Familiarity”.
+
+---------
+	
+	•	RT models: Option 1 (choose Base Frequency; keep Family Size out of RTs, or put it in as a covariate but don’t foreground it)
+
+
+Reaction times
+	•	Words
+	•		Continuous Base Frequency (or LexFam)
+	•		Orthographic Sensitivity
+	•	Nonwords
+	•		Complexity (categorical)
+	•		Base Frequency or Family Size (one, not both)
+	•		Orthographic Sensitivity
+
+Language Proficiency can be included once and reported as null.
+
+---------
+
+What I would do concretely with your existing ERP data
+
+N250
+	•	Words:
+	•		Family Size (high vs low)
+	•		Orthographic Sensitivity (continuous)
+	•	Nonwords:
+	•		Complexity (simple vs complex)
+	•		Orthographic Sensitivity
+
+Language Proficiency included, but not foregrounded.
+
+⸻
+
+N400
+	•	Words:
+	•	Family Size (or Familiarity composite)
+	•	Language Proficiency (continuous)
+	•	Nonwords:
+	•	Complexity × Familiarity (if you keep it)
+	•	Language Proficiency
+
+This retains your strongest effects and eliminates fragile high-order interactions.

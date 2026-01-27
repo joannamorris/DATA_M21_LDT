@@ -1,0 +1,185 @@
+---
+title: "M21_202607_preprocessing"
+date: "`r Sys.Date()`"
+output:
+  bookdown::pdf_document2:
+    toc: true
+    toc_depth: 4
+editor_options: 
+  chunk_output_type: inline
+---
+
+\scriptsize
+# Setup  {-}
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      error = FALSE,
+                      comment = "||",
+                      fig.height = 4,
+                      fig.width = 7)
+options(width = 150)
+```
+
+
+Load libraries
+```{r load_libraries, echo=FALSE}
+library(tidyverse)
+library(ggeffects)
+library(lme4)
+library(afex)
+library(gridExtra)
+library(emmeans)
+library(effectsize)
+library(performance)
+library(cowplot)  # for use with `plot_grid(x,x,ncol = x)` function
+library(e1071) # for use with `skewness()` function
+library(lmerTest)
+```
+
+# Load Files and Format Files  {-}
+
+## Load Files 
+
+```{r load_files}
+#DIR <- "csv_files"
+df_a <- read_csv("rt_data_hc_A.csv")
+df_b <- read_csv( "rt_data_hc_B_fixed.csv")
+frq_w <- read_csv("frq_cw.csv")
+frq_nw <- read_csv("frq_nw.csv")
+dmg <- read_csv("demo_lang_vsl_pca_hc.csv")
+
+erp_2A <- read_csv("fs_m21_ldt_mea_200300_050050_1_AB.csv")
+erp_2B <- read_csv("fs_m21_ldt_mea_200300_050050_1_BA.csv")
+erp_4A <- read_csv("fs_m21_ldt_mea_300500_050050_1_AB.csv")
+erp_4B <- read_csv("fs_m21_ldt_mea_300500_050050_1_BA.csv")
+```
+
+```{r}
+# Concatenate datasets
+rt <- bind_rows(AB = df_a, 
+                BA = df_b,
+               .id = "List")
+rt_dmg<- right_join(dmg, rt, join_by(SubjID == subject_nr)) |>  # Join Participant Demographic and Lang Data
+                    mutate(target = tolower(target)) |>
+                    filter(correct == 1)
+
+# Divide into Experimental and Filler Items
+rt_fill <- rt_dmg |> filter(str_detect(targ_type, "^FILL"))
+rt_exp <- rt_dmg |> filter(!str_detect(targ_type, "^FILL"))
+
+# Add logFS to frequency datasets
+frq_w <- frq_w |> mutate(Log10FS = log10(FS))
+frq_nw <- frq_nw |> mutate(Log10FS = log10(FS))
+
+frq_w <- frq_w |> mutate(LogFS = log(FS))
+frq_nw <- frq_nw |> mutate(LogFS = log(FS))
+
+# Define Factors and Conditions
+rt_exp_format <- rt_exp |>
+  separate(targ_type, into = c("trial_type", "family_size", "complexity"), sep = "_",
+           remove = TRUE,
+           extra = "drop",
+           fill = "right")
+
+# Divide into Words and Nonwords
+rt_words <- rt_exp_format |> filter(trial_type == "CW") |> select(- complexity) 
+rt_nwords <- rt_exp_format |> filter(trial_type == "NW")
+
+# Join Stimulus Frequency Data
+rt_words_frq <- left_join(rt_words, frq_w, join_by(target))|>
+  select(-cond_trig.y, -word_trig.y) |>
+  rename(cond_trig = cond_trig.x, word_trig = word_trig.x)  # remove duplicate columns
+rt_nwords_frq <-  left_join(rt_nwords, frq_nw, join_by(target==word)) |>   
+  select(-cond_trig.y, -word_trig.y, -List.y) |>
+  rename(cond_trig = cond_trig.x, word_trig = word_trig.x, List = List.x)  
+
+rt_words_frq2 <- rt_words_frq |> select(SubjID, z_vcb, z_spl, z_art, Dim.1, Dim.2, correct, response_time,
+                                        trial_type, target, word_trig, cond_trig, Base,affix, FS, BF, LogFS,LogBF, 
+                                        BaseLength, WholeFormLength, List)
+rt_nwords_frq2 <- rt_nwords_frq |> select(SubjID, z_vcb, z_spl, z_art, Dim.1, Dim.2, correct, response_time,
+                                        trial_type, complexity, target, ItemID, word_trig, cond_trig, base,affix, FS, BF, LogFS,LogBF, 
+                                        BaseLength, WholeFormLength, List)
+```
+
+```{r}
+# Join lists
+erp_2i <- bind_rows(
+  erp_2A |> mutate(List = "AB"),
+  erp_2B |> mutate(List = "BA")
+)
+
+erp_4i <- bind_rows(
+  erp_4A |> mutate(List = "AB"),
+  erp_4B |> mutate(List = "BA")
+)
+
+
+
+# Now join both time windows
+erp_FS <- bind_rows(
+  erp_2i |> mutate(time_window = "N250"),
+  erp_4i |> mutate(time_window = "N400")
+)
+
+
+# Now we extract `SubjID` from the `ERPset` column
+
+erp_FS_i <- erp_FS |>
+  rename(SubjID = ERPset) |>
+  mutate(SubjID = str_replace(SubjID, "_LDT_diff_waves", "")) |>
+  mutate(binlabel = str_replace(binlabel, "Critical_", "")) |>
+  mutate(binlabel = str_replace(binlabel, "_family", "")) |>
+  select(-mlabel)
+
+
+erp_dmg <- erp_FS_i |>
+  left_join(dmg, by = "SubjID") |>
+  select(SubjID, everything()) 
+```
+
+Then we do some more formatting and cleanup of the dataframes.We  create separate columns, one for each independent variable (anteriority, laterality, morphological family size). To do this we have to use `seperate` function from the `stringr` package. Run `vignette("programming", package = "dplyr")` to see more about `tidy-selection` and `tidy-evaluation`.
+
+
+
+```{r}
+erp_dmg_words <- erp_dmg |> filter(bini %in% c(1:2)) |>
+  select(SubjID, value,chindex,chlabel,bini,binlabel,List,time_window,z_vcb,z_spl,z_art,Dim.1,Dim.2)
+erp_dmg_nonwords <- erp_dmg |> filter(bini %in% c(3:6)) |>
+  select(SubjID, value,chindex,chlabel,bini,binlabel,List,time_window,z_vcb,z_spl,z_art,Dim.1,Dim.2)
+
+# Words
+erp_dmg_words <- erp_dmg_words |>
+  separate(binlabel, into = c("trial_type","family_size"), sep = "_", remove = TRUE) |>
+  select(-trial_type)
+
+erp_dmg_words$family_size[erp_dmg_words$family_size == "large"] <- "Large"
+erp_dmg_words$family_size[erp_dmg_words$family_size == "small"] <- "Small"
+
+
+# Nonwords
+erp_dmg_nonwords <- erp_dmg_nonwords |>
+  separate(binlabel, into = c("trial_type", "family_size", "complexity"), sep = "_", remove = TRUE) |>
+  select(-trial_type)
+
+erp_dmg_nonwords$complexity[erp_dmg_nonwords$complexity == "complex"] <- "Complex"
+erp_dmg_nonwords$complexity[erp_dmg_nonwords$complexity == "simple"] <- "Simple"
+erp_dmg_nonwords$family_size[erp_dmg_nonwords$family_size == "large"] <- "Large"
+erp_dmg_nonwords$family_size[erp_dmg_nonwords$family_size == "small"] <- "Small"
+
+# Format as factors
+erp_dmg_nonwords <- erp_dmg_nonwords |>
+  mutate(complexity = fct_relevel(complexity, "Simple", "Complex"))
+
+erp_dmg_nonwords <- erp_dmg_nonwords |>
+  mutate(family_size = fct_relevel(family_size, "Small", "Large"))
+
+
+write_csv(erp_dmg_words, "erp_dmg_words.csv")
+write_csv(erp_dmg_nonwords, "erp_dmg_nonwords.csv")
+
+write_csv(rt_words_frq2, "rt_words_frq.csv")
+write_csv(rt_nwords_frq2, "rt_nwords_frq.csv")
+```
+
