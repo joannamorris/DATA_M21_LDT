@@ -1,5 +1,7 @@
 #!/bin/bash
 
+
+# This script computes How much time (in samples) elapsed between consecutive markers?
 # Usage: ./extract_vmrk_deltas.sh /path/to/vmrk/files
 
 input_dir="$1"

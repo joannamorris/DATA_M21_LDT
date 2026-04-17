@@ -1,0 +1,36 @@
+---
+title: "m21_pca"
+author: "Joemari Pulido"
+date: '2022-07-06'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, error = FALSE, message = FALSE)
+```
+
+Principal components analysis (PCA) 
+load in packages and dataset
+```{r load in dataset }
+library(readxl)
+m21_pca <- read_excel("m21_pca.xlsx", col_types = c("text", 
+    "skip", "skip", "numeric", "skip", "skip", 
+    "numeric", "skip", "skip", "numeric"))
+View(m21_pca)
+```
+
+compute # of principal components
+number of principal components = 2
+```{r # of principal components}
+library(psych)
+fa.parallel(m21_pca [,-1], fa = "pc", n.iter = 100, show.legend = FALSE, main = "Screen plot with parallel analysis")
+
+abline(h=1)
+```
+conduct pca using principal() function
+```{r pca}
+library(psych)
+pca <- principal(m21_pca [, -1], nfactors = 2)
+pca
+```
+

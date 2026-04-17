@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# This script collects all valid subject marker files into one working directory
 # Usage: ./copy_vmrk_files.sh [search_dir]
 # If no argument is given, defaults to current directory
 
