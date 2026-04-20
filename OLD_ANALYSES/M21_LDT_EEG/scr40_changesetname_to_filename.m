@@ -1,6 +1,3 @@
-% This file attaches the "_INT" suffixes to files that do not need
-% interpolation for consistency in naming
-
 %% Clear memory and the command window
 clear;
 clc;
@@ -11,22 +8,26 @@ clc;
 
 %% Set up variables holding key values 
     
-%  Dialog box to get info about script variables 
+    
+
+% Dialog box to get info about script variables 
 prompt   = {'Enter StudyID:',...
             'Enter TaskID:',...
             'Enter name of subject list file:',...
             'Enter the part of the file names that comes after the subject and task IDs, including the underscores. If there are no filename extensions, leave the box empty:'};
 dlgtitle =  'Input';
 dims     = [1 70];
-definput = {'M21','LDT','subjlist1_non_interp.txt','_FLT_RSP_REF_ELS_BIN_ICA'};
+definput = {'M21','VSL2','subjlist1_notused_a.txt','_FLT_RSP_REF_ELS'};
 my_input   = inputdlg(prompt,dlgtitle,dims,definput);
 
 DIR            = pwd;                         % Current folder (where the script should be located)
 studyID        = my_input{1};                 % which study
-taskID         = my_input{2};                 % which task
+task           = my_input{2};                 % which task
 subj_list      = importdata(my_input{3});     % list of subject ids
 f_string       = my_input{4};                 % this string allows you to specify which .set file to load
-nsubj          = length(subj_list);           % number of subjects
+nsubj          = length(subj_list);                      % number of subjects
+
+
   
 %% Load the  ERPsets and make them available in the ERPLAB GUI
 
@@ -36,34 +37,45 @@ for subject = 1:nsubj
     
     subject_DIR = [DIR filesep subjID];
 
-    % Handle the case where taskID is empty
-    if isempty(taskID)
-        fname = [subjID f_string];  % No taskID in the filename
-    else
-        fname = [subjID '_' taskID f_string];  % Include taskID if it's not empty
-    end
     
+    % f_string    = '';
+    fname       = [subjID '_'  task f_string];     % this string allows you to specify which .set file to load
     fname_set   = [fname '.set'];
-    fname_fdt   = [fname '.fdt'];    
+    fname_fdt   = [fname '.fdt'];
     
     %% Check to make sure the dataset file exists
     if (exist([subject_DIR filesep fname_set ], 'file')<=0||...
-            exist([subject_DIR filesep fname_fdt ], 'file')<=0);
+            exist([subject_DIR filesep fname_fdt ], 'file')<=0)
         fprintf('\n *** WARNING: %s does not exist *** \n', fname);
         fprintf('\n *** Skip all processing for this subject *** \n\n');
     else 
         %% Load .set file
         fprintf('\n\n\n**** %s: Loading set file ****\n\n\n', fname_set);
         EEG = pop_loadset(fname_set, subject_DIR);
-        EEG.setname = [fname '_INT'];  % save the file with a new affix indicating that no interpolation was done.
+        EEG.setname = fname;
         EEG.datfile = fname_fdt; 
         [ALLEEG, EEG, CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET,...
+                                               'setname',EEG.setname,...
+                                               'gui','off');
+        eeglab redraw;
+             
+
+% Assuming ALLEEG is a structure array with fields 'filename' and 'setname'
+for i = 1:length(ALLEEG)
+    % Extract the filename from each element in the ALLEEG structure array
+    filename = ALLEEG(i).filename;
+    
+    % Remove the '.set' extension to get the setname
+    setname = filename(1:end-4);
+    
+    % Assign the setname to the appropriate field in the structure
+    ALLEEG(i).setname = setname;
+
+    [ALLEEG, EEG, CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET,...
                                                  'setname',EEG.setname,...
                                                  'save', [subject_DIR filesep EEG.setname '.set'],...
                                                  'gui','off');
-        eeglab redraw;
+end
 
-
- end % end of the "if/else" statement that makes sure the file exists
-
-end % end of looping through all subjects
+eeglab redraw;
+% erplab redraw;

@@ -17,11 +17,10 @@ prompt   = {'Enter StudyID:',...
             'Enter TaskID:',...
             'Enter data collection location:',...            
             'Enter name of subject list file:',...
-            'Enter name of the file containing channels to interpolate for each subject:',...
             'Enter the part of the file names that comes after the subject and task IDs. If there are no filename extensions, leave the box empty:'};
 dlgtitle =  'Input';
 dims     = [1 70];
-definput = {'M21','LDT','hc','subjlist1_interp.txt','subjlist1_interp_chan.txt','FLT_RSP_REF_ELS_BIN_ICA'};
+definput = {'MSC','','pc','msc_subjlist.txt','FLT_RSP_REF_ELS_BIN_CLN_ICA'};
 my_input   = inputdlg(prompt,dlgtitle,dims,definput);
 
 
@@ -30,40 +29,22 @@ studyID        = my_input{1};                 % which study
 taskID         = my_input{2};                 % which task
 location       = my_input{3}
 subj_list      = importdata(my_input{4});     % list of subject ids
-f_string       = ['_' my_input{6}];                 % this string allows you to specify which .set file to load
+f_string       = ['_' my_input{5}];                 % this string allows you to specify which .set file to load
 nsubj          = length(subj_list);           % number of subjects
 
-if strcmp(location,'hc')
+if strcmp(location,'hampshire')
     chan_ignore = [1, 27:33];
 else
     chan_ignore = [1 31];
 end
 
 
-% Open the file containing the channels to interpolate
-fileID = fopen(my_input{5}, 'r');
 
-% Read the file line by line into a cell array, where each cell contains a numeric array
-int_ch = {};
-
-while ~feof(fileID)
-    line = fgetl(fileID);  % Read a line from the file
-    if ischar(line)  % Check if the line is a string (i.e., not the end of the file)
-        int_ch{end+1} = str2num(line);  % Convert the line to a numeric array and store it in the cell array
-    end
-end
-
-% Close the file
-fclose(fileID);
-
-% Display the result
-% disp(int_ch);
 
 %% Load the  ERPsets and make them available in the ERPLAB GUI
 
 for subject = 1:nsubj
     subjID = subj_list{subject};
-    badchans = int_ch{subject};
     fprintf('\n******\nProcessing subject %s\n******\n\n', subjID);
     
     subject_DIR = [DIR filesep subjID];
@@ -94,12 +75,16 @@ for subject = 1:nsubj
                                                'gui','off');
         eeglab redraw;
         
-        %% interpolate bad channels
-        EEG  = pop_erplabInterpolateElectrodes(EEG ,...
-                                               'displayEEG', 0,...
-                                               'ignoreChannels', [ chan_ignore],...
-                                               'interpolationMethod', 'spherical',...
-                                               'replaceChannels', [badchans] );
+        %% Interpolate bad channels (skip if none were removed)
+        if isfield(EEG.chaninfo, 'removedchans') && ~isempty(EEG.chaninfo.removedchans)
+            fprintf('\n\n\n**** %s: Interpolating %d removed channel(s) ****\n\n\n', ...
+                fname_set, length(EEG.chaninfo.removedchans));
+            EEG = eeg_interp(EEG, EEG.chaninfo.removedchans, 'spherical');
+        else
+            fprintf('\n\n\n**** %s: No removed channels found, skipping interpolation ****\n\n\n', fname_set);
+        end
+        
+        
         EEG.setname = [fname '_INT'];
         [ALLEEG, EEG, CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET,...
                                                  'setname',EEG.setname,...
