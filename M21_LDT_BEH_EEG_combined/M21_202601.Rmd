@@ -77,7 +77,7 @@ my_style <- list(my_theme,scale_color_custom(),scale_fill_custom())
 ```
 
 
-## A. RT — Words (primary behavioral model)
+# A. RT — Words (primary behavioral model)
 
 **Question:**
 Does orthographic sensitivity predict efficiency, controlling lexical familiarity?
@@ -116,7 +116,7 @@ LP is included but not emphasized.
 
 ---
 
-## B. RT — Nonwords (primary behavioral model)
+# B. RT — Nonwords (primary behavioral model)
 
 **Question:**
 Does morphological complexity slow decisions, and is this cost modulated by OS?
@@ -149,11 +149,11 @@ summary(m_rt_nw)
 
 ---
 
-## C. ERP — Words
+# C. ERP — Words
 
 Run **separately by time window** (this is important).
 
-### C1. N250 — Words
+## C1. N250 — Words
 
 **Question:**
 Does orthographic sensitivity modulate early sensitivity to morphological family structure?
@@ -193,7 +193,7 @@ emmeans(m_w_N250, ~ family_size | OS,
 
 ---
 
-### C2. N400 — Words
+## C2. N400 — Words
 
 **Question:**
 Does language proficiency shape semantic integration of family structure?
@@ -212,11 +212,11 @@ summary(m_w_N400)
 
 ---
 
-## D. ERP — Nonwords
+# D. ERP — Nonwords
 
 Again, **separate by time window**.
 
-### D1. N250 — Nonwords
+## D1. N250 — Nonwords
 
 **Question:**
 Is early morpho-orthographic parsing sensitive to complexity and family size?
@@ -319,7 +319,7 @@ p_LP
 ---
 
 
-### D2. N400 — Nonwords (strongest ERP result)
+## D2. N400 — Nonwords (strongest ERP result)
 
 **Question:**
 Does language proficiency determine how familiarity modulates complexity costs?
