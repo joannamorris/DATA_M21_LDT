@@ -176,8 +176,8 @@ erp_dmg_nonwords <- erp_dmg_nonwords |>
   mutate(family_size = fct_relevel(family_size, "Small", "Large"))
 
 
-write_csv(erp_dmg_words, "erp_dmg_words.csv")
-write_csv(erp_dmg_nonwords, "erp_dmg_nonwords.csv")
+write_csv(erp_dmg_words, "erp_fs_dmg_words.csv")
+write_csv(erp_dmg_nonwords, "erp_fs_dmg_nonwords.csv")
 
 write_csv(rt_words_frq2, "rt_words_frq.csv")
 write_csv(rt_nwords_frq2, "rt_nwords_frq.csv")
