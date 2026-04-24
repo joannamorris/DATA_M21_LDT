@@ -7,7 +7,7 @@ output:
     toc: true
     toc_depth: 4
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 
@@ -100,17 +100,13 @@ rt_nw <- read_csv("rt_nwords_frq.csv") %>%
   mutate(
     SubjID = factor(SubjID),
     ItemID = factor(ItemID),
-    complexity = factor(complexity, levels = c("Simple", "Complex")),  # SIMP / COMP
+    complexity = factor(complexity, levels = c("simple" == "SIMP", "complex" == "COMP")),  # SIMP / COMP
     logRT  = log(response_time),
     OS     = as.numeric(Dim.2),
     LP     = as.numeric(Dim.1),
     zLogBF = as.numeric(scale(LogBF)),
     zLogFS = as.numeric(scale(LogFS))
-  )%>%
-  mutate(complexity = {
-    contrasts(complexity) <- c(-0.5, 0.5)
-    complexity
-  })
+  )
 
 # Load data: erp_fs words
 erp_w <- read_csv("erp_fs_dmg_words.csv") %>%
@@ -133,11 +129,7 @@ erp_nw <- read_csv("erp_fs_dmg_nonwords.csv") %>%
     time_window = factor(time_window),
     OS = as.numeric(Dim.2),
     LP = as.numeric(Dim.1)
-  )%>%
-  mutate(complexity = {
-    contrasts(complexity) <- c(-0.5, 0.5)
-    complexity
-  })
+  )
 ```
 
 # Response Time (RT)
@@ -167,8 +159,17 @@ m_rt_words <- lmer(
 summary(m_rt_words)
 ```
 
-**Report:** main effects + OS moderation only.
-LP is included but not emphasized.
+**What to report:**
+
+- Main effect of zLogBF — this is your primary finding, should be significant and negative (higher frequency = faster RT). Report and interpret.
+- Main effect of zLogFS — this is a covariate. If significant, note it briefly. If not, report the null without dwelling on it.
+- Main effect of OS — report whether it reaches significance or shows a trend. This is theoretically meaningful either way: a significant effect supports the efficiency claim; a null effect should be noted honestly.
+- Main effect of LP — report as null. One sentence is sufficient.
+
+**What not to report in text:** The random effects structure, the optimizer setting, or any discussion of model convergence unless there was a problem.
+
+**Example narrative pattern:**
+Words were recognized more quickly when derived from higher-frequency bases, β = X, SE = X, t(X) = X, p = X. Family size also contributed a reliable facilitory effect, β = X, SE = X, t(X) = X, p = X. Orthographic Sensitivity showed a marginal trend toward faster overall responding, β = X, SE = X, t(X) = X, p = X, whereas Language Proficiency did not reliably predict response times, β = X, SE = X, t(X) = X, p = X.
 
 ---
 
@@ -189,8 +190,18 @@ m_rt_nw <- lmer(
   control = lmerControl(optimizer = "bobyqa")
 )
 
-summary(m_rt_nw)
+summary(m_rt_nw, ddf = "Kenward-Roger")
 ```
+
+**What to report:**
+
+- Main effect of Complexity — your primary finding, should be large and significant (complex slower than simple). Report and interpret in terms of the processing cost of morphological structure without a stored whole-word representation.
+- Main effect of zLogBF — report the inhibitory effect (higher frequency = slower rejection). This is theoretically interesting and worth a sentence of interpretation: high-frequency stems generate strong cue activation that competes with the rejection decision, consistent with discriminative learning accounts.
+- Main effect of zLogFS — covariate. Report briefly whether significant or null.
+- Main effect of OS — report. If significant, it speaks to overall efficiency for novel forms. If null, note it.
+- Main effect of LP — report as null. One sentence.
+
+**What not to report in text:** Again, do not narrate the absence of interactions you did not include — do not say "we did not find a Complexity × OS interaction" because that interaction is not in this model by design. If a reviewer asks, you explain it was a Question 2 test reserved for the ERP.
 
 ---
 
@@ -218,7 +229,7 @@ m_w_N250 <- lmer(
   control = lmerControl(optimizer = "bobyqa")
 )
 
-summary(m_w_N250)
+summary(m_w_N250, ddf = "Kenward-Roger")
 ```
 
 **Follow-up (only if interaction significant):**

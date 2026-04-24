@@ -164,3 +164,96 @@ The introduction as rewritten does not need substantial revision to accommodate 
 5. Make minor adjustments to the aims section if needed to ensure the OS/LP asymmetry is explicit
 
 The introduction does not need to be rewritten again. The analyses need to be rerun, and the results section needs to be rewritten around the new analyses. That is the right order.
+
+---
+
+# WHAT TO REPORT
+
+Here is what to report from each model, organized by the three-question structure. I am assuming you are reporting in a specialist psycholinguistics journal format where full model output goes in a table and the text narrates the key findings.
+
+---
+
+### General Principles Across All Models
+
+Report fixed effects only — random effects structure should be described in the methods, not the results. For each fixed effect report β, SE, t, and p. For lmer models p-values need to be obtained via Satterthwaite or Kenward-Roger approximation (if using lmerTest) or likelihood ratio tests — be consistent across all models and state which method you used. Flag your significance threshold once at the start of the results section and do not repeat it for every test.
+
+---
+
+### Question 1: RT Words
+
+**What to report:**
+
+- Main effect of zLogBF — this is your primary finding, should be significant and negative (higher frequency = faster RT). Report and interpret.
+- Main effect of zLogFS — this is a covariate. If significant, note it briefly. If not, report the null without dwelling on it.
+- Main effect of OS — report whether it reaches significance or shows a trend. This is theoretically meaningful either way: a significant effect supports the efficiency claim; a null effect should be noted honestly.
+- Main effect of LP — report as null. One sentence is sufficient.
+
+**What not to report in text:** The random effects structure, the optimizer setting, or any discussion of model convergence unless there was a problem.
+
+**Example narrative pattern:**
+Words were recognized more quickly when derived from higher-frequency bases, β = X, SE = X, t(X) = X, p = X. Family size also contributed a reliable facilitory effect, β = X, SE = X, t(X) = X, p = X. Orthographic Sensitivity showed a marginal trend toward faster overall responding, β = X, SE = X, t(X) = X, p = X, whereas Language Proficiency did not reliably predict response times, β = X, SE = X, t(X) = X, p = X.
+
+---
+
+### Question 1: RT Nonwords
+
+**What to report:**
+
+- Main effect of Complexity — your primary finding, should be large and significant (complex slower than simple). Report and interpret in terms of the processing cost of morphological structure without a stored whole-word representation.
+- Main effect of zLogBF — report the inhibitory effect (higher frequency = slower rejection). This is theoretically interesting and worth a sentence of interpretation: high-frequency stems generate strong cue activation that competes with the rejection decision, consistent with discriminative learning accounts.
+- Main effect of zLogFS — covariate. Report briefly whether significant or null.
+- Main effect of OS — report. If significant, it speaks to overall efficiency for novel forms. If null, note it.
+- Main effect of LP — report as null. One sentence.
+
+**What not to report in text:** Again, do not narrate the absence of interactions you did not include — do not say "we did not find a Complexity × OS interaction" because that interaction is not in this model by design. If a reviewer asks, you explain it was a Question 2 test reserved for the ERP.
+
+---
+
+### Question 2: N250 Words
+
+**What to report:**
+
+- Main effect of Family Size — your primary morphological finding. Report direction and magnitude. Note that a family size effect at the N250 is not straightforwardly predicted by multi-stage accounts and flag this briefly as requiring interpretation.
+- Family Size × OS interaction — this is your primary individual difference test for this model. Report regardless of outcome. If significant, describe the pattern (does OS amplify or attenuate the family size effect and in which direction). If not significant, report the null honestly — a one-sentence statement is sufficient.
+- LP as covariate — report the main effect only. If null, one sentence. If unexpectedly significant, note it and flag for Discussion.
+
+---
+
+### Question 2: N250 Nonwords
+
+**What to report:**
+
+- Main effect of Complexity — primary morphological finding. Report direction (complex more positive than simple, or vice versa depending on your data).
+- Complexity × OS interaction — primary individual difference test. Report fully regardless of outcome. If significant, follow up with estimated marginal means at −1, 0, +1 SD of OS. Describe whether high OS readers show reduced complexity costs, eliminated costs, or reversed effects.
+- Complexity × LP interaction — secondary test, but report it fully because your existing results show it is significant. Do not suppress it. Acknowledge it directly and note that it qualifies the predicted OS-specific effect — this is the honest framing that pre-empts reviewer criticism.
+- Family Size as covariate — report briefly.
+- Follow-up contrasts — if either interaction is significant, report the estimated marginal means at the three SD levels you already computed. These are essential for characterizing the nature of the interaction and should be reported in the text, not just the table.
+
+---
+
+### Question 3: N400 Words
+
+**What to report:**
+
+- Main effect of Family Size — primary morphological finding. Should be significant and in the facilitory direction (larger family = less negative N400). This is your most straightforward result at the N400 for words.
+- Family Size × LP interaction — primary individual difference test. Report fully. If not significant, this is worth noting in the Discussion as suggesting LP does not selectively shape family size effects for familiar words — possibly because whole-word representations reduce the need to recruit family-level semantic information.
+- OS as covariate — if the main effect of OS is significant (as in your existing results), report it and give it one sentence of interpretation: OS influences overall N400 amplitude independently of morphological family structure, suggesting spelling-based skill affects general semantic access efficiency rather than the specific contribution of family size.
+
+---
+
+### Question 3: N400 Nonwords
+
+**What to report:**
+
+- Main effect of Complexity — report direction and magnitude.
+- Three-way Complexity × Family Size × LP interaction — this is your centerpiece finding and should receive the most extensive treatment. Report the interaction, then follow up with estimated marginal means showing how the Complexity × Family Size pattern changes across levels of LP. The contrast between low-LP readers (strong complexity × family size joint effect) and high-LP readers (attenuated or absent effect) is your key result and should be described in enough detail that the reader understands the pattern without having to reconstruct it from a table.
+- OS as covariate — report the main effect if present. Note that the corresponding three-way for OS was not significant, and explicitly contrast this with the LP three-way — this asymmetry is the closest your data come to the predicted dissociation and should be foregrounded rather than buried.
+- Any significant lower-order effects — report briefly as context for the three-way.
+
+---
+
+### What Goes in Tables vs Text
+
+**Tables** should contain the full fixed effects output for each model: β, SE, t, p for every term included. Readers who want to check your work or use your estimates need the full table.
+
+**Text** should narrate only the theoretically meaningful effects — primary predictors, primary moderator interactions, and any unexpected findings that require interpretation. A results section that re-narrates every table entry is exhausting to read and obscures your actual findings. A good rule of thumb: if you cannot say in one sentence why a finding matters theoretically, it belongs in the table but not the text.
