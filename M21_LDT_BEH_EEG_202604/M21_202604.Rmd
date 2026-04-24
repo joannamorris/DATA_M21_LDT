@@ -81,6 +81,7 @@ my_style <- list(my_theme,scale_color_custom(),scale_fill_custom())
 ```{r}
 
 # Load data: rt words
+
 rt_w <- read_csv("rt_words_frq.csv") %>%
   filter(correct == 1) %>%
   mutate(
@@ -99,7 +100,7 @@ rt_nw <- read_csv("rt_nwords_frq.csv") %>%
   mutate(
     SubjID = factor(SubjID),
     ItemID = factor(ItemID),
-    complexity = factor(complexity),  # SIMP / COMP
+    complexity = factor(complexity, levels = c("Simple", "Complex")),  # SIMP / COMP
     logRT  = log(response_time),
     OS     = as.numeric(Dim.2),
     LP     = as.numeric(Dim.1),
@@ -127,8 +128,8 @@ erp_nw <- read_csv("erp_fs_dmg_nonwords.csv") %>%
   mutate(
     SubjID = factor(SubjID),
     chlabel = factor(chlabel),
-    family_size = factor(family_size),
-    complexity = factor(complexity),
+    family_size = factor(family_size, levels = c("Small", "Large")),
+    complexity = factor(complexity,  levels = c("Simple", "Complex")),
     time_window = factor(time_window),
     OS = as.numeric(Dim.2),
     LP = as.numeric(Dim.1)
@@ -177,6 +178,9 @@ LP is included but not emphasized.
 Does morphological complexity slow decisions, and is this cost modulated by OS?
 
 ```{r}
+
+contrasts(rt_nw$complexity) <- c(-0.5, 0.5)
+
 m_rt_nw <- lmer(
   logRT ~ complexity + zLogBF + zLogFS + OS + LP +
     (1 + complexity | SubjID) +
@@ -202,10 +206,9 @@ Run **separately by time window** (this is important).
 Does orthographic sensitivity modulate early sensitivity to morphological family structure?
 
 ```{r}
-
-
 # ERP words
-contrasts(erp_w$family_size) <- contr.sum(2)
+
+contrasts(family_size) <- c(-0.5, 0.5)
 
 m_w_N250 <- lmer(
   value ~ family_size*OS + family_size*LP +
@@ -234,6 +237,9 @@ emmeans(m_w_N250, ~ family_size | OS,
 Does language proficiency shape semantic integration of family structure?
 
 ```{r}
+
+contrasts(family_size) <- c(-0.5, 0.5)
+
 m_w_N400 <- lmer(
   value ~ family_size*LP + family_size*OS +
     (1 | SubjID) +
@@ -258,8 +264,9 @@ Is early morpho-orthographic parsing sensitive to complexity and family size?
 
 ```{r}
 # ERP nonwords
-contrasts(erp_nw$complexity)  <- contr.sum(2)
-contrasts(erp_nw$family_size) <- contr.sum(2)
+
+contrasts(m_nw_N250$complexity) <- c(-0.5, 0.5)
+contrasts(m_nw_N250$family_size) <- c(-0.5, 0.5)
 
 m_nw_N250 <- lmer(
   value ~ complexity*family_size*OS + complexity*family_size*LP +
@@ -349,6 +356,10 @@ p_LP
 Does language proficiency determine how familiarity modulates complexity costs?
 
 ```{r}
+
+contrasts(m_nw_N400$complexity) <- c(-0.5, 0.5)
+contrasts(m_nw_N400$family_size) <- c(-0.5, 0.5)
+
 m_nw_N400 <- lmer(
   value ~ complexity*family_size*LP + complexity*family_size*OS +
     (1 | SubjID) +
