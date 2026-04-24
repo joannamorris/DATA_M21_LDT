@@ -100,7 +100,9 @@ rt_nw <- read_csv("rt_nwords_frq.csv") %>%
   mutate(
     SubjID = factor(SubjID),
     ItemID = factor(ItemID),
-    complexity = factor(complexity, levels = c("simple" == "SIMP", "complex" == "COMP")),  # SIMP / COMP
+    complexity = factor(complexity,
+                    levels = c("SIMP", "COMP"),
+                    labels = c("=Simple", "Complex")),
     logRT  = log(response_time),
     OS     = as.numeric(Dim.2),
     LP     = as.numeric(Dim.1),
@@ -125,7 +127,9 @@ erp_nw <- read_csv("erp_fs_dmg_nonwords.csv") %>%
     SubjID = factor(SubjID),
     chlabel = factor(chlabel),
     family_size = factor(family_size, levels = c("Small", "Large")),
-    complexity = factor(complexity,  levels = c("Simple", "Complex")),
+    complexity = factor(complexity,
+                    levels = c("SIMP", "COMP"),
+                    labels = c("=Simple", "Complex")),
     time_window = factor(time_window),
     OS = as.numeric(Dim.2),
     LP = as.numeric(Dim.1)
@@ -158,6 +162,9 @@ m_rt_words <- lmer(
 
 summary(m_rt_words)
 ```
+
+- Base Frequency as the primary lexical familiarity predictor
+- Family Size included as a covariate but not interacted or foregrounded
 
 **What to report:**
 
@@ -192,6 +199,9 @@ m_rt_nw <- lmer(
 
 summary(m_rt_nw, ddf = "Kenward-Roger")
 ```
+
+- Complexity as the primary morphological contrast
+- Base Frequency as lexical familiarity covariate
 
 **What to report:**
 
