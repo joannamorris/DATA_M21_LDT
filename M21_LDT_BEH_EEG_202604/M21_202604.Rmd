@@ -32,14 +32,15 @@ library(ggeffects)
 library(lme4)
 library(afex)
 library(gridExtra)
-library(emmeans)
+library(MuMIn)
+library(pbkrtest)
 library(effectsize)
 library(performance)
 library(cowplot)  # for use with `plot_grid(x,x,ncol = x)` function
 library(e1071) # for use with `skewness()` function
 library(lmerTest)
-library(MuMIn)
-library(pbkrtest)
+library(emmeans)
+emm_options(lmer.df = "satterthwaite")
 ```
 
 1. Set `ggplot2` parameters
@@ -130,8 +131,7 @@ erp_nw <- read_csv("erp_fs_dmg_nonwords.csv") %>%
     chlabel = factor(chlabel),
     family_size = factor(family_size, levels = c("Small", "Large")),
     complexity = factor(complexity,
-                    levels = c("SIMP", "COMP"),
-                    labels = c("=Simple", "Complex")),
+                    labels = c("Simple", "Complex")),
     time_window = factor(time_window),
     OS = as.numeric(Dim.2),
     LP = as.numeric(Dim.1)
@@ -212,6 +212,8 @@ eta_squared(m_rt_nw, partial = TRUE)
 
 # Model R²
 r2_nakagawa(m_rt_nw)
+
+
 ```
 
 - Complexity as the primary morphological contrast
@@ -228,13 +230,27 @@ r2_nakagawa(m_rt_nw)
 **What not to report in text:** Again, do not narrate the absence of interactions you did not include — do not say "we did not find a Complexity × OS interaction" because that interaction is not in this model by design. If a reviewer asks, you explain it was a Question 2 test reserved for the ERP.
 
 ```{r}
+library(emmeans)
+emm_options(lmer.df = "satterthwaite")
+
 # estimated marginal means for each level of complexity, adjusted for zLogBF, zLogFS, OS, and LP
-(emm_complexity <- emmeans(m_rt_nw,  ~ complexity))
+(emm_complexity <- emmeans(m_rt_nw,  ~ complexity, lmer.df = "satterthwaite"))
 
 # Because your outcome is logRT, these means are on the log reaction-time scale. 
 # To back-transform them to RTs
-emm_complexity <- emmeans(m_rt_nw, ~ complexity, tran = "log")
+emm_complexity <- emmeans(m_rt_nw, ~ complexity, tran = "log", lmer.df = "satterthwaite")
 summary(emm_complexity, type = "response")
+
+# Step 1: Get emmeans on log scale with Satterthwaite df
+emm_log <- emmeans(m_rt_nw, ~ complexity, lmer.df = "satterthwaite")
+summary(emm_log)  # check df are no longer Inf
+
+# Step 2: Back-transform manually
+emm_summary <- summary(emm_log)
+emm_summary$mean_ms  <- exp(emm_summary$emmean)
+emm_summary$lower_ms <- exp(emm_summary$asymp.LCL)
+emm_summary$upper_ms <- exp(emm_summary$asymp.UCL)
+emm_summary
 
 
 #To compare the two complexity levels:
@@ -253,8 +269,8 @@ emm_summary$emmean_ms <- exp(emm_summary$emmean)
 emm_summary$lower_ms  <- exp(emm_summary$asymp.LCL)
 emm_summary$upper_ms  <- exp(emm_summary$asymp.UCL)
 emm_summary
-diff_ms <- exp(emm_summary$emmean[emm_summary$complexity == "complex"]) - 
-           exp(emm_summary$emmean[emm_summary$complexity == "simple"])
+diff_ms <- exp(emm_summary$emmean[emm_summary$complexity == "Complex"]) - 
+           exp(emm_summary$emmean[emm_summary$complexity == "Simple"])
 diff_ms
 ```
 
@@ -285,6 +301,7 @@ m_w_N250 <- lmer(
   control = lmerControl(optimizer = "bobyqa")
 )
 summary(m_w_N250)
+# class(m_w_N250)
 
 ```
 
@@ -292,8 +309,7 @@ summary(m_w_N250)
 
 ```{r}
 library(emmeans)
-emmeans(m_w_N250, ~ family_size | OS,
-        at = list(OS = c(-1, 0, 1)))
+emmeans(m_w_N250, ~ family_size)
 ```
 
 ## N250 — Nonwords
@@ -311,6 +327,7 @@ m_nw_N250 <- lmer(
   control = lmerControl(optimizer = "bobyqa")
 )
 summary(m_nw_N250)
+class(m_w_N250)
 ```
 
 ####  Complexity × OS collapsed over Family Size (N250 nonwords)
