@@ -38,6 +38,8 @@ library(performance)
 library(cowplot)  # for use with `plot_grid(x,x,ncol = x)` function
 library(e1071) # for use with `skewness()` function
 library(lmerTest)
+library(MuMIn)
+library(pbkrtest)
 ```
 
 1. Set `ggplot2` parameters
@@ -102,7 +104,7 @@ rt_nw <- read_csv("rt_nwords_frq.csv") %>%
     ItemID = factor(ItemID),
     complexity = factor(complexity,
                     levels = c("SIMP", "COMP"),
-                    labels = c("=Simple", "Complex")),
+                    labels = c("Simple", "Complex")),
     logRT  = log(response_time),
     OS     = as.numeric(Dim.2),
     LP     = as.numeric(Dim.1),
@@ -147,20 +149,26 @@ Does orthographic sensitivity predict efficiency, controlling lexical familiarit
 
 **Theoretical framing:** RTs index processing speed and overall efficiency. The finding that OS predicts overall RT but does not modulate the structure of morphological effects is theoretically meaningful — it suggests that orthographic skill affects how fast the system operates without changing what it does. This is consistent with discriminative learning accounts in which OS indexes the precision of sublexical cue weights, which would speed all form-based processing rather than selectively facilitating morphologically structured items.
 
-Interactions between morphological variables and individual differences are Question 2 and 3 territory. RT models establish the efficiency baseline cleanly, without prejudging what the ERP models will show.
+RT models: Strip out the morphological structure × individual difference interactions entirely. RTs answer Question 1 only — who is faster — and the models should be specified accordingly. Running leaner models also strengthens the RT results by removing the fragile interaction terms that are currently cluttering them. Interactions between morphological variables and individual differences are Question 2 and 3 territory. RT models establish the efficiency baseline cleanly, without prejudging what the ERP models will show.
 
 ```{r}
-library(lme4)
 
-m_rt_words <- lmer(
+library(lmerTest)
+
+m_rt_words <-lmer(
   logRT ~ zLogBF + zLogFS + OS + LP +
-    (1 + zLogBF | SubjID) +
+    (1 | SubjID) +
     (1 | Item),
   data = rt_w,
   control = lmerControl(optimizer = "bobyqa")
 )
-
 summary(m_rt_words)
+
+# Effect sizes for individual terms
+eta_squared(m_rt_words, partial = TRUE)
+
+# Model R²
+r2_nakagawa(m_rt_words)
 ```
 
 - Base Frequency as the primary lexical familiarity predictor
@@ -182,10 +190,9 @@ Words were recognized more quickly when derived from higher-frequency bases, β 
 
 ## RT — Nonwords (primary behavioral model)
 
-**Question:**
-Does morphological complexity slow decisions, and is this cost modulated by OS?
 
 ```{r}
+library(lmerTest)
 
 contrasts(rt_nw$complexity) <- c(-0.5, 0.5)
 
@@ -196,8 +203,15 @@ m_rt_nw <- lmer(
   data = rt_nw,
   control = lmerControl(optimizer = "bobyqa")
 )
+m_rt_nw
+summary(m_rt_nw)
 
-summary(m_rt_nw, ddf = "Kenward-Roger")
+
+# Effect sizes for individual terms
+eta_squared(m_rt_nw, partial = TRUE)
+
+# Model R²
+r2_nakagawa(m_rt_nw)
 ```
 
 - Complexity as the primary morphological contrast
@@ -213,13 +227,44 @@ summary(m_rt_nw, ddf = "Kenward-Roger")
 
 **What not to report in text:** Again, do not narrate the absence of interactions you did not include — do not say "we did not find a Complexity × OS interaction" because that interaction is not in this model by design. If a reviewer asks, you explain it was a Question 2 test reserved for the ERP.
 
+```{r}
+# estimated marginal means for each level of complexity, adjusted for zLogBF, zLogFS, OS, and LP
+(emm_complexity <- emmeans(m_rt_nw,  ~ complexity))
+
+# Because your outcome is logRT, these means are on the log reaction-time scale. 
+# To back-transform them to RTs
+emm_complexity <- emmeans(m_rt_nw, ~ complexity, tran = "log")
+summary(emm_complexity, type = "response")
+
+
+#To compare the two complexity levels:
+pairs(emm_complexity)
+
+# Back-transformed contrast (ratio rather than difference on log scale)
+pairs(emmeans(m_rt_nw, ~ complexity, tran = "log"), 
+      type = "response")
+
+# on the back-transformed scale the contrast becomes a ratio rather than a difference in ms — 
+# complex/simple rather than complex − simple. To get the difference in ms directly, compute it from the 
+# # back-transformed means
+
+emm_summary <- summary(emm_complexity)
+emm_summary$emmean_ms <- exp(emm_summary$emmean)
+emm_summary$lower_ms  <- exp(emm_summary$asymp.LCL)
+emm_summary$upper_ms  <- exp(emm_summary$asymp.UCL)
+emm_summary
+diff_ms <- exp(emm_summary$emmean[emm_summary$complexity == "complex"]) - 
+           exp(emm_summary$emmean[emm_summary$complexity == "simple"])
+diff_ms
+```
+
+
 ---
 
 # Early event related potentials (N250)
 
-## ERP — Words
+Restructure so that OS is the primary moderator and LP is a covariate in the words analysis, while both are tested for nonwords but with OS foregrounded. The three-way Complexity × Family Size × OS interaction for nonwords should be dropped unless you have a specific theoretical reason to retain it — it is currently one of the results that is hardest to interpret and easiest for reviewers to challenge.
 
-Run **separately by time window** (this is important).
 
 ## N250 — Words
 
@@ -229,17 +274,18 @@ Does orthographic sensitivity modulate early sensitivity to morphological family
 ```{r}
 # ERP words
 
-contrasts(family_size) <- c(-0.5, 0.5)
+# Set contrast on the data column, not a model object
+contrasts(erp_w$family_size) <- c(-0.5, 0.5)
 
 m_w_N250 <- lmer(
-  value ~ family_size*OS + family_size*LP +
+  value ~ family_size * OS + LP +
     (1 | SubjID) +
     (1 | SubjID:chlabel),
   data = subset(erp_w, time_window == "N250"),
   control = lmerControl(optimizer = "bobyqa")
 )
+summary(m_w_N250)
 
-summary(m_w_N250, ddf = "Kenward-Roger")
 ```
 
 **Follow-up (only if interaction significant):**
@@ -250,47 +296,15 @@ emmeans(m_w_N250, ~ family_size | OS,
         at = list(OS = c(-1, 0, 1)))
 ```
 
----
-
-## C2. N400 — Words
-
-**Question:**
-Does language proficiency shape semantic integration of family structure?
+## N250 — Nonwords
 
 ```{r}
-
-contrasts(family_size) <- c(-0.5, 0.5)
-
-m_w_N400 <- lmer(
-  value ~ family_size*LP + family_size*OS +
-    (1 | SubjID) +
-    (1 | SubjID:chlabel),
-  data = subset(erp_w, time_window == "N400"),
-  control = lmerControl(optimizer = "bobyqa")
-)
-
-summary(m_w_N400)
-```
-
----
-
-# D. ERP — Nonwords
-
-Again, **separate by time window**.
-
-## D1. N250 — Nonwords
-
-**Question:**
-Is early morpho-orthographic parsing sensitive to complexity and family size?
-
-```{r}
-# ERP nonwords
-
-contrasts(m_nw_N250$complexity) <- c(-0.5, 0.5)
-contrasts(m_nw_N250$family_size) <- c(-0.5, 0.5)
+# Set contrasts on data columns before the model
+contrasts(erp_nw$complexity)   <- c(-0.5, 0.5)
+contrasts(erp_nw$family_size)  <- c(-0.5, 0.5)
 
 m_nw_N250 <- lmer(
-  value ~ complexity*family_size*OS + complexity*family_size*LP +
+  value ~ complexity * OS + complexity * LP + family_size +
     (1 | SubjID) +
     (1 | SubjID:chlabel),
   data = subset(erp_nw, time_window == "N250"),
@@ -366,20 +380,46 @@ p_LP <- ggplot(df_emm_LP, aes(x = LP, y = emmean, group = complexity)) +
 
 p_LP
 ```
-
-
 ---
 
+# ERP: N400
 
-## D2. N400 — Nonwords (strongest ERP result)
 
-**Question:**
-Does language proficiency determine how familiarity modulates complexity costs?
+**Question:** Does language proficiency shape semantic integration of morphological information (N400)?
+
+Restructure so that LP is the primary moderator and OS is a covariate. The three-way Complexity × Family Size × LP for nonwords is your strongest finding and should be the centerpiece of Question 3 — but it needs to be the planned primary test rather than one of several equally-weighted interactions, which is how it currently reads.
+
+**Theoretical framing**: The N400 indexes semantic integration. The prediction is that LP — which indexes depth and breadth of lexical-semantic knowledge — should modulate the N400 response to morphological family structure, particularly for nonwords where semantic co-activation from family members must be generated from stem-level cues alone. OS is included as a covariate. The key finding is the three-way Complexity × Family Size × LP interaction for nonwords, which is your strongest evidence for the predicted role of LP in morphological family activation during semantic integration.
+
+
+## N400 — Words
+
 
 ```{r}
 
-contrasts(m_nw_N400$complexity) <- c(-0.5, 0.5)
-contrasts(m_nw_N400$family_size) <- c(-0.5, 0.5)
+contrasts(erp_nw$complexity)  <- c(-0.5, 0.5)
+contrasts(erp_nw$family_size) <- c(-0.5, 0.5)
+
+m_nw_N400 <- lmer(
+  value ~ complexity * family_size * LP + OS +
+    (1 | SubjID) +
+    (1 | SubjID:chlabel),
+  data = subset(erp_nw, time_window == "N400"),
+  control = lmerControl(optimizer = "bobyqa")
+)
+summary(m_nw_N400)
+```
+
+---
+
+##  N400 — Nonwords
+
+**Question:** Does language proficiency determine how familiarity modulates complexity costs?
+
+```{r}
+
+contrasts(erp_nw$complexity) <- c(-0.5, 0.5)
+contrasts(erp_nw$family_size) <- c(-0.5, 0.5)
 
 m_nw_N400 <- lmer(
   value ~ complexity*family_size*LP + complexity*family_size*OS +
