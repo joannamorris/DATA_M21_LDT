@@ -40,7 +40,7 @@ library(cowplot)  # for use with `plot_grid(x,x,ncol = x)` function
 library(e1071) # for use with `skewness()` function
 library(lmerTest)
 library(emmeans)
-emm_options(lmer.df = "satterthwaite")
+# emm_options(lmer.df = "satterthwaite")
 ```
 
 1. Set `ggplot2` parameters
@@ -81,7 +81,7 @@ my_style <- list(my_theme,scale_color_custom(),scale_fill_custom())
 
 # Load Files
 
-```{r}
+```{r load_files}
 
 # Load data: rt words
 
@@ -142,7 +142,7 @@ erp_nw <- read_csv("erp_fs_dmg_nonwords.csv") %>%
 
 - **Base Frequency** is your primary lexical familiarity index for **RT models** — it drives the behavioral effects and is interpretable as overall lexical availability. Family Size can be included as a covariate in RT models but should not be foregrounded.
 
-## RT — Words (primary behavioral model)
+## Words — RT
 
 **Question:**
 Does orthographic sensitivity predict efficiency, controlling lexical familiarity?
@@ -151,7 +151,7 @@ Does orthographic sensitivity predict efficiency, controlling lexical familiarit
 
 RT models: Strip out the morphological structure × individual difference interactions entirely. RTs answer Question 1 only — who is faster — and the models should be specified accordingly. Running leaner models also strengthens the RT results by removing the fragile interaction terms that are currently cluttering them. Interactions between morphological variables and individual differences are Question 2 and 3 territory. RT models establish the efficiency baseline cleanly, without prejudging what the ERP models will show.
 
-```{r}
+```{r anova_rt_words}
 
 library(lmerTest)
 
@@ -188,10 +188,9 @@ Words were recognized more quickly when derived from higher-frequency bases, β 
 
 ---
 
-## RT — Nonwords (primary behavioral model)
+## Nonwords — RT
 
-
-```{r}
+```{r anova_rt_nonwords}
 library(lmerTest)
 
 contrasts(rt_nw$complexity) <- c(-0.5, 0.5)
@@ -229,51 +228,26 @@ r2_nakagawa(m_rt_nw)
 
 **What not to report in text:** Again, do not narrate the absence of interactions you did not include — do not say "we did not find a Complexity × OS interaction" because that interaction is not in this model by design. If a reviewer asks, you explain it was a Question 2 test reserved for the ERP.
 
-```{r}
+```{r complexity_maineffect}
 library(emmeans)
-emm_options(lmer.df = "satterthwaite")
-
-# estimated marginal means for each level of complexity, adjusted for zLogBF, zLogFS, OS, and LP
-(emm_complexity <- emmeans(m_rt_nw,  ~ complexity, lmer.df = "satterthwaite"))
-
-# Because your outcome is logRT, these means are on the log reaction-time scale. 
-# To back-transform them to RTs
-emm_complexity <- emmeans(m_rt_nw, ~ complexity, tran = "log", lmer.df = "satterthwaite")
-summary(emm_complexity, type = "response")
 
 # Step 1: Get emmeans on log scale with Satterthwaite df
-emm_log <- emmeans(m_rt_nw, ~ complexity, lmer.df = "satterthwaite")
-summary(emm_log)  # check df are no longer Inf
+emm_log <- emmeans(m_rt_nw, ~ complexity,lmer.df = "kenward-roger", pbkrtest.limit = 5000)
+summary(emm_log)  
 
 # Step 2: Back-transform manually
 emm_summary <- summary(emm_log)
 emm_summary$mean_ms  <- exp(emm_summary$emmean)
-emm_summary$lower_ms <- exp(emm_summary$asymp.LCL)
-emm_summary$upper_ms <- exp(emm_summary$asymp.UCL)
+# emm_summary$lower_ms <- exp(emm_summary$asymp.LCL)  # Uncomment for asymptotic df calculation
+# emm_summary$upper_ms <- exp(emm_summary$asymp.UCL)
+emm_summary$lower_ms <- exp(emm_summary$lower.CL)    # Uncomment for kenward-roger df calculation
+emm_summary$upper_ms <- exp(emm_summary$upper.CL)
 emm_summary
 
-
-#To compare the two complexity levels:
-pairs(emm_complexity)
-
-# Back-transformed contrast (ratio rather than difference on log scale)
-pairs(emmeans(m_rt_nw, ~ complexity, tran = "log"), 
-      type = "response")
-
-# on the back-transformed scale the contrast becomes a ratio rather than a difference in ms — 
-# complex/simple rather than complex − simple. To get the difference in ms directly, compute it from the 
-# # back-transformed means
-
-emm_summary <- summary(emm_complexity)
-emm_summary$emmean_ms <- exp(emm_summary$emmean)
-emm_summary$lower_ms  <- exp(emm_summary$asymp.LCL)
-emm_summary$upper_ms  <- exp(emm_summary$asymp.UCL)
-emm_summary
 diff_ms <- exp(emm_summary$emmean[emm_summary$complexity == "Complex"]) - 
            exp(emm_summary$emmean[emm_summary$complexity == "Simple"])
 diff_ms
 ```
-
 
 ---
 
@@ -282,14 +256,12 @@ diff_ms
 Restructure so that OS is the primary moderator and LP is a covariate in the words analysis, while both are tested for nonwords but with OS foregrounded. The three-way Complexity × Family Size × OS interaction for nonwords should be dropped unless you have a specific theoretical reason to retain it — it is currently one of the results that is hardest to interpret and easiest for reviewers to challenge.
 
 
-## N250 — Words
+## Words — 250 
 
 **Question:**
 Does orthographic sensitivity modulate early sensitivity to morphological family structure?
 
-```{r}
-# ERP words
-
+```{r anova_n250_words}
 # Set contrast on the data column, not a model object
 contrasts(erp_w$family_size) <- c(-0.5, 0.5)
 
@@ -301,20 +273,24 @@ m_w_N250 <- lmer(
   control = lmerControl(optimizer = "bobyqa")
 )
 summary(m_w_N250)
-# class(m_w_N250)
 
+# Effect sizes for individual terms
+eta_squared(m_w_N250, partial = TRUE)
+
+# Model R²
+r2_nakagawa(m_w_N250)
 ```
 
 **Follow-up (only if interaction significant):**
 
-```{r}
+```{r fs_maineffect}
 library(emmeans)
 emmeans(m_w_N250, ~ family_size)
 ```
 
-## N250 — Nonwords
+## Nonwords — N250 
 
-```{r}
+```{r anova_n250_nonwords}
 # Set contrasts on data columns before the model
 contrasts(erp_nw$complexity)   <- c(-0.5, 0.5)
 contrasts(erp_nw$family_size)  <- c(-0.5, 0.5)
@@ -327,77 +303,88 @@ m_nw_N250 <- lmer(
   control = lmerControl(optimizer = "bobyqa")
 )
 summary(m_nw_N250)
-class(m_w_N250)
+
 ```
 
-####  Complexity × OS collapsed over Family Size (N250 nonwords)
+### Main Effect of Complexity
+Simple means for each level — establishes direction and magnitude:
 
-```{r}
-# Confirm factor levels (optional but good)
-with(subset(erp_nw, time_window == "N250"), table(complexity, family_size))
+```{r cmpl_maineffecct}
+library(emmeans)
+emm_options(lmer.df = "kenward-roger")
 
-# Estimated marginal means of complexity at OS = -1, 0, +1
-emm_cx_by_OS <- emmeans(
-  m_nw_N250,
-  ~ complexity | OS,
-  at = list(OS = c(-1, 0, 1)),
-  # This is the key: average over family_size
-  weights = "proportional"
-)
-emm_cx_by_OS
-
-
-# “Slopes”: complexity effect (Complex - Simple) at OS = -1, 0, +1
-slopes_cx_OS <- contrast(emm_cx_by_OS, method = "pairwise")  # Complex - Simple within each OS
-slopes_cx_OS
-
-# Plot the EMMs (collapsed over family size)
-df_emm_OS <- as.data.frame(emm_cx_by_OS)
-
-p_OS <- ggplot(df_emm_OS, aes(x = OS, y = emmean, group = complexity)) +
-  geom_line() +
-  geom_point() +
-  geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL), width = 0.08) +
-  labs(
-    x = "Orthographic Sensitivity (OS; SD units)",
-    y = "Estimated mean N250 amplitude (µV)",
-    title = "N250 Nonwords: Complexity effect across OS (averaged over family size)"
-  )
-p_OS
+emm_complexity <- emmeans(m_nw_N250, ~ complexity)
+summary(emm_complexity)
+pairs(emm_complexity)
 ```
 
-#### Complexity × LP collapsed over Family Size (N250 nonwords)
+### Main Effect of Family Size
 
-```{r}
-# Estimated marginal means of complexity at LP = -1, 0, +1
-emm_cx_by_LP <- emmeans(
-  m_nw_N250,
-  ~ complexity | LP,
-  at = list(LP = c(-1, 0, 1)),
-  weights = "proportional"
-)
-emm_cx_by_LP
-
-# “Slopes”: complexity effect (Complex - Simple) at LP = -1, 0, +1
-slopes_cx_LP <- contrast(emm_cx_by_LP, method = "pairwise")  # Complex - Simple within each LP
-slopes_cx_LP
-
-# Plot the EMMs (collapsed over family size)
-df_emm_LP <- as.data.frame(emm_cx_by_LP)
-
-p_LP <- ggplot(df_emm_LP, aes(x = LP, y = emmean, group = complexity)) +
-  geom_line() +
-  geom_point() +
-  geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL), width = 0.08) +
-  labs(
-    x = "Language Proficiency (LP; SD units)",
-    y = "Estimated mean N250 amplitude (µV)",
-    title = "N250 Nonwords: Complexity effect across LP (averaged over family size)"
-  )
-
-p_LP
+```{r fs_maineffect}
+emm_fs <- emmeans(m_nw_N250, ~ family_size)
+summary(emm_fs)
+pairs(emm_fs)
 ```
----
+
+### Complexity × OS Interaction
+This is your primary Question 2 test. You want to know how the complexity effect changes across levels of OS. The standard approach is to probe OS at −1, 0, and +1 SD:
+
+```{r cmplxos_interaction}
+# Complexity effect at three levels of OS
+emm_complexity_OS <- emmeans(m_nw_N250, 
+                              ~ complexity | OS,
+                              at = list(OS = c(-1, 0, 1)))
+summary(emm_complexity_OS)
+
+# Pairwise complexity contrast at each level of OS
+pairs(emm_complexity_OS)
+
+# Test whether the complexity contrast changes across OS levels
+# (this is the formal test of the interaction slope)
+# emtrends(m_nw_N250, ~ OS, var = "complexity")
+```
+
+### Complexity × LP Interaction. Parallel follow-up for LP:
+
+```{r cmplxls_interaction}
+# Complexity effect at three levels of LP
+emm_complexity_LP <- emmeans(m_nw_N250,
+                              ~ complexity | LP,
+                              at = list(LP = c(-1, 0, 1)))
+summary(emm_complexity_LP)
+
+# Pairwise complexity contrast at each level of LP
+pairs(emm_complexity_LP)
+
+# Formal test of interaction slope
+# emtrends(m_nw_N250, ~ LP, var = "complexity1")
+```
+
+### Direct Comparison of the Two Interaction Slopes
+This is theoretically important — you want to know whether the Complexity × OS and Complexity × LP interactions are meaningfully different from each other, since your theoretical framing predicts both should be present at the N250 but potentially with different magnitudes.
+
+The slopes themselves — $\beta = 0.392$ for OS and $\beta = 0.358$ for LP — are very similar in magnitude, which is consistent with your finding that both dimensions modulate early parsing efficiency for nonwords. Reporting both slopes alongside the follow-up contrasts at ±1 SD will allow you to make this point clearly in the write-up.
+
+```{r interaction_slope_comparison}
+# Extract the two slopes
+trend_OS <- emtrends(m_nw_N250, ~ OS, var = "complexity1")
+trend_LP <- emtrends(m_nw_N250, ~ LP, var = "complexity1")
+
+summary(trend_OS)
+summary(trend_LP)
+```
+
+#### What to Report From Each
+
+| Test                    | What to report |
+|-------------------------|-------------------------------------------------------|
+| Complexity main effect  | Means ± CIs for simple and complex, pairwise contrast |
+| Family Size main effect | Means ± CIs for large and small, pairwise contrast |
+| Complexity × OS         | Complexity contrast at −1, 0, +1 SD of OS; note where effect reverses or disappears |
+| Complexity × LP         | Complexity contrast at −1, 0, +1 SD of LP; same logic |
+| Slope comparison        | Both emtrends values to show similarity of the two interaction slopes |
+
+The pattern you are looking for in both interactions is the same: at **low skill** the complexity effect should be large and positive (*complex more positive than simple*), at mean skill attenuated, and at **high skill** *reduced or reversed* — consistent with your existing results showing that higher-skill readers show more efficient early parsing of novel morphological structure.
 
 # ERP: N400
 
