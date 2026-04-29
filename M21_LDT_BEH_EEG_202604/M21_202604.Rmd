@@ -251,7 +251,7 @@ diff_ms
 
 ---
 
-# Early event related potentials (N250)
+# ERP N250
 
 Restructure so that OS is the primary moderator and LP is a covariate in the words analysis, while both are tested for nonwords but with OS foregrounded. The three-way Complexity × Family Size × OS interaction for nonwords should be dropped unless you have a specific theoretical reason to retain it — it is currently one of the results that is hardest to interpret and easiest for reviewers to challenge.
 
@@ -281,9 +281,11 @@ eta_squared(m_w_N250, partial = TRUE)
 r2_nakagawa(m_w_N250)
 ```
 
-**Follow-up (only if interaction significant):**
 
-```{r fs_maineffect}
+
+### Main Effect of Family Size
+
+```{r fs_me_n2_wrds}
 library(emmeans)
 emmeans(m_w_N250, ~ family_size)
 ```
@@ -320,7 +322,7 @@ pairs(emm_complexity)
 
 ### Main Effect of Family Size
 
-```{r fs_maineffect}
+```{r fs_me_n2_nwrd}
 emm_fs <- emmeans(m_nw_N250, ~ family_size)
 summary(emm_fs)
 pairs(emm_fs)
@@ -365,14 +367,6 @@ This is theoretically important — you want to know whether the Complexity × O
 
 The slopes themselves — $\beta = 0.392$ for OS and $\beta = 0.358$ for LP — are very similar in magnitude, which is consistent with your finding that both dimensions modulate early parsing efficiency for nonwords. Reporting both slopes alongside the follow-up contrasts at ±1 SD will allow you to make this point clearly in the write-up.
 
-```{r interaction_slope_comparison}
-# Extract the two slopes
-trend_OS <- emtrends(m_nw_N250, ~ OS, var = "complexity1")
-trend_LP <- emtrends(m_nw_N250, ~ LP, var = "complexity1")
-
-summary(trend_OS)
-summary(trend_LP)
-```
 
 #### What to Report From Each
 
@@ -400,6 +394,34 @@ Restructure so that LP is the primary moderator and OS is a covariate. The three
 
 
 ```{r}
+contrasts(erp_w$family_size) <- c(-0.5, 0.5)
+
+m_w_N400 <- lmer(
+  value ~ family_size * LP + OS +
+    (1 | SubjID) +
+    (1 | SubjID:chlabel),
+  data = subset(erp_w, time_window == "N400"),
+  control = lmerControl(optimizer = "bobyqa")
+)
+summary(m_w_N400)
+```
+
+---
+
+### Main Effect of Family Size
+
+```{r fs_me_n4_wrds}
+emm_fs_w_N400 <- emmeans(m_w_N400, ~ family_size)
+summary(emm_fs_w_N400)
+pairs(emm_fs_w_N400)
+```
+
+
+##  N400 — Nonwords
+
+**Question:** Does language proficiency determine how familiarity modulates complexity costs?
+
+```{r}
 
 contrasts(erp_nw$complexity)  <- c(-0.5, 0.5)
 contrasts(erp_nw$family_size) <- c(-0.5, 0.5)
@@ -414,56 +436,60 @@ m_nw_N400 <- lmer(
 summary(m_nw_N400)
 ```
 
----
+### Complexity × Family Size × LP interaction
 
-##  N400 — Nonwords
-
-**Question:** Does language proficiency determine how familiarity modulates complexity costs?
+The three-way needs to be unpacked by examining the Complexity × Family Size interaction separately at each level of LP. This tells you how the joint influence of morphological complexity and family size on semantic integration changes as a function of language proficiency — which is exactly your theoretical claim.
 
 ```{r}
+# Step 1: Unpack the three-way
+# Complexity x Family Size at three levels of LP
+emm_3way <- emmeans(m_nw_N400, 
+                    ~ complexity * family_size | LP,
+                    at = list(LP = c(-1, 0, 1)))
+summary(emm_3way)
 
-contrasts(erp_nw$complexity) <- c(-0.5, 0.5)
-contrasts(erp_nw$family_size) <- c(-0.5, 0.5)
+# Step 2: Pairwise complexity contrasts within each 
+# family size condition at each level of LP
+pairs(emm_3way, simple = "complexity")
 
-m_nw_N400 <- lmer(
-  value ~ complexity*family_size*LP + complexity*family_size*OS +
-    (1 | SubjID) +
-    (1 | SubjID:chlabel),
-  data = subset(erp_nw, time_window == "N400"),
-  control = lmerControl(optimizer = "bobyqa")
-)
+# Step 3: Pairwise family size contrasts within each
+# complexity condition at each level of LP
+pairs(emm_3way, simple = "family_size")
 
-summary(m_nw_N400)
+# Step 4: The interaction contrast — does the complexity x 
+# family size interaction itself change across LP levels?
+# This is the formal test of the three-way
+emm_2way_by_LP <- emmeans(m_nw_N400,
+                           ~ complexity * family_size | LP,
+                           at = list(LP = c(-1, 0, 1)))
+contrast(emm_2way_by_LP, 
+         interaction = c("pairwise", "pairwise"))
 ```
+###  Complexity × Family Size interaction averaged across LP
 
-**Critical follow-up:**
 
 ```{r}
-emmeans(
-  m_nw_N400,
-  ~ complexity*family_size | LP,
-  at = list(LP = c(-1, 0, 1))
-)
-```
-```{r}
-emmeans(
-  m_nw_N400,
-  ~ complexity*family_size | OS,
-  at = list(OS = c(-1, 0, 1))
-)
+# Complexity x Family Size averaged over LP
+emm_2way <- emmeans(m_nw_N400, ~ complexity * family_size)
+summary(emm_2way)
+pairs(emm_2way, simple = "complexity")
+pairs(emm_2way, simple = "family_size")
 ```
 
+### Complexity × LP interaction averaged over Family Size:
+
 ```{r}
-contrast(
-  emmeans(m_nw_N400, ~ complexity*family_size | LP,
-          at = list(LP = c(-1, 1))),
-  interaction = "pairwise"
-)
+# Complexity x LP at three levels of LP
+emm_complexity_LP_N400 <- emmeans(m_nw_N400,
+                                   ~ complexity | LP,
+                                   at = list(LP = c(-1, 0, 1)))
+summary(emm_complexity_LP_N400)
+pairs(emm_complexity_LP_N400)
 ```
+
 #### N400 (nonwords): (Complex - Simple) difference scores as a function of continuous Language Proficiency (LP), averaged over Family Size
 
 .
-
 
 ```{r}
 # Generate complexity differences across LP
@@ -497,7 +523,6 @@ ggplot(df_diff_lp, aes(x = LP, y = estimate)) +
     subtitle = "Model-estimated difference scores averaged over family size"
   ) +
   theme_classic()
-
 ```
 
 ---
