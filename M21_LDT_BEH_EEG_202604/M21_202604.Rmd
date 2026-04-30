@@ -183,8 +183,6 @@ r2_nakagawa(m_rt_words)
 
 **What not to report in text:** The random effects structure, the optimizer setting, or any discussion of model convergence unless there was a problem.
 
-**Example narrative pattern:**
-Words were recognized more quickly when derived from higher-frequency bases, β = X, SE = X, t(X) = X, p = X. Family size also contributed a reliable facilitory effect, β = X, SE = X, t(X) = X, p = X. Orthographic Sensitivity showed a marginal trend toward faster overall responding, β = X, SE = X, t(X) = X, p = X, whereas Language Proficiency did not reliably predict response times, β = X, SE = X, t(X) = X, p = X.
 
 ---
 
@@ -329,7 +327,7 @@ pairs(emm_fs)
 ```
 
 ### Complexity × OS Interaction
-This is your primary Question 2 test. You want to know how the complexity effect changes across levels of OS. The standard approach is to probe OS at −1, 0, and +1 SD:
+This is your primary Question 2 test. You want to know how the complexity effect changes across levels of OS. The standard approach is to probe OS at -1, 0, and +1 SD:
 
 ```{r cmplxos_interaction}
 # Complexity effect at three levels of OS
@@ -374,8 +372,8 @@ The slopes themselves — $\beta = 0.392$ for OS and $\beta = 0.358$ for LP — 
 |-------------------------|-------------------------------------------------------|
 | Complexity main effect  | Means ± CIs for simple and complex, pairwise contrast |
 | Family Size main effect | Means ± CIs for large and small, pairwise contrast |
-| Complexity × OS         | Complexity contrast at −1, 0, +1 SD of OS; note where effect reverses or disappears |
-| Complexity × LP         | Complexity contrast at −1, 0, +1 SD of LP; same logic |
+| Complexity × OS         | Complexity contrast at -1, 0, +1 SD of OS; note where effect reverses or disappears |
+| Complexity × LP         | Complexity contrast at -1, 0, +1 SD of LP; same logic |
 | Slope comparison        | Both emtrends values to show similarity of the two interaction slopes |
 
 The pattern you are looking for in both interactions is the same: at **low skill** the complexity effect should be large and positive (*complex more positive than simple*), at mean skill attenuated, and at **high skill** *reduced or reversed* — consistent with your existing results showing that higher-skill readers show more efficient early parsing of novel morphological structure.
