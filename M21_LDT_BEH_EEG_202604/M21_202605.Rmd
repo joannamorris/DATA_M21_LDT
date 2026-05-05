@@ -1,0 +1,471 @@
+---
+title: "M21_20260502"
+author: "Joanna Morris"
+date: "`r Sys.Date()`"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load Files
+
+```{r load_files}
+
+# Load data: rt words
+
+rt_w <- read_csv("rt_words_frq.csv") %>%
+  filter(correct == 1) %>%
+  mutate(
+    SubjID = factor(SubjID),
+    Item   = factor(target),
+    logRT  = log(response_time),
+    OS     = as.numeric(Dim.2),
+    LP     = as.numeric(Dim.1),
+    zLogBF = as.numeric(scale(LogBF)),
+    zLogFS = as.numeric(scale(LogFS))
+  )
+
+# Load data: rt nonwords
+rt_nw <- read_csv("rt_nwords_frq.csv") %>%
+  filter(correct == 1) %>%
+  mutate(
+    SubjID = factor(SubjID),
+    ItemID = factor(ItemID),
+    complexity = factor(complexity,
+                    levels = c("SIMP", "COMP"),
+                    labels = c("Simple", "Complex")),
+    logRT  = log(response_time),
+    OS     = as.numeric(Dim.2),
+    LP     = as.numeric(Dim.1),
+    zLogBF = as.numeric(scale(LogBF)),
+    zLogFS = as.numeric(scale(LogFS))
+  )
+
+# Load data: erp_fs words
+erp_fs_w <- read_csv("erp_fs_dmg_words.csv") %>%
+  mutate(
+    SubjID = factor(SubjID),
+    chlabel = factor(chlabel),
+    family_size = factor(family_size, 
+                         levels = c("Small", "Large")),
+    time_window = factor(time_window),
+    OS = as.numeric(Dim.2),
+    LP = as.numeric(Dim.1)
+  )
+
+# Load data: erp_fs nonwords
+erp_fs_nw <- read_csv("erp_fs_dmg_nonwords.csv") %>%
+  mutate(
+    SubjID = factor(SubjID),
+    chlabel = factor(chlabel),
+    family_size = factor(family_size, 
+                         levels = c("Small", "Large")),
+    complexity = factor(complexity,
+                    labels = c("Simple", "Complex")),
+    time_window = factor(time_window),
+    OS = as.numeric(Dim.2),
+    LP = as.numeric(Dim.1)
+  )
+
+# Load data: erp_bf words
+erp_bf_w <- read_csv("erp_bf_dmg_words.csv") %>%
+  mutate(
+    SubjID = factor(SubjID),
+    chlabel = factor(chlabel),
+    base_frequency = factor(base_frequency, 
+                            levels = c("Low", "High")),
+    time_window = factor(time_window),
+    OS = as.numeric(Dim.2),
+    LP = as.numeric(Dim.1)
+  )
+
+# Load data: erp_bf nonwords
+erp_bf_nw <- read_csv("erp_bf_dmg_nonwords.csv") %>%
+  mutate(
+    SubjID = factor(SubjID),
+    chlabel = factor(chlabel),
+    base_frequency = factor(base_frequency, 
+                            levels = c("Low", "High")),
+    complexity = factor(complexity,
+                    labels = c("Simple", "Complex")),
+    time_window = factor(time_window),
+    OS = as.numeric(Dim.2),
+    LP = as.numeric(Dim.1)
+  )
+```
+
+# WORDS
+
+## RESPONSE TIME DATA
+
+```{r anova_rt_words}
+
+library(lmerTest)
+
+m_rt_words <-lmer(
+  logRT ~ zLogBF + zLogFS + OS + LP +
+    (1 | SubjID) +
+    (1 | Item),
+  data = rt_w,
+  control = lmerControl(optimizer = "bobyqa")
+)
+summary(m_rt_words)
+
+# Effect sizes for individual terms
+eta_squared(m_rt_words, partial = TRUE)
+
+# Model R²
+r2_nakagawa(m_rt_words)
+```
+
+## ERP DATA
+### N250 DATA
+#### Base Frequency
+
+```{r anova_n250_words_bf}
+contrasts(erp_bf_w$base_frequency) <- c(-0.5, 0.5)
+
+m_w_N250_bf <- lmer(
+  value ~ base_frequency * OS + LP +
+    (1 | SubjID) +
+    (1 | SubjID:chlabel),
+  data = subset(erp_bf_w, time_window == "N250"),
+  control = lmerControl(optimizer = "bobyqa")
+)
+summary(m_w_N250_bf)
+
+# Effect sizes for individual terms
+eta_squared(m_w_N250_bf, partial = TRUE)
+
+# Model R²
+r2_nakagawa(m_w_N250_bf)
+```
+
+#### Family Size
+
+```{r anova_n250_words_fs}
+contrasts(erp_fs_w$family_size) <- c(-0.5, 0.5)
+
+m_w_N250_fs <- lmer(
+  value ~ family_size * OS + LP +
+    (1 | SubjID) +
+    (1 | SubjID:chlabel),
+  data = subset(erp_fs_w, time_window == "N250"),
+  control = lmerControl(optimizer = "bobyqa")
+)
+summary(m_w_N250_fs)
+
+# Effect sizes for individual terms
+eta_squared(m_w_N250_fs, partial = TRUE)
+
+# Model R²
+r2_nakagawa(m_w_N250_fs)
+```
+
+---
+
+### N400 DATA
+#### Base Frequency
+
+```{r anova_N400_words_bf}
+contrasts(erp_bf_w$base_frequency) <- c(-0.5, 0.5)
+
+m_w_N400_bf <- lmer(
+  value ~ base_frequency * LP + OS +
+    (1 | SubjID) +
+    (1 | SubjID:chlabel),
+  data = subset(erp_bf_w, time_window == "N400"),
+  control = lmerControl(optimizer = "bobyqa")
+)
+summary(m_w_N400_bf)
+
+# Effect sizes for individual terms
+eta_squared(m_w_N400_bf, partial = TRUE)
+
+# Model R²
+r2_nakagawa(m_w_N400_bf)
+```
+
+#### Family Size
+
+```{r anova_N400_words_fs}
+contrasts(erp_fs_w$family_size) <- c(-0.5, 0.5)
+
+m_w_N400_fs <- lmer(
+  value ~ family_size * LP + OS +
+    (1 | SubjID) +
+    (1 | SubjID:chlabel),
+  data = subset(erp_fs_w, time_window == "N400"),
+  control = lmerControl(optimizer = "bobyqa")
+)
+summary(m_w_N400_fs)
+
+# Effect sizes for individual terms
+eta_squared(m_w_N400_fs, partial = TRUE)
+
+# Model R²
+r2_nakagawa(m_w_N400_fs)
+```
+
+---
+
+# NON-WORDS
+## RESPONSE TIME DATA
+
+```{r anova_rt_nonwords}
+contrasts(rt_nw$complexity) <- c(-0.5, 0.5)
+
+m_rt_nw <- lmer(
+  logRT ~ complexity + zLogBF + zLogFS + OS + LP +
+    (1 + complexity | SubjID) +
+    (1 | ItemID),
+  data = rt_nw,
+  control = lmerControl(optimizer = "bobyqa")
+)
+m_rt_nw
+summary(m_rt_nw)
+
+# Effect sizes for individual terms
+eta_squared(m_rt_nw, partial = TRUE)
+
+# Model R²
+r2_nakagawa(m_rt_nw)
+```
+
+## ERP DATA
+### N250 DATA
+#### Base Frequency
+
+```{r anova_n250_nonwords_bf}
+contrasts(erp_bf_nw$complexity)   <- c(-0.5, 0.5)
+contrasts(erp_bf_nw$base_frequency)  <- c(-0.5, 0.5)
+
+m_nw_N250_bf <- lmer(
+  value ~ complexity * OS + complexity * LP + base_frequency +
+    (1 | SubjID) +
+    (1 | SubjID:chlabel),
+  data = subset(erp_bf_nw, time_window == "N250"),
+  control = lmerControl(optimizer = "bobyqa")
+)
+summary(m_nw_N250_bf)
+
+# Effect sizes for individual terms
+eta_squared(m_nw_N250_bf, partial = TRUE)
+
+# Model R²
+r2_nakagawa(m_nw_N250_bf)
+```
+
+#### Family Size
+
+```{r anova_n250_nonwords_fs}
+contrasts(erp_fs_nw$complexity)   <- c(-0.5, 0.5)
+contrasts(erp_fs_nw$family_size)  <- c(-0.5, 0.5)
+
+m_nw_N250_fs <- lmer(
+  value ~ complexity * OS + complexity * LP + family_size +
+    (1 | SubjID) +
+    (1 | SubjID:chlabel),
+  data = subset(erp_fs_nw, time_window == "N250"),
+  control = lmerControl(optimizer = "bobyqa")
+)
+summary(m_nw_N250_fs)
+
+# Effect sizes for individual terms
+eta_squared(m_nw_N250_fs, partial = TRUE)
+
+# Model R²
+r2_nakagawa(m_nw_N250_fs)
+```
+
+### N400 DATA
+#### Base Frequency
+
+```{r anova_n400_nonwords_bf}
+
+contrasts(erp_bf_nw$complexity)  <- c(-0.5, 0.5)
+contrasts(erp_bf_nw$base_frequency) <- c(-0.5, 0.5)
+
+m_nw_N400_bf <- lmer(
+  value ~ complexity * base_frequency * LP + OS +
+    (1 | SubjID) +
+    (1 | SubjID:chlabel),
+  data = subset(erp_bf_nw, time_window == "N400"),
+  control = lmerControl(optimizer = "bobyqa")
+)
+summary(m_nw_N400_bf)
+
+
+# Effect sizes for individual terms
+eta_squared(m_nw_N400_bf, partial = TRUE)
+
+# Model R²
+r2_nakagawa(m_nw_N400_bf)
+```
+
+#### Family Size
+
+```{r anova_n400_nonwords_fs}
+contrasts(erp_fs_nw$complexity)  <- c(-0.5, 0.5)
+contrasts(erp_fs_nw$family_size) <- c(-0.5, 0.5)
+
+m_nw_N400_fs <- lmer(
+  value ~ complexity * family_size * LP + OS +
+    (1 | SubjID) +
+    (1 | SubjID:chlabel),
+  data = subset(erp_fs_nw, time_window == "N400"),
+  control = lmerControl(optimizer = "bobyqa")
+)
+summary(m_nw_N400_fs)
+
+# Effect sizes for individual terms
+eta_squared(m_nw_N400_fs, partial = TRUE)
+
+# Model R²
+r2_nakagawa(m_nw_N400_fs)
+```
+
+
+
+# FOLLOW UP TESTS WORDS
+## N250
+### Base Frequency
+```{r BFxOS_interaction}
+# N250 Words: Base Frequency x OS
+emm_bf_OS <- emmeans(m_w_N250_bf,
+                     ~ base_frequency | OS,
+                     at = list(OS = c(-1, 0, 1)))
+summary(emm_bf_OS)
+pairs(emm_bf_OS)
+```
+
+### N400
+#### Base Frequency
+```{r n400_BFxLP_interaction}
+# N400 Words: Base Frequency x LP
+emm_bf_LP <- emmeans(m_w_N400_bf,
+                     ~ base_frequency | LP,
+                     at = list(LP = c(-1, 0, 1)))
+summary(emm_bf_LP)
+pairs(emm_bf_LP)
+```
+
+
+# FOLLOW UP TESTS  NON-WORDS
+## ERP DATA
+### N250
+#### Base Frequency
+
+```{r n250_CMPxOS_interaction_bf}
+# Complexity effect at three levels of OS
+emm_complexity_OS_bf <- emmeans(m_nw_N250_bf, 
+                              ~ complexity | OS,
+                              at = list(OS = c(-1, 0, 1)),pbkrtest.limit = 6480)
+summary(emm_complexity_OS_bf)
+
+# Pairwise complexity contrast at each level of OS
+pairs(emm_complexity_OS_bf)
+```
+
+```{r n250_CMPxLP_interaction_bf}
+# Complexity effect at three levels of LP
+emm_complexity_LP_bf <- emmeans(m_nw_N250_bf,
+                              ~ complexity | LP,
+                              at = list(LP = c(-1, 0, 1)),pbkrtest.limit = 6480)
+summary(emm_complexity_LP_bf)
+
+# Pairwise complexity contrast at each level of LP
+pairs(emm_complexity_LP_bf)
+```
+
+#### Family Size
+##### Complexity x OS interaction
+```{r n250_CMPxOS_interaction_fs}
+# Complexity effect at three levels of OS
+emm_complexity_OS_fs <- emmeans(m_nw_N250_fs, 
+                              ~ complexity | OS,
+                              at = list(OS = c(-1, 0, 1)),pbkrtest.limit = 6480)
+summary(emm_complexity_OS_fs)
+
+# Pairwise complexity contrast at each level of OS
+pairs(emm_complexity_OS_fs)
+```
+
+### Complexity × LP Interaction
+```{r n250_CMPxLP_interaction_fs}
+# Complexity effect at three levels of LP
+emm_complexity_LP_fs <- emmeans(m_nw_N250_fs,
+                              ~ complexity | LP,
+                              at = list(LP = c(-1, 0, 1)), pbkrtest.limit = 6480)
+summary(emm_complexity_LP_fs)
+
+# Pairwise complexity contrast at each level of LP
+pairs(emm_complexity_LP_fs)
+```
+
+### N400
+#### Family Size
+##### Complexity × Family Size × LP interaction
+```{r cmpl_fs_lp_int}
+# Step 1: Unpack the three-way
+# Complexity x Family Size at three levels of LP
+emm_3way <- emmeans(m_nw_N400_fs, 
+                    ~ complexity * family_size | LP,
+                    at = list(LP = c(-1, 0, 1)), pbkrtest.limit = 6480)
+summary(emm_3way)
+
+# Step 2: Pairwise complexity contrasts within each 
+# family size condition at each level of LP
+pairs(emm_3way, simple = "complexity")
+
+# Step 3: Pairwise family size contrasts within each
+# complexity condition at each level of LP
+pairs(emm_3way, simple = "family_size")
+
+# Step 4: The interaction contrast — does the complexity x 
+# family size interaction itself change across LP levels?
+# This is the formal test of the three-way
+emm_2way_by_LP <- emmeans(m_nw_N400_fs,
+                           ~ complexity * family_size | LP,
+                           at = list(LP = c(-1, 0, 1)),pbkrtest.limit = 6480)
+contrast(emm_2way_by_LP, 
+         interaction = c("pairwise", "pairwise"))
+```
+
+
+#####  Complexity × Family Size interaction averaged across LP
+
+```{r cmpl_fs_int}
+# Complexity x Family Size averaged over LP
+emm_2way <- emmeans(m_nw_N400_fs, ~ complexity * family_size, pbkrtest.limit = 6480)
+summary(emm_2way)
+pairs(emm_2way, simple = "complexity")
+pairs(emm_2way, simple = "family_size")
+```
+
+### Complexity × LP interaction averaged over Family Size:
+
+```{r cmpl_lp_int}
+# Complexity x LP averaged over FS at three levels of LP
+emm_complexity_LP_N400 <- emmeans(m_nw_N400_fs,
+                                   ~ complexity | LP,
+                                   at = list(LP = c(-1, 0, 1)), pbkrtest.limit = 6480)
+summary(emm_complexity_LP_N400)
+pairs(emm_complexity_LP_N400)
+```
+
+### FS × LP interaction averaged over Complexity:
+
+```{r}
+# Complexity x LP averaged over FS at three levels of LP
+emm_FS_LP_N400 <- emmeans(m_nw_N400_fs,
+                          ~ family_size | LP,
+                          at = list(LP = c(-1, 0, 1)), pbkrtest.limit = 6480)
+summary(emm_FS_LP_N400)
+pairs(emm_FS_LP_N400)
+```
+
