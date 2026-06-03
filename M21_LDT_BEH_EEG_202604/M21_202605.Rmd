@@ -4,21 +4,39 @@ author: "Joanna Morris"
 date: "`r Sys.Date()`"
 output: pdf_document
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+Load libraries
+```{r load_libraries, echo=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(ggeffects)
+library(lme4)
+library(afex)
+library(gridExtra)
+library(MuMIn)
+library(pbkrtest)
+library(effectsize)
+library(performance)
+library(cowplot)  # for use with `plot_grid(x,x,ncol = x)` function
+library(e1071) # for use with `skewness()` function
+library(lmerTest)
+library(emmeans)
+# emm_options(lmer.df = "satterthwaite")
+```
+
 # Load Files
 
-```{r load_files}
+```{r load_files, message=FALSE, warning=FALSE}
 
 # Load data: rt words
 
-rt_w <- read_csv("rt_words_frq.csv") %>%
-  filter(correct == 1) %>%
+rt_w <- read_csv("rt_words_frq.csv") |>
+  filter(correct == 1) |>
   mutate(
     SubjID = factor(SubjID),
     Item   = factor(target),
@@ -30,8 +48,8 @@ rt_w <- read_csv("rt_words_frq.csv") %>%
   )
 
 # Load data: rt nonwords
-rt_nw <- read_csv("rt_nwords_frq.csv") %>%
-  filter(correct == 1) %>%
+rt_nw <- read_csv("rt_nwords_frq.csv") |>
+  filter(correct == 1) |>
   mutate(
     SubjID = factor(SubjID),
     ItemID = factor(ItemID),
@@ -46,7 +64,7 @@ rt_nw <- read_csv("rt_nwords_frq.csv") %>%
   )
 
 # Load data: erp_fs words
-erp_fs_w <- read_csv("erp_fs_dmg_words.csv") %>%
+erp_fs_w <- read_csv("erp_fs_dmg_words.csv") |>
   mutate(
     SubjID = factor(SubjID),
     chlabel = factor(chlabel),
@@ -58,7 +76,7 @@ erp_fs_w <- read_csv("erp_fs_dmg_words.csv") %>%
   )
 
 # Load data: erp_fs nonwords
-erp_fs_nw <- read_csv("erp_fs_dmg_nonwords.csv") %>%
+erp_fs_nw <- read_csv("erp_fs_dmg_nonwords.csv") |>
   mutate(
     SubjID = factor(SubjID),
     chlabel = factor(chlabel),
@@ -72,7 +90,7 @@ erp_fs_nw <- read_csv("erp_fs_dmg_nonwords.csv") %>%
   )
 
 # Load data: erp_bf words
-erp_bf_w <- read_csv("erp_bf_dmg_words.csv") %>%
+erp_bf_w <- read_csv("erp_bf_dmg_words.csv") |>
   mutate(
     SubjID = factor(SubjID),
     chlabel = factor(chlabel),
@@ -84,7 +102,7 @@ erp_bf_w <- read_csv("erp_bf_dmg_words.csv") %>%
   )
 
 # Load data: erp_bf nonwords
-erp_bf_nw <- read_csv("erp_bf_dmg_nonwords.csv") %>%
+erp_bf_nw <- read_csv("erp_bf_dmg_nonwords.csv") |>
   mutate(
     SubjID = factor(SubjID),
     chlabel = factor(chlabel),
