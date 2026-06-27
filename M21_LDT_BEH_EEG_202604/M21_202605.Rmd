@@ -2,16 +2,32 @@
 title: "M21_20260502"
 author: "Joanna Morris"
 date: "`r Sys.Date()`"
-output: pdf_document
+output: 
+  bookdown::pdf_document2:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+header-includes:
+  - \setcounter{secnumdepth}{3}
 editor_options: 
   chunk_output_type: inline
 ---
 
+\scriptsize
+
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      error = FALSE,
+                      comment = "||",
+                      fig.height = 4,
+                      fig.width = 7)
+options(width = 150)
 ```
 
 Load libraries
+
 ```{r load_libraries, echo=FALSE, warning=FALSE, message=FALSE}
 library(tidyverse)
 library(ggeffects)
@@ -28,6 +44,262 @@ library(lmerTest)
 library(emmeans)
 # emm_options(lmer.df = "satterthwaite")
 ```
+
+Set emmeans options
+
+```{r emmeans_options}
+emm_options(
+  lmer.df = "kenward-roger",
+  pbkrtest.limit = 10000,
+  disable.pbkrtest = FALSE
+)
+```
+
+Set ggplot parameters
+
+```{r ggplot_parameters}
+# Color palette
+my_palette_2 <- c(
+  "#E31A1C",   # red
+  "#1F78B4"  # blue
+)
+
+# Theme
+my_theme <- theme_classic(base_size = 14) +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "horizontal",
+    legend.box = "horizontal"
+  )
+
+# Common guides
+my_guides <- guides(
+  colour = guide_legend(nrow = 1),
+  fill   = guide_legend(nrow = 1)
+)
+
+```
+
+Define 2-way interaction table function
+
+```{r interaction_table_function.2way, echo=FALSE}
+compact_emm_table <- function(emm_object,
+                              by_var,
+                              condition_prefix = NULL,
+                              digits_est = 2,
+                              digits_df = 1,
+                              digits_p = 3) {
+  
+  by_var_name <- rlang::as_name(rlang::ensym(by_var))
+  
+  emm_df <- summary(emm_object) |>
+    as.data.frame()
+  
+  contrast_df <- pairs(emm_object) |>
+    summary() |>
+    as.data.frame()
+  
+  # Focal factor columns are the EMM columns other than the conditioning variable
+  focal_vars <- setdiff(
+    names(emm_df),
+    c(by_var_name, "emmean", "SE", "df", "lower.CL", "upper.CL")
+  )
+  
+  emm_part <- emm_df |>
+    rowwise() |>
+    mutate(
+      Comparison = paste(c_across(all_of(focal_vars)), collapse = " "),
+      Condition = if (is.null(condition_prefix)) {
+        as.character(.data[[by_var_name]])
+      } else {
+        paste(condition_prefix, "=", .data[[by_var_name]])
+      }
+    ) |>
+    ungroup() |>
+    transmute(
+      Comparison,
+      Condition,
+      Estimate = emmean,
+      SE,
+      df,
+      lower.CL,
+      upper.CL,
+      t.ratio = NA_real_,
+      p.value = NA_real_
+    )
+  
+  contrast_part <- contrast_df |>
+    mutate(
+      Comparison = contrast,
+      Condition = if (is.null(condition_prefix)) {
+        as.character(.data[[by_var_name]])
+      } else {
+        paste(condition_prefix, "=", .data[[by_var_name]])
+      }
+    ) |>
+    transmute(
+      Comparison,
+      Condition,
+      Estimate = estimate,
+      SE,
+      df,
+      lower.CL = NA_real_,
+      upper.CL = NA_real_,
+      t.ratio,
+      p.value
+    )
+  
+  bind_rows(emm_part, contrast_part) |>
+    arrange(Condition, Comparison) |>
+    mutate(
+      Estimate = round(Estimate, digits_est),
+      SE       = round(SE, digits_est),
+      df       = round(df, digits_df),
+      lower.CL = round(lower.CL, digits_est),
+      upper.CL = round(upper.CL, digits_est),
+      t.ratio  = round(t.ratio, digits_est),
+      p.value  = round(p.value, digits_p)
+    )
+}
+```
+
+```{r interaction_table_function.3way, echo=FALSE}
+compact_3way_table <- function(emm_object,
+                               by_var,
+                               condition_prefix = NULL,
+                               factor1,
+                               factor2,
+                               digits_est = 2,
+                               digits_df = 1,
+                               digits_p = 3) {
+  
+  by_var_name <- rlang::as_name(rlang::ensym(by_var))
+  factor1_name <- rlang::as_name(rlang::ensym(factor1))
+  factor2_name <- rlang::as_name(rlang::ensym(factor2))
+  
+  emm_df <- summary(emm_object) |>
+    as.data.frame()
+  
+  make_condition <- function(x) {
+    if (is.null(condition_prefix)) {
+      as.character(x[[by_var_name]])
+    } else {
+      paste(condition_prefix, "=", x[[by_var_name]])
+    }
+  }
+  
+  emm_part <- emm_df |>
+    mutate(
+      Comparison = paste(.data[[factor1_name]], .data[[factor2_name]]),
+      Condition = make_condition(cur_data())
+    ) |>
+    transmute(
+      Comparison,
+      Condition,
+      Estimate = emmean,
+      SE,
+      df,
+      lower.CL,
+      upper.CL,
+      t.ratio = NA_real_,
+      p.value = NA_real_
+    )
+  
+  factor1_part <- pairs(emm_object, simple = factor1_name) |>
+    summary() |>
+    as.data.frame() |>
+    mutate(
+      Comparison = contrast,
+      Condition = paste(
+        if (is.null(condition_prefix)) .data[[by_var_name]] else paste(condition_prefix, "=", .data[[by_var_name]]),
+        "|",
+        factor2_name, "=",
+        .data[[factor2_name]]
+      )
+    ) |>
+    transmute(
+      Comparison,
+      Condition,
+      Estimate = estimate,
+      SE,
+      df,
+      lower.CL = NA_real_,
+      upper.CL = NA_real_,
+      t.ratio,
+      p.value
+    )
+  
+  factor2_part <- pairs(emm_object, simple = factor2_name) |>
+    summary() |>
+    as.data.frame() |>
+    mutate(
+      Comparison = contrast,
+      Condition = paste(
+        if (is.null(condition_prefix)) .data[[by_var_name]] else paste(condition_prefix, "=", .data[[by_var_name]]),
+        "|",
+        factor1_name, "=",
+        .data[[factor1_name]]
+      )
+    ) |>
+    transmute(
+      Comparison,
+      Condition,
+      Estimate = estimate,
+      SE,
+      df,
+      lower.CL = NA_real_,
+      upper.CL = NA_real_,
+      t.ratio,
+      p.value
+    )
+  
+  interaction_part <- contrast(
+  emm_object,
+  interaction = c("pairwise", "pairwise")
+) |>
+  summary() |>
+  as.data.frame() |>
+  mutate(
+    Comparison = paste0(
+      "Int: ",
+      .data[[paste0(factor1_name, "_pairwise")]],
+      " across ",
+      .data[[paste0(factor2_name, "_pairwise")]]
+    ),
+    Condition = make_condition(cur_data())
+  ) |>
+  transmute(
+    Comparison,
+    Condition,
+    Estimate = estimate,
+    SE,
+    df,
+    lower.CL = NA_real_,
+    upper.CL = NA_real_,
+    t.ratio,
+    p.value
+  )
+  
+  bind_rows(
+    emm_part         |> mutate(RowType = 1),
+    factor1_part     |> mutate(RowType = 2),
+    factor2_part     |> mutate(RowType = 2),
+    interaction_part |> mutate(RowType = 3)
+  ) |>
+    arrange(Condition, RowType, Comparison) |>
+    mutate(
+      Estimate = round(Estimate, digits_est),
+      SE       = round(SE, digits_est),
+      df       = round(df, digits_df),
+      lower.CL = round(lower.CL, digits_est),
+      upper.CL = round(upper.CL, digits_est),
+      t.ratio  = round(t.ratio, digits_est),
+      p.value  = round(p.value, digits_p)
+    ) |>
+    select(-RowType)
+}
+```
+
 
 # Load Files
 
@@ -120,6 +392,8 @@ erp_bf_nw <- read_csv("erp_bf_dmg_nonwords.csv") |>
 
 ## RESPONSE TIME DATA
 
+#### Model
+
 ```{r anova_rt_words}
 
 library(lmerTest)
@@ -141,11 +415,14 @@ r2_nakagawa(m_rt_words)
 ```
 
 ## ERP DATA
-### N250 DATA
-#### Base Frequency
+
+### N250 DATA: Base Frequency
+
+#### Model
 
 ```{r anova_n250_words_bf}
 contrasts(erp_bf_w$base_frequency) <- c(-0.5, 0.5)
+
 
 m_w_N250_bf <- lmer(
   value ~ base_frequency * OS + LP +
@@ -163,10 +440,82 @@ eta_squared(m_w_N250_bf, partial = TRUE)
 r2_nakagawa(m_w_N250_bf)
 ```
 
-#### Family Size
+#### Means and contrasts
+
+```{r means_n250_words_bf}
+emmeans(m_w_N250_bf, ~ base_frequency)
+
+emm_bf_OS <- emmeans(m_w_N250_bf,
+                      ~ base_frequency | OS,
+                      at = list(OS = c(-1, 0, 1)))
+
+emm_part <- summary(emm_bf_OS) |>
+  as.data.frame() |>
+  transmute(OS, Effect = paste("EMM:", base_frequency), Estimate = emmean, SE, df, 
+            lower.CL, upper.CL, t.ratio = NA_real_, p.value = NA_real_)
+
+contrast_part <- pairs(emm_bf_OS) |>
+  summary() |>
+  as.data.frame() |>
+  transmute(OS,Effect = paste("Contrast:", contrast), Estimate = estimate, SE, df,
+            lower.CL = NA_real_, upper.CL = NA_real_, t.ratio, p.value)
+
+(emm_contrast_table <- bind_rows(emm_part, contrast_part) |>
+  arrange(OS, Effect)|>
+  mutate(
+    Estimate = round(Estimate, 2),
+    SE       = round(SE, 2),
+    df       = round(df, 1),
+    lower.CL = round(lower.CL, 2),
+    upper.CL = round(upper.CL, 2),
+    t.ratio  = round(t.ratio, 2),
+    p.value  = round(p.value, 3)
+  ))
+
+#  kable(emm_contrast_table, digits = 3)
+```
+#### Plots
+
+```{r plots_n250_words_bf, include=FALSE}
+library(ggeffects)
+library(ggplot2)
+
+# Predicted values across the observed range of OS
+pred <- ggpredict(
+  m_w_N250_bf,
+  terms = c("OS", "base_frequency")
+)
+
+(BFxOS_n250 <- ggplot(pred,
+       aes(x = x,
+           y = predicted,
+           color = group,
+           fill = group)) +
+  geom_line(size = 1.2) +
+  geom_ribbon(aes(ymin = conf.low,
+                  ymax = conf.high),
+              alpha = 0.2,
+              colour = NA) +
+  labs(
+    x = "Orthographic Sensitivity (OS)",
+    y = "Predicted N250 amplitude (µV)",
+    color = "Base Frequency",
+    fill = "Base Frequency"
+  ) +
+  scale_colour_manual(values = my_palette_2) +
+  scale_fill_manual(values = my_palette_2) +
+  my_theme +
+  my_guides)
+
+```
+
+### N250 DATA: Family Size
+
+#### Model
 
 ```{r anova_n250_words_fs}
 contrasts(erp_fs_w$family_size) <- c(-0.5, 0.5)
+
 
 m_w_N250_fs <- lmer(
   value ~ family_size * OS + LP +
@@ -184,10 +533,52 @@ eta_squared(m_w_N250_fs, partial = TRUE)
 r2_nakagawa(m_w_N250_fs)
 ```
 
----
+#### Means and Contrasts
 
-### N400 DATA
-#### Base Frequency
+```{r means_n250_words_fs}
+# family size
+emmeans(m_w_N250_fs, ~ family_size)
+```
+
+#### Plots
+
+```{r plots_n250_words_fs, include=FALSE }
+library(ggeffects)
+library(ggplot2)
+
+# Predicted values across the observed range of OS
+pred <- ggpredict(
+  m_w_N250_fs,
+  terms = c("OS", "family_size")
+)
+
+(FSxOS_n250 <- ggplot(pred,
+       aes(x = x,
+           y = predicted,
+           color = group,
+           fill = group)) +
+  geom_line(size = 1.2) +
+  geom_ribbon(aes(ymin = conf.low,
+                  ymax = conf.high),
+              alpha = 0.2,
+              colour = NA) +
+  labs(
+    x = "Orthographic Sensitivity (OS)",
+    y = "Predicted N250 amplitude (µV)",
+    color = "Family Size",
+    fill = "Family Size"
+  )  +
+  scale_colour_manual(values = my_palette_2) +
+  scale_fill_manual(values = my_palette_2) +
+  my_theme +
+  my_guides)
+```
+
+------------------------------------------------------------------------
+
+### N400 DATA: Base Frequency
+
+#### Model
 
 ```{r anova_N400_words_bf}
 contrasts(erp_bf_w$base_frequency) <- c(-0.5, 0.5)
@@ -206,6 +597,74 @@ eta_squared(m_w_N400_bf, partial = TRUE)
 
 # Model R²
 r2_nakagawa(m_w_N400_bf)
+```
+
+#### Means and Contrasts
+
+```{r means_N400_words_bf}
+emmeans(m_w_N400_bf, ~ base_frequency)
+
+emm_bf_LP <- emmeans(m_w_N400_bf,
+                      ~ base_frequency | LP,
+                      at = list(LP = c(-1, 0, 1)))
+
+emm_part <- summary(emm_bf_LP) |>
+  as.data.frame() |>
+  transmute(LP, Effect = paste("EMM:", base_frequency), Estimate = emmean, SE, df, 
+            lower.CL, upper.CL, t.ratio = NA_real_, p.value = NA_real_)
+
+contrast_part <- pairs(emm_bf_LP) |>
+  summary() |>
+  as.data.frame() |>
+  transmute(LP, Effect = paste("Contrast:", contrast), Estimate = estimate, SE, df,
+            lower.CL = NA_real_, upper.CL = NA_real_, t.ratio, p.value)
+
+(emm_contrast_table <- bind_rows(emm_part, contrast_part) |>
+  arrange(LP, Effect)|>
+  mutate(
+    Estimate = round(Estimate, 2),
+    SE       = round(SE, 2),
+    df       = round(df, 1),
+    lower.CL = round(lower.CL, 2),
+    upper.CL = round(upper.CL, 2),
+    t.ratio  = round(t.ratio, 2),
+    p.value  = round(p.value, 3)
+  ))
+
+#  kable(emm_contrast_table, digits = 3)
+```
+#### Plots
+
+```{r plot_N400_words_bf, include=FALSE}
+library(ggeffects)
+library(ggplot2)
+
+# Predicted values across the observed range of LP
+pred <- ggpredict(
+  m_w_N400_bf,
+  terms = c("LP", "base_frequency")
+)
+
+(BFxLP_n400 <- ggplot(pred,
+       aes(x = x,
+           y = predicted,
+           color = group,
+           fill = group)) +
+  geom_line(size = 1.2) +
+  geom_ribbon(aes(ymin = conf.low,
+                  ymax = conf.high),
+              alpha = 0.2,
+              colour = NA) +
+  labs(
+    x = "Language Proficiency (LP)",
+    y = "Predicted N400 amplitude (µV)",
+    color = "Base Frequency",
+    fill = "Base Frequency"
+  )  +
+  scale_colour_manual(values = my_palette_2) +
+  scale_fill_manual(values = my_palette_2) +
+  my_theme +
+  my_guides)
 ```
 
 #### Family Size
@@ -229,9 +688,75 @@ eta_squared(m_w_N400_fs, partial = TRUE)
 r2_nakagawa(m_w_N400_fs)
 ```
 
----
+#### Means
+
+```{r means_N400_words_fs}
+emmeans(m_w_N400_fs, ~ family_size)
+```
+
+#### Plots (Interaction Not significant)
+
+```{r plots_N400_words_fs, include=FALSE}
+library(ggeffects)
+library(ggplot2)
+
+# Predicted values across the observed range of LP
+pred <- ggpredict(
+  m_w_N400_fs,
+  terms = c("LP", "family_size")
+)
+
+(FSxLP_n400 <- ggplot(pred,
+       aes(x = x,
+           y = predicted,
+           color = group,
+           fill = group)) +
+  geom_line(size = 1.2) +
+  geom_ribbon(aes(ymin = conf.low,
+                  ymax = conf.high),
+              alpha = 0.2,
+              colour = NA) +
+  labs(
+    x = "Language Proficiency (LP)",
+    y = "Predicted N400 amplitude (µV)",
+    color = "Family Size",
+    fill = "Family Size"
+  )  +
+  scale_colour_manual(values = my_palette_2) +
+  scale_fill_manual(values = my_palette_2) +
+  my_theme +
+  my_guides)
+```
+
+### N250 WORD DATA: Combined Interaction Plots
+
+```{r combi_plot_word, fig.width=7.5, fig.height=7.5}
+row1 <- plot_grid(
+  BFxOS_n250,
+  FSxOS_n250,
+  ncol = 2
+)
+
+row2 <- plot_grid(
+  BFxLP_n400,
+  FSxLP_n400,
+  ncol = 2
+)
+
+plot_grid(
+  ggdraw() + draw_label("N250", angle = 90, fontface = "bold"),
+  row1,
+  ggdraw() + draw_label("N400", angle = 90, fontface = "bold"),
+  row2,
+  ncol = 2,
+  rel_widths = c(0.08, 1)
+)
+```
+
+------------------------------------------------------------------------
 
 # NON-WORDS
+
 ## RESPONSE TIME DATA
 
 ```{r anova_rt_nonwords}
@@ -252,11 +777,28 @@ eta_squared(m_rt_nw, partial = TRUE)
 
 # Model R²
 r2_nakagawa(m_rt_nw)
+
+# Means
+# get means on log scale
+emm_logrt <- emmeans(m_rt_nw, ~ complexity)
+emm_summary <- summary(emm_logrt)
+
+# back transform manually
+emm_summary$mean_ms <- exp(emm_summary$emmean)
+emm_summary$lower_ms <- exp(emm_summary$lower.CL)
+emm_summary$upper_ms <- exp(emm_summary$upper.CL)
+emm_summary
+
+diff_ms <- exp(emm_summary$emmean[emm_summary$complexity == "Complex"]) -
+            exp(emm_summary$emmean[emm_summary$complexity == "Simple"])
+diff_ms
 ```
 
 ## ERP DATA
-### N250 DATA
-#### Base Frequency
+
+### N250 DATA: Base Frequency as covariate (NOT USED IN WRITE-UP)
+
+#### Model
 
 ```{r anova_n250_nonwords_bf}
 contrasts(erp_bf_nw$complexity)   <- c(-0.5, 0.5)
@@ -271,14 +813,139 @@ m_nw_N250_bf <- lmer(
 )
 summary(m_nw_N250_bf)
 
+
 # Effect sizes for individual terms
 eta_squared(m_nw_N250_bf, partial = TRUE)
 
 # Model R²
 r2_nakagawa(m_nw_N250_bf)
+
 ```
 
-#### Family Size
+#### Means and Contrasts
+```{r means_n250_nonwords_bf}
+## complexity
+emmeans(m_nw_N250_bf, ~ complexity, )
+
+## complexity x LP
+emm_bf_LP <- emmeans(m_nw_N250_bf,
+                      ~ complexity | LP,
+                      at = list(LP = c(-1, 0, 1)))
+
+emm_part <- summary(emm_bf_LP) |>
+  as.data.frame() |>
+  transmute(LP, Effect = paste("EMM:", complexity), Estimate = emmean, SE, df, 
+            lower.CL, upper.CL, t.ratio = NA_real_, p.value = NA_real_)
+
+contrast_part <- pairs(emm_bf_LP) |>
+  summary() |>
+  as.data.frame() |>
+  transmute(LP, Effect = paste("Contrast:", contrast), Estimate = estimate, SE, df,
+            lower.CL = NA_real_, upper.CL = NA_real_, t.ratio, p.value)
+
+(emm_contrast_table <- bind_rows(emm_part, contrast_part) |>
+  arrange(LP, Effect)|>
+  mutate(
+    Estimate = round(Estimate, 2),
+    SE       = round(SE, 2),
+    df       = round(df, 1),
+    lower.CL = round(lower.CL, 2),
+    upper.CL = round(upper.CL, 2),
+    t.ratio  = round(t.ratio, 2),
+    p.value  = round(p.value, 3)
+  ))
+
+## complexity x OS
+emm_bf_OS <- emmeans(m_nw_N250_bf,
+                      ~ complexity | OS,
+                      at = list(OS = c(-1, 0, 1)))
+
+emm_part <- summary(emm_bf_OS) |>
+  as.data.frame() |>
+  transmute(OS, Effect = paste("EMM:", complexity), Estimate = emmean, SE, df, 
+            lower.CL, upper.CL, t.ratio = NA_real_, p.value = NA_real_)
+
+contrast_part <- pairs(emm_bf_OS) |>
+  summary() |>
+  as.data.frame() |>
+  transmute(OS, Effect = paste("Contrast:", contrast), Estimate = estimate, SE, df,
+            lower.CL = NA_real_, upper.CL = NA_real_, t.ratio, p.value)
+
+(emm_contrast_table <- bind_rows(emm_part, contrast_part) |>
+  arrange(OS, Effect)|>
+  mutate(
+    Estimate = round(Estimate, 2),
+    SE       = round(SE, 2),
+    df       = round(df, 1),
+    lower.CL = round(lower.CL, 2),
+    upper.CL = round(upper.CL, 2),
+    t.ratio  = round(t.ratio, 2),
+    p.value  = round(p.value, 3)
+  ))
+```
+#### Plots
+
+```{r plots_n250_nonwords_bf, include = FALSE}
+# Predicted values across the observed range of OS
+pred <- ggpredict(
+  m_nw_N250_bf,
+  terms = c("OS", "complexity")
+)
+
+(CMP.OS.bf.n250.nw <- ggplot(pred,
+       aes(x = x,
+           y = predicted,
+           color = group,
+           fill = group)) +
+  geom_line(size = 1.2) +
+  geom_ribbon(aes(ymin = conf.low,
+                  ymax = conf.high),
+              alpha = 0.2,
+              colour = NA) +
+  labs(
+    x = "Orthographic Sensitivity (OS)",
+    y = "Predicted N250 amplitude (µV)",
+    color = "Complexity",
+    fill = "Complexity"
+  )  +
+  scale_colour_manual(values = my_palette_2) +
+  scale_fill_manual(values = my_palette_2) +
+  my_theme +
+  my_guides)
+
+# Predicted values across the observed range of LP
+pred <- ggpredict(
+  m_nw_N250_bf,
+  terms = c("LP", "complexity")
+)
+
+(CMP.LP.bf.n250.nw <- ggplot(pred,
+       aes(x = x,
+           y = predicted,
+           color = group,
+           fill = group)) +
+  geom_line(size = 1.2) +
+  geom_ribbon(aes(ymin = conf.low,
+                  ymax = conf.high),
+              alpha = 0.2,
+              colour = NA) +
+  labs(
+    x = "Language Proficiency (LP)",
+    y = "Predicted N250 amplitude (µV)",
+    color = "Complexity",
+    fill = "Complexity"
+  )  +
+  scale_colour_manual(values = my_palette_2) +
+  scale_fill_manual(values = my_palette_2) +
+  my_theme +
+  my_guides)
+```
+
+
+
+### N250 DATA: Family Size as covariate
+
+#### Model
 
 ```{r anova_n250_nonwords_fs}
 contrasts(erp_fs_nw$complexity)   <- c(-0.5, 0.5)
@@ -300,8 +967,154 @@ eta_squared(m_nw_N250_fs, partial = TRUE)
 r2_nakagawa(m_nw_N250_fs)
 ```
 
-### N400 DATA
-#### Base Frequency
+#### Means and Contrasts
+
+```{r means_n250_nonwords_fs}
+## complexity
+emmeans(m_nw_N250_fs, ~ complexity)
+
+## complexity x LP
+emm_bf_LP <- emmeans(m_nw_N250_fs,
+                      ~ complexity | LP,
+                      at = list(LP = c(-1, 0, 1)))
+
+emm_part <- summary(emm_bf_LP) |>
+  as.data.frame() |>
+  transmute(LP, Effect = paste("EMM:", complexity), Estimate = emmean, SE, df, 
+            lower.CL, upper.CL, t.ratio = NA_real_, p.value = NA_real_)
+
+contrast_part <- pairs(emm_bf_LP) |>
+  summary() |>
+  as.data.frame() |>
+  transmute(LP, Effect = paste("Contrast:", contrast), Estimate = estimate, SE, df,
+            lower.CL = NA_real_, upper.CL = NA_real_, t.ratio, p.value)
+
+(emm_contrast_table <- bind_rows(emm_part, contrast_part) |>
+  arrange(LP, Effect)|>
+  mutate(
+    Estimate = round(Estimate, 2),
+    SE       = round(SE, 2),
+    df       = round(df, 1),
+    lower.CL = round(lower.CL, 2),
+    upper.CL = round(upper.CL, 2),
+    t.ratio  = round(t.ratio, 2),
+    p.value  = round(p.value, 3)
+  ))
+
+## complexity x OS
+emm_bf_OS <- emmeans(m_nw_N250_fs,
+                      ~ complexity | OS,
+                      at = list(OS = c(-1, 0, 1)))
+
+emm_part <- summary(emm_bf_OS) |>
+  as.data.frame() |>
+  transmute(OS, Effect = paste("EMM:", complexity), Estimate = emmean, SE, df, 
+            lower.CL, upper.CL, t.ratio = NA_real_, p.value = NA_real_)
+
+contrast_part <- pairs(emm_bf_OS) |>
+  summary() |>
+  as.data.frame() |>
+  transmute(OS, Effect = paste("Contrast:", contrast), Estimate = estimate, SE, df,
+            lower.CL = NA_real_, upper.CL = NA_real_, t.ratio, p.value)
+
+(emm_contrast_table <- bind_rows(emm_part, contrast_part) |>
+  arrange(OS, Effect)|>       # sorts rows in the combined table, first by column "OS", then by "Effect"
+  mutate(
+    Estimate = round(Estimate, 2),
+    SE       = round(SE, 2),
+    df       = round(df, 1),
+    lower.CL = round(lower.CL, 2),
+    upper.CL = round(upper.CL, 2),
+    t.ratio  = round(t.ratio, 2),
+    p.value  = round(p.value, 3)
+  ))
+```
+#### Plots
+
+```{r plots_n250_nonwords_fs, include = FALSE}
+# Predicted values across the observed range of OS
+pred <- ggpredict(
+  m_nw_N250_fs,
+  terms = c("OS", "complexity")
+)
+
+(CMP.OS.fs.n250.nw <- ggplot(pred,
+       aes(x = x,
+           y = predicted,
+           color = group,
+           fill = group)) +
+  geom_line(size = 1.2) +
+  geom_ribbon(aes(ymin = conf.low,
+                  ymax = conf.high),
+              alpha = 0.2,
+              colour = NA) +
+  labs(
+    x = "Orthographic Sensitivity (OS)",
+    y = "Predicted N250 amplitude (µV)",
+    color = "Complexity",
+    fill = "Complexity"
+  )  +
+  scale_colour_manual(values = my_palette_2) +
+  scale_fill_manual(values = my_palette_2) +
+  my_theme +
+  my_guides)
+
+# Predicted values across the observed range of LP
+pred <- ggpredict(
+  m_nw_N250_fs,
+  terms = c("LP", "complexity")
+)
+
+(CMP.LP.fs.n250.nw<- ggplot(pred,
+       aes(x = x,
+           y = predicted,
+           color = group,
+           fill = group)) +
+  geom_line(size = 1.2) +
+  geom_ribbon(aes(ymin = conf.low,
+                  ymax = conf.high),
+              alpha = 0.2,
+              colour = NA) +
+  labs(
+    x = "Language Proficiency (LP)",
+    y = "Predicted N250 amplitude (µV)",
+    color = "Complexity",
+    fill = "Complexity"
+  )  +
+  scale_colour_manual(values = my_palette_2) +
+  scale_fill_manual(values = my_palette_2) +
+  my_theme +
+  my_guides)
+```
+### N250 NONWORD DATA: Combined Interaction Plots
+
+```{r combi_plot_nw, fig.width=7.5, fig.height=7.5}
+row1 <- plot_grid(
+  CMP.OS.bf.n250.nw,
+  CMP.LP.bf.n250.nw,
+  ncol = 2
+)
+
+row2 <- plot_grid(
+  CMP.OS.fs.n250.nw,
+  CMP.LP.fs.n250.nw,
+  ncol = 2
+)
+
+plot_grid(
+  ggdraw() + draw_label("Base Frequency", angle = 90, fontface = "bold"),
+  row1,
+  ggdraw() + draw_label("Family Size", angle = 90, fontface = "bold"),
+  row2,
+  ncol = 2,
+  rel_widths = c(0.08, 1)
+)
+```
+
+
+### N400 DATA: Base Frequency (NOT USED IN WRITE-UP)
+
+#### Model
 
 ```{r anova_n400_nonwords_bf}
 
@@ -325,7 +1138,9 @@ eta_squared(m_nw_N400_bf, partial = TRUE)
 r2_nakagawa(m_nw_N400_bf)
 ```
 
-#### Family Size
+### 400 DATA: Family Size
+
+##### Model
 
 ```{r anova_n400_nonwords_fs}
 contrasts(erp_fs_nw$complexity)  <- c(-0.5, 0.5)
@@ -348,142 +1163,133 @@ r2_nakagawa(m_nw_N400_fs)
 ```
 
 
+##### Means and Contrasts: Complexity × Family Size × LP interaction
 
-# FOLLOW UP TESTS WORDS
-## N250
-### Base Frequency
-```{r BFxOS_interaction}
-# N250 Words: Base Frequency x OS
-emm_bf_OS <- emmeans(m_w_N250_bf,
-                     ~ base_frequency | OS,
-                     at = list(OS = c(-1, 0, 1)))
-summary(emm_bf_OS)
-pairs(emm_bf_OS)
-```
-
-### N400
-#### Base Frequency
-```{r n400_BFxLP_interaction}
-# N400 Words: Base Frequency x LP
-emm_bf_LP <- emmeans(m_w_N400_bf,
-                     ~ base_frequency | LP,
-                     at = list(LP = c(-1, 0, 1)))
-summary(emm_bf_LP)
-pairs(emm_bf_LP)
-```
-
-
-# FOLLOW UP TESTS  NON-WORDS
-## ERP DATA
-### N250
-#### Base Frequency
-
-```{r n250_CMPxOS_interaction_bf}
-# Complexity effect at three levels of OS
-emm_complexity_OS_bf <- emmeans(m_nw_N250_bf, 
-                              ~ complexity | OS,
-                              at = list(OS = c(-1, 0, 1)),pbkrtest.limit = 6480)
-summary(emm_complexity_OS_bf)
-
-# Pairwise complexity contrast at each level of OS
-pairs(emm_complexity_OS_bf)
-```
-
-```{r n250_CMPxLP_interaction_bf}
-# Complexity effect at three levels of LP
-emm_complexity_LP_bf <- emmeans(m_nw_N250_bf,
-                              ~ complexity | LP,
-                              at = list(LP = c(-1, 0, 1)),pbkrtest.limit = 6480)
-summary(emm_complexity_LP_bf)
-
-# Pairwise complexity contrast at each level of LP
-pairs(emm_complexity_LP_bf)
-```
-
-#### Family Size
-##### Complexity x OS interaction
-```{r n250_CMPxOS_interaction_fs}
-# Complexity effect at three levels of OS
-emm_complexity_OS_fs <- emmeans(m_nw_N250_fs, 
-                              ~ complexity | OS,
-                              at = list(OS = c(-1, 0, 1)),pbkrtest.limit = 6480)
-summary(emm_complexity_OS_fs)
-
-# Pairwise complexity contrast at each level of OS
-pairs(emm_complexity_OS_fs)
-```
-
-### Complexity × LP Interaction
-```{r n250_CMPxLP_interaction_fs}
-# Complexity effect at three levels of LP
-emm_complexity_LP_fs <- emmeans(m_nw_N250_fs,
-                              ~ complexity | LP,
-                              at = list(LP = c(-1, 0, 1)), pbkrtest.limit = 6480)
-summary(emm_complexity_LP_fs)
-
-# Pairwise complexity contrast at each level of LP
-pairs(emm_complexity_LP_fs)
-```
-
-### N400
-#### Family Size
-##### Complexity × Family Size × LP interaction
-```{r cmpl_fs_lp_int}
+```{r cmpl_fs_lp_int, include=FALSE}
 # Step 1: Unpack the three-way
 # Complexity x Family Size at three levels of LP
-emm_3way <- emmeans(m_nw_N400_fs, 
-                    ~ complexity * family_size | LP,
-                    at = list(LP = c(-1, 0, 1)), pbkrtest.limit = 6480)
-summary(emm_3way)
+
 
 # Step 2: Pairwise complexity contrasts within each 
 # family size condition at each level of LP
-pairs(emm_3way, simple = "complexity")
+# pairs(emm_3way, simple = "complexity")
 
 # Step 3: Pairwise family size contrasts within each
 # complexity condition at each level of LP
-pairs(emm_3way, simple = "family_size")
+# pairs(emm_3way, simple = "family_size")
 
 # Step 4: The interaction contrast — does the complexity x 
 # family size interaction itself change across LP levels?
 # This is the formal test of the three-way
-emm_2way_by_LP <- emmeans(m_nw_N400_fs,
-                           ~ complexity * family_size | LP,
-                           at = list(LP = c(-1, 0, 1)),pbkrtest.limit = 6480)
-contrast(emm_2way_by_LP, 
-         interaction = c("pairwise", "pairwise"))
+
 ```
 
 
-#####  Complexity × Family Size interaction averaged across LP
+```{r means_n400_nonwords_fs.3way}
+emm_3way <- emmeans(
+  m_nw_N400_fs,
+  ~ complexity * family_size | LP,
+  at = list(LP = c(-1, 0, 1))
+)
 
-```{r cmpl_fs_int}
-# Complexity x Family Size averaged over LP
-emm_2way <- emmeans(m_nw_N400_fs, ~ complexity * family_size, pbkrtest.limit = 6480)
-summary(emm_2way)
-pairs(emm_2way, simple = "complexity")
-pairs(emm_2way, simple = "family_size")
+compact_3way_table(
+  emm_3way,
+  by_var = LP,
+  condition_prefix = "LP",
+  factor1 = complexity,
+  factor2 = family_size
+)
 ```
 
-### Complexity × LP interaction averaged over Family Size:
+##### Complexity × Family Size interaction averaged across LP
 
-```{r cmpl_lp_int}
-# Complexity x LP averaged over FS at three levels of LP
-emm_complexity_LP_N400 <- emmeans(m_nw_N400_fs,
-                                   ~ complexity | LP,
-                                   at = list(LP = c(-1, 0, 1)), pbkrtest.limit = 6480)
-summary(emm_complexity_LP_N400)
-pairs(emm_complexity_LP_N400)
+```{r means_n400_nonwords_fs.2way.A}
+emm_complexity_FS_N400 <- emmeans(
+  m_nw_N400_fs,
+  ~ complexity | family_size)
+
+compact_emm_table(
+  emm_complexity_FS_N400,
+  by_var = family_size
+)
+
+emm_complexity_CMP_N400 <- emmeans(
+  m_nw_N400_fs,
+  ~ family_size | complexity)
+
+compact_emm_table(
+  emm_complexity_CMP_N400,
+  by_var = complexity
+)
 ```
 
-### FS × LP interaction averaged over Complexity:
+##### Complexity × LP interaction averaged over Family Size:
+
+```{r means_n400_nonwords_fs.2way.B}
+emm_complexity_LP_N400 <- emmeans(
+  m_nw_N400_fs,
+  ~ complexity | LP,
+  at = list(LP = c(-1, 0, 1))
+)
+
+compact_emm_table(
+  emm_complexity_LP_N400,
+  by_var = LP,
+  condition_prefix = "LP"
+)
+```
+
+
+##### FS × LP interaction averaged over Complexity:
+
+```{r means_n400_nonwords_fs.2way.C}
+emm_FS_LP_N400 <- emmeans(
+  m_nw_N400_fs,
+  ~ family_size | LP,
+  at = list(LP = c(-1, 0, 1))
+)
+
+compact_emm_table(
+  emm_FS_LP_N400,
+  by_var = LP,
+  condition_prefix = "LP"
+)
+```
+#### Plots
+
+```{r plots_n400_nonwords_fs.3way, include=FALSE}
+library(ggeffects)
+library(ggplot2)
+
+pred <- ggpredict(
+  m_nw_N400_fs,
+  terms = c("LP", "complexity", "family_size")
+)
+
+nw.n400.3way <- ggplot(pred,
+       aes(x = x,
+           y = predicted,
+           colour = group,
+           fill = group)) +
+  geom_line(linewidth = 1.2) +
+  geom_ribbon(aes(ymin = conf.low,
+                  ymax = conf.high),
+              alpha = .20,
+              colour = NA) +
+  facet_wrap(~facet) +
+  scale_colour_manual(values = my_palette_2) +
+  scale_fill_manual(values = my_palette_2) +
+  labs(
+    x = "Lexical Proficiency (LP)",
+    y = "Predicted N400 amplitude (µV)",
+    colour = "Complexity",
+    fill = "Complexity"
+  ) +
+  my_theme
+```
 
 ```{r}
-# Complexity x LP averaged over FS at three levels of LP
-emm_FS_LP_N400 <- emmeans(m_nw_N400_fs,
-                          ~ family_size | LP,
-                          at = list(LP = c(-1, 0, 1)), pbkrtest.limit = 6480)
-summary(emm_FS_LP_N400)
-pairs(emm_FS_LP_N400)
+plot_grid(nw.n400.3way, ncol = 1)
 ```
+
 
