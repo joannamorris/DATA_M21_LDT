@@ -1,0 +1,757 @@
+---
+title: "M21 2026 July 2026 N400 Component"
+author: "Joanna Morris"
+date: "`r Sys.Date()`"
+output: 
+  bookdown::pdf_document2:
+    toc: true
+    toc_depth: 4
+    number_sections: true
+header-includes:
+  - \setcounter{secnumdepth}{3}
+editor_options: 
+  chunk_output_type: inline
+---
+
+\scriptsize
+
+# Setup {-}
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      error = FALSE,
+                      comment = "||",
+                      fig.height = 4,
+                      fig.width = 7)
+options(width = 150)
+```
+
+## Load libraries {-}
+
+```{r load_libraries, echo=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(ggeffects)
+library(lme4)
+library(afex)
+library(gridExtra)
+library(MuMIn)
+library(pbkrtest)
+library(effectsize)
+library(performance)
+library(cowplot)  # for use with `plot_grid(x,x,ncol = x)` function
+library(e1071) # for use with `skewness()` function
+library(lmerTest)
+library(emmeans)
+# emm_options(lmer.df = "satterthwaite")
+```
+
+## Set emmeans options {-}
+
+```{r emmeans_options}
+emm_options(
+  lmer.df = "kenward-roger",
+  pbkrtest.limit = 10000,
+  disable.pbkrtest = FALSE
+)
+```
+
+# Functions {-}
+
+```{r echo=FALSE}
+## Set ggplot parameters {-}
+
+# Color palette
+my_palette_1 <- c(
+  "#E31A1C",   # red
+  "#1F78B4"  # blue
+)
+
+my_palette_2 <- c(
+  "#0072B2",  # dark blue
+  "#E69F00"   # orange/gold
+)
+my_linetypes_1 <- c("dashed", "solid")
+
+# Theme
+my_theme <- theme_classic(base_size = 10) +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "horizontal",
+    legend.box = "horizontal"
+  )
+
+# Common guides
+my_guides <- guides(
+  colour = guide_legend(nrow = 1),
+  fill   = guide_legend(nrow = 1)
+)
+
+
+## Define  interaction table functions {-}
+
+compact_emm_table <- function(emm_object,
+                              by_var,
+                              condition_prefix = NULL,
+                              digits_est = 2,
+                              digits_df = 1,
+                              digits_p = 3) {
+  
+  by_var_name <- rlang::as_name(rlang::ensym(by_var))
+  
+  emm_df <- summary(emm_object) |> as.data.frame()
+  contrast_df <- pairs(emm_object) |> summary() |> as.data.frame()
+  
+  # Exclude BOTH Satterthwaite/KR-style and asymptotic-style CI/df column names
+  non_focal_cols <- c(by_var_name, "emmean", "SE", "df",
+                      "lower.CL", "upper.CL",
+                      "asymp.LCL", "asymp.UCL")
+  
+  focal_vars <- setdiff(names(emm_df), non_focal_cols)
+  
+  # Detect whichever CI column names are actually present
+  lcl_col <- intersect(c("lower.CL", "asymp.LCL"), names(emm_df))
+  ucl_col <- intersect(c("upper.CL", "asymp.UCL"), names(emm_df))
+  
+  emm_part <- emm_df |>
+    rowwise() |>
+    mutate(
+      Comparison = paste(c_across(all_of(focal_vars)), collapse = " "),
+      Condition = if (is.null(condition_prefix)) {
+        as.character(.data[[by_var_name]])
+      } else {
+        paste(condition_prefix, "=", .data[[by_var_name]])
+      }
+    ) |>
+    ungroup() |>
+    transmute(
+      Comparison,
+      Condition,
+      Estimate = emmean,
+      SE,
+      df,
+      lower.CL = if (length(lcl_col) > 0) .data[[lcl_col]] else NA_real_,
+      upper.CL = if (length(ucl_col) > 0) .data[[ucl_col]] else NA_real_,
+      t.ratio = NA_real_,
+      p.value = NA_real_
+    )
+  
+  # Detect whichever test-statistic column name is present (t.ratio vs z.ratio)
+  ratio_col <- intersect(c("t.ratio", "z.ratio"), names(contrast_df))
+  
+  contrast_part <- contrast_df |>
+    mutate(
+      Comparison = contrast,
+      Condition = if (is.null(condition_prefix)) {
+        as.character(.data[[by_var_name]])
+      } else {
+        paste(condition_prefix, "=", .data[[by_var_name]])
+      }
+    ) |>
+    transmute(
+      Comparison,
+      Condition,
+      Estimate = estimate,
+      SE,
+      df,
+      lower.CL = NA_real_,
+      upper.CL = NA_real_,
+      t.ratio = if (length(ratio_col) > 0) .data[[ratio_col]] else NA_real_,
+      p.value
+    )
+  
+  bind_rows(emm_part, contrast_part) |>
+    arrange(Condition, Comparison) |>
+    mutate(
+      Estimate = round(Estimate, digits_est),
+      SE       = round(SE, digits_est),
+      df       = round(df, digits_df),
+      lower.CL = round(lower.CL, digits_est),
+      upper.CL = round(upper.CL, digits_est),
+      t.ratio  = round(t.ratio, digits_est),
+      p.value  = round(p.value, digits_p)
+    )
+}
+
+compact_3way_table <- function(emm_object,
+                               by_var,
+                               condition_prefix = NULL,
+                               factor1,
+                               factor2,
+                               digits_est = 2,
+                               digits_df = 1,
+                               digits_p = 3) {
+  
+  by_var_name <- rlang::as_name(rlang::ensym(by_var))
+  factor1_name <- rlang::as_name(rlang::ensym(factor1))
+  factor2_name <- rlang::as_name(rlang::ensym(factor2))
+  
+  emm_df <- summary(emm_object) |>
+    as.data.frame()
+  
+  make_condition <- function(x) {
+    if (is.null(condition_prefix)) {
+      as.character(x[[by_var_name]])
+    } else {
+      paste(condition_prefix, "=", x[[by_var_name]])
+    }
+  }
+  
+  emm_part <- emm_df |>
+    mutate(
+      Comparison = paste(.data[[factor1_name]], .data[[factor2_name]]),
+      Condition = make_condition(cur_data())
+    ) |>
+    transmute(
+      Comparison,
+      Condition,
+      Estimate = emmean,
+      SE,
+      df,
+      lower.CL,
+      upper.CL,
+      t.ratio = NA_real_,
+      p.value = NA_real_
+    )
+  
+  factor1_part <- pairs(emm_object, simple = factor1_name) |>
+    summary() |>
+    as.data.frame() |>
+    mutate(
+      Comparison = contrast,
+      Condition = paste(
+        if (is.null(condition_prefix)) .data[[by_var_name]] else paste(condition_prefix, "=", .data[[by_var_name]]),
+        "|",
+        factor2_name, "=",
+        .data[[factor2_name]]
+      )
+    ) |>
+    transmute(
+      Comparison,
+      Condition,
+      Estimate = estimate,
+      SE,
+      df,
+      lower.CL = NA_real_,
+      upper.CL = NA_real_,
+      t.ratio,
+      p.value
+    )
+  
+  factor2_part <- pairs(emm_object, simple = factor2_name) |>
+    summary() |>
+    as.data.frame() |>
+    mutate(
+      Comparison = contrast,
+      Condition = paste(
+        if (is.null(condition_prefix)) .data[[by_var_name]] else paste(condition_prefix, "=", .data[[by_var_name]]),
+        "|",
+        factor1_name, "=",
+        .data[[factor1_name]]
+      )
+    ) |>
+    transmute(
+      Comparison,
+      Condition,
+      Estimate = estimate,
+      SE,
+      df,
+      lower.CL = NA_real_,
+      upper.CL = NA_real_,
+      t.ratio,
+      p.value
+    )
+  
+  interaction_part <- contrast(
+    emm_object,
+    interaction = c("pairwise", "pairwise")
+  ) |>
+    summary() |>
+    as.data.frame() |>
+    mutate(
+      Comparison = paste0(
+        "Int: ",
+        .data[[paste0(factor1_name, "_pairwise")]],
+        " across ",
+        .data[[paste0(factor2_name, "_pairwise")]]
+      ),
+      Condition = make_condition(cur_data())
+    ) |>
+    transmute(
+      Comparison,
+      Condition,
+      Estimate = estimate,
+      SE,
+      df,
+      lower.CL = NA_real_,
+      upper.CL = NA_real_,
+      t.ratio,
+      p.value
+    )
+  
+  bind_rows(
+    emm_part         |> mutate(RowType = 1),
+    factor1_part     |> mutate(RowType = 2),
+    factor2_part     |> mutate(RowType = 2),
+    interaction_part |> mutate(RowType = 3)
+  ) |>
+    arrange(Condition, RowType, Comparison) |>
+    mutate(
+      Estimate = round(Estimate, digits_est),
+      SE       = round(SE, digits_est),
+      df       = round(df, digits_df),
+      lower.CL = round(lower.CL, digits_est),
+      upper.CL = round(upper.CL, digits_est),
+      t.ratio  = round(t.ratio, digits_est),
+      p.value  = round(p.value, digits_p)
+    ) |>
+    select(-RowType)
+}
+
+
+
+compact_3way_trends_table <- function(model,
+                                      focal_var,
+                                      moderator_var,
+                                      condition_var,
+                                      moderator_values,
+                                      condition_prefix = NULL,
+                                      digits_est = 2,
+                                      digits_df = 1,
+                                      digits_p = 3,
+                                      lmerTest.limit = NULL) {
+  
+  library(emmeans)
+  library(dplyr)
+  library(rlang)
+  
+  focal_name     <- rlang::as_name(rlang::ensym(focal_var))
+  moderator_name <- rlang::as_name(rlang::ensym(moderator_var))
+  condition_name <- rlang::as_name(rlang::ensym(condition_var))
+  
+  # Construct emtrends formula:
+  # ~ condition_var | moderator_var
+  trend_formula <- as.formula(
+    paste0("~ ", condition_name, " | ", moderator_name)
+  )
+  
+  # Values at which the moderator is evaluated
+  at_list <- setNames(
+    list(moderator_values),
+    moderator_name
+  )
+  
+  # ------------------------------------------------------------
+  # Estimate focal-variable slopes at each moderator value
+  # separately for each categorical condition
+  # ------------------------------------------------------------
+  
+  if (is.null(lmerTest.limit)) {
+    
+    trends <- emtrends(
+      model,
+      specs = trend_formula,
+      var = focal_name,
+      at = at_list
+    )
+    
+  } else {
+    
+    trends <- emtrends(
+      model,
+      specs = trend_formula,
+      var = focal_name,
+      at = at_list,
+      lmerTest.limit = lmerTest.limit
+    )
+  }
+  
+  trend_col <- paste0(focal_name, ".trend")
+  
+  # ------------------------------------------------------------
+  # Simple slopes
+  # ------------------------------------------------------------
+  
+  slope_part <- summary(
+    trends,
+    infer = c(TRUE, TRUE)
+  ) |>
+    as.data.frame() |>
+    mutate(
+      Comparison = paste0(
+        focal_name,
+        " slope: ",
+        .data[[condition_name]]
+      ),
+      
+      Condition = paste0(
+        moderator_name,
+        " = ",
+        .data[[moderator_name]]
+      ),
+      
+      Estimate = .data[[trend_col]],
+      
+      RowType = 1
+    ) |>
+    transmute(
+      Comparison,
+      Condition,
+      ModeratorValue = .data[[moderator_name]],
+      Estimate,
+      SE,
+      df,
+      lower.CL,
+      upper.CL,
+      t.ratio,
+      p.value,
+      RowType
+    )
+  
+  # ------------------------------------------------------------
+  # Difference between focal-variable slopes across levels
+  # of the categorical factor
+  # ------------------------------------------------------------
+  
+  contrast_part <- pairs(trends) |>
+    summary(
+      infer = c(TRUE, TRUE)
+    ) |>
+    as.data.frame() |>
+    mutate(
+      Comparison = paste0(
+        focal_name,
+        " slope difference: ",
+        contrast
+      ),
+      
+      Condition = paste0(
+        moderator_name,
+        " = ",
+        .data[[moderator_name]]
+      ),
+      
+      RowType = 2
+    ) |>
+    transmute(
+      Comparison,
+      Condition,
+      ModeratorValue = .data[[moderator_name]],
+      Estimate = estimate,
+      SE,
+      df,
+      lower.CL,
+      upper.CL,
+      t.ratio,
+      p.value,
+      RowType
+    )
+  
+  # ------------------------------------------------------------
+  # Combine and format
+  # ------------------------------------------------------------
+  
+  bind_rows(
+    slope_part,
+    contrast_part
+  ) |>
+    arrange(
+      .data$ModeratorValue,
+      .data$RowType,
+      .data$Comparison
+    ) |>
+    mutate(
+      Estimate = round(Estimate, digits_est),
+      SE       = round(SE, digits_est),
+      df       = round(df, digits_df),
+      lower.CL = round(lower.CL, digits_est),
+      upper.CL = round(upper.CL, digits_est),
+      t.ratio  = round(t.ratio, digits_est),
+      p.value  = round(p.value, digits_p)
+    ) |>
+    select(-RowType, -ModeratorValue)
+}
+
+
+```
+
+
+# Load Files
+
+```{r load_files, message=FALSE, warning=FALSE}
+
+
+
+# Load data: erp_fs nonwords
+erp_fs_nw <- read_csv("erp_fs_dmg.csv") |>
+  filter(time_window == "N400" & lexical_status == "nonword") |>
+  mutate(
+    SubjID = factor(SubjID),
+    chlabel = factor(chlabel),
+    family_size = factor(family_size, 
+                         levels = c("small", "large")),
+    complexity = factor(complexity,
+                    labels = c("simple", "complex")),
+    time_window = factor(time_window),
+    OS = as.numeric(Dim.2),
+    LP = as.numeric(Dim.1)
+  )
+
+
+# Load data: erp_bf nonwords
+erp_bf_nw <- read_csv("erp_bf_dmg.csv") |>
+  filter(time_window == "N400" & lexical_status == "nonword") |>
+  mutate(
+    SubjID = factor(SubjID),
+    chlabel = factor(chlabel),
+    base_frequency = factor(base_frequency, 
+                            levels = c("low", "high")),
+    complexity = factor(complexity,
+                    labels = c("simple", "complex")),
+    time_window = factor(time_window),
+    OS = as.numeric(Dim.2),
+    LP = as.numeric(Dim.1)
+  )
+
+range(erp_bf_nw$LP, na.rm = TRUE)
+range(erp_fs_nw$OS, na.rm = TRUE)
+```
+
+
+
+# N400 NONWORD DATA : SYMMETRICAL MODEL, INTERACTION WITH LP AND OS
+
+For the nonword N400, does the symmetric model we just ran replace the separate LP and OS models, or do all three get reported?**
+
+The symmetric model is the cleanest solution — it tests both dimensions in the same model and provides the strongest evidence for the dissociation. The separate models are now superseded.
+
+## N400 NONWORD DATA: Family Size
+
+### Model Comparisons
+```{r}
+contrasts(erp_fs_nw$complexity)   <- c(-0.5, 0.5)
+contrasts(erp_fs_nw$family_size)  <- c(-0.5, 0.5)
+
+# Base model: current confirmed N400 structure, OS now fully crossed rather than covariate-only
+m_base_nw_n400 <- lmer(
+  value ~ complexity * family_size * LP + complexity * OS + family_size * OS +
+    (1 | SubjID) + (1 | SubjID:chlabel),
+  data = subset(erp_fs_nw, time_window == "N400"),
+  REML = FALSE,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+# Full four-way
+m_full_nw_n400 <- lmer(
+  value ~ complexity * family_size * LP * OS +
+    (1 | SubjID) + (1 | SubjID:chlabel),
+  data = subset(erp_fs_nw, time_window == "N400"),
+  REML = FALSE,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+anova(m_base_nw_n400, m_full_nw_n400)
+summary(m_full_nw_n400)
+```
+
+
+```{r}
+m_3way_n400 <- lmer(value ~ complexity*OS + complexity*LP + complexity*family_size +
+                             OS*LP*family_size + complexity:OS:LP +
+                             complexity:OS:family_size + complexity:LP:family_size +
+                             (1|SubjID) + (1|SubjID:chlabel),
+                     data = subset(erp_fs_nw, time_window == "N400"),
+                     REML = FALSE, control = lmerControl(optimizer = "bobyqa"))
+
+m_4way_n400 <- update(m_3way_n400, . ~ . + complexity:OS:LP:family_size)
+
+anova(m_3way_n400, m_4way_n400)
+```
+
+
+```{r}
+contrasts(erp_fs_nw$complexity)  <- c(-0.5, 0.5)
+contrasts(erp_fs_nw$family_size) <- c(-0.5, 0.5)
+
+# N400: theoretically-motivated confirmatory model per the agreed principle
+# complexity crossed with each of OS, LP, family_size (affix-led/stem-led + processing cost tests)
+# OS, LP, family_size fully crossed with each other (parallel individual-difference dimensions)
+# No complexity four-way (already ruled out)
+
+m_full_nw_n400_fs <- lmer(
+  value ~ complexity * family_size * LP * OS +
+    (1 | SubjID) + (1 | SubjID:chlabel),
+  data = subset(erp_fs_nw, time_window == "N400"),
+  REML = TRUE,
+  control = lmerControl(optimizer = "bobyqa")
+)
+summary(m_full_nw_n400_fs)
+
+# Effect Sizes
+eta_squared(m_full_nw_n400_fs, partial = TRUE)
+
+# R-squared
+r2_nakagawa(m_full_nw_n400_fs)
+```
+```{r}
+# 1. Does erp_fs_nw still have an N400 level at all?
+table(erp_fs_nw$time_window, useNA = "always")
+
+# 2. If it does, does the subset actually return rows?
+nw_n400_data <- subset(erp_fs_nw, time_window == "N400")
+nrow(nw_n400_data)
+
+# 3. If rows exist, which specific column is fully NA?
+sapply(nw_n400_data[c("value", "complexity", "family_size", "LP", "OS")],
+       function(x) sum(!is.na(x)))
+```
+
+
+### EXPLORE INTERACTIONS
+
+```{r}
+library(emmeans)
+library(dplyr)
+library(rlang)
+library(purrr)
+
+emm_options(lmer.df = "satterthwaite")
+
+# Representative levels: mean ± 1 SD for both continuous ID dimensions
+os_vals <- c(mean(erp_fs_nw$OS) - sd(erp_fs_nw$OS), mean(erp_fs_nw$OS), mean(erp_fs_nw$OS) + sd(erp_fs_nw$OS))
+lp_vals <- c(mean(erp_fs_nw$LP) - sd(erp_fs_nw$LP), mean(erp_fs_nw$LP), mean(erp_fs_nw$LP) + sd(erp_fs_nw$LP))
+os_labels <- c("Low OS", "Mean OS", "High OS")
+lp_labels <- c("Low LP", "Mean LP", "High LP")
+
+os_vals <- c(mean(erp_fs_nw$OS, na.rm = TRUE) - sd(erp_fs_nw$OS, na.rm = TRUE),
+             mean(erp_fs_nw$OS, na.rm = TRUE),
+             mean(erp_fs_nw$OS, na.rm = TRUE) + sd(erp_fs_nw$OS, na.rm = TRUE))
+
+lp_vals <- c(mean(erp_fs_nw$LP, na.rm = TRUE) - sd(erp_fs_nw$LP, na.rm = TRUE),
+             mean(erp_fs_nw$LP, na.rm = TRUE),
+             mean(erp_fs_nw$LP, na.rm = TRUE) + sd(erp_fs_nw$LP, na.rm = TRUE))
+
+os_vals
+lp_vals
+```
+
+N400 — Complexity × Family Size × OS (three-way, p = .047)
+
+Model: m_base_nw_n400 (or m_full_nw_n400 — either contains this term; use whichever you're treating as final)
+
+```{r}
+n400_fs_threeway <- emmeans(m_full_nw_n400_fs,
+                             ~ complexity * family_size | OS,
+                             at = list(OS = os_vals),
+                      nesting = NULL) |>
+  compact_emm_table(by_var = OS, condition_prefix = "OS")
+
+as.tibble(n400_fs_threeway) |>
+  print(n = 50)
+```
+
+
+
+```{r}
+n400_fs_interaction <- emmeans(m_full_nw_n400_fs,
+                                ~ complexity * family_size | OS,
+                                at = list(OS = os_vals),
+                                nesting = NULL) |>
+  contrast(interaction = "pairwise") |>
+  as.data.frame()
+
+as.tibble(n400_fs_interaction) |>
+  print(n = 50)
+
+n400_fs_interaction
+
+```
+
+### Model BASE FREQUENCY
+
+
+
+```{r}
+m_3way_n400 <- lmer(value ~ complexity*OS + complexity*LP + complexity*base_frequency +
+                             OS*LP*base_frequency + complexity:OS:LP +
+                             complexity:OS:base_frequency + complexity:LP:base_frequency +
+                             (1|SubjID) + (1|SubjID:chlabel),
+                     data = subset(erp_bf_nw, time_window == "N400"),
+                     REML = FALSE, control = lmerControl(optimizer = "bobyqa"))
+
+m_4way_n400 <- update(m_3way_n400, . ~ . + complexity:OS:LP:base_frequency)
+
+anova(m_3way_n400, m_4way_n400)
+```
+
+```{r}
+contrasts(erp_bf_nw$complexity)      <- c(-0.5, 0.5)
+contrasts(erp_bf_nw$base_frequency)  <- c(-0.5, 0.5)
+
+# N400 nonwords: specificity check for base frequency, matching the family_size
+# confirmatory structure so it's a fair parallel test
+m_confirm_nw_n400_bf <- lmer(
+  value ~ complexity * OS  * LP * base_frequency +
+    (1 | SubjID) + (1 | SubjID:chlabel),
+  data = subset(erp_bf_nw, time_window == "N400"),
+  control = lmerControl(optimizer = "bobyqa")
+)
+summary(m_confirm_nw_n400_bf)
+
+# Effect Sizes
+eta_squared(m_confirm_nw_n400_bf, partial = TRUE)
+
+# R-squared
+r2_nakagawa(m_confirm_nw_n400_bf)
+
+```
+
+```{r}
+n400_bf_fourway <- map2_dfr(lp_vals, lp_labels, function(lp_fixed, lp_lab) {
+  emm_obj <- emmeans(m_confirm_nw_n400_bf,
+                      ~ complexity * base_frequency | OS,
+                      at = list(OS = os_vals, LP = lp_fixed),
+                      nesting = NULL)
+  compact_emm_table(emm_obj, by_var = OS, condition_prefix = "OS") |>
+    mutate(LP_level = lp_lab)
+})
+
+as.tibble(n400_bf_fourway) |>
+  print(n = 100)
+```
+
+
+```{r}
+# Example for the N400 BF four-way, at each LP level
+n400_bf_interaction <- map2_dfr(lp_vals, lp_labels, function(lp_fixed, lp_lab) {
+  emm_obj <- emmeans(m_confirm_nw_n400_bf,
+                      ~ complexity * base_frequency | OS,
+                      at = list(OS = os_vals, LP = lp_fixed),
+                      nesting = NULL)
+  contrast(emm_obj, interaction = "pairwise") |>
+    as.data.frame() |>
+    mutate(LP_level = lp_lab)
+})
+as.tibble(n400_bf_interaction)
+
+```
+
+
+```{r}
+summary(m_confirm_nw_n400_bf)
+```
+
+```{r}
+# Does a model with only up to three-way terms show the same three-way?
+m_3way_n400_bf <- lmer(
+  value ~ complexity * OS + complexity * LP + complexity * base_frequency +
+    OS * LP * base_frequency + complexity:OS:LP + complexity:OS:base_frequency +
+    complexity:LP:base_frequency +
+    (1 | SubjID) + (1 | SubjID:chlabel),
+  data = subset(erp_bf_nw, time_window == "N400"),
+  control = lmerControl(optimizer = "bobyqa")
+)
+summary(m_3way_n400_bf)
+```
+```
+

@@ -1,0 +1,1015 @@
+Summary statistics for Methods section
+Study:    Task: LDT
+Run: 31-Oct-2026 20:13:07
+
+--- Per-subject processing time ---
+  N subjects: 35
+  Mean:  1m 25s
+  SD:    16.3 s
+  Range: 0m 08s - 1m 45s
+
+--- Total pipeline runtime ---
+  49m 29s (49.5 minutes)
+
+--- ICA components removed ---
+  N subjects: 34
+  Mean:  1.9
+  SD:    1.0
+  Range: 0 - 4
+
+--- Accepted trials per condition ---
+  NW_c203_w01_item31_Complex_SmallFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  NW_c203_w02_item32_Complex_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c203_w03_item33_Complex_SmallFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c203_w04_item34_Complex_SmallFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c203_w05_item35_Complex_SmallFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c203_w06_item36_Complex_SmallFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c203_w07_item37_Complex_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c203_w08_item38_Complex_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c203_w09_item39_Complex_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c203_w10_item310_Complex_SmallFS_LowBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c203_w11_item311_Complex_SmallFS_LowBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c203_w12_item312_Complex_SmallFS_LowBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c203_w13_item313_Complex_SmallFS_LowBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c203_w14_item314_Complex_SmallFS_LowBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c203_w16_item316_Complex_SmallFS_HighBF
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  NW_c203_w17_item317_Complex_SmallFS_HighBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c203_w18_item318_Complex_SmallFS_HighBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c203_w19_item319_Simple_SmallFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  NW_c203_w20_item320_Complex_SmallFS_LowBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  NW_c203_w21_item321_Complex_SmallFS_LowBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c203_w22_item322_Complex_SmallFS_LowBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c203_w23_item323_Complex_SmallFS_LowBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c203_w24_item324_Complex_SmallFS_LowBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c203_w25_item325_Complex_SmallFS_LowBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c204_w01_item41_Complex_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c204_w02_item42_Complex_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c204_w03_item43_Complex_LargeFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.4
+    Range: 0 - 1
+  NW_c204_w04_item44_Complex_LargeFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c204_w05_item45_Complex_LargeFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  NW_c204_w06_item46_Complex_LargeFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c204_w07_item47_Complex_LargeFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c204_w08_item48_Complex_LargeFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c204_w09_item49_Complex_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c204_w10_item410_Complex_LargeFS_HighBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c204_w11_item411_Complex_LargeFS_HighBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c204_w12_item412_Complex_LargeFS_HighBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c204_w13_item413_Complex_LargeFS_HighBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c204_w14_item414_Complex_LargeFS_HighBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c204_w15_item415_Complex_LargeFS_HighBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c204_w16_item416_Complex_LargeFS_LowBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c204_w17_item417_Complex_LargeFS_HighBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c204_w18_item418_Complex_LargeFS_HighBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c204_w19_item419_Complex_LargeFS_HighBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c204_w20_item420_Complex_LargeFS_HighBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c204_w21_item421_Complex_LargeFS_HighBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c204_w22_item422_Complex_LargeFS_LowBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c204_w23_item423_Complex_LargeFS_HighBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c204_w24_item424_Complex_LargeFS_HighBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c204_w25_item425_Complex_LargeFS_LowBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c205_w01_item51_Simple_SmallFS_LowBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c205_w02_item52_Simple_SmallFS_LowBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c205_w03_item53_Simple_SmallFS_LowBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c205_w04_item54_Simple_SmallFS_HighBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c205_w05_item55_Simple_SmallFS_LowBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c205_w06_item56_Simple_SmallFS_LowBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c205_w07_item57_Simple_SmallFS_LowBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c205_w08_item58_Simple_SmallFS_HighBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c205_w09_item59_Simple_SmallFS_HighBF
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  NW_c205_w10_item510_Simple_SmallFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  NW_c205_w11_item511_Simple_SmallFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c205_w12_item512_Simple_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c205_w13_item513_Simple_SmallFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  NW_c205_w14_item514_Simple_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c205_w15_item515_Simple_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c205_w16_item516_Simple_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c205_w17_item517_Simple_SmallFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c205_w18_item518_Simple_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c205_w19_item519_Simple_SmallFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  NW_c205_w20_item520_Simple_SmallFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c205_w21_item521_Simple_SmallFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c205_w22_item522_Simple_SmallFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  NW_c205_w23_item523_Simple_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c205_w24_item524_Simple_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c205_w25_item525_Simple_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c206_w01_item61_Simple_LargeFS_HighBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c206_w02_item62_Simple_LargeFS_LowBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c206_w03_item63_Simple_LargeFS_HighBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c206_w04_item64_Simple_LargeFS_LowBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c206_w05_item65_Simple_LargeFS_HighBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c206_w06_item66_Simple_LargeFS_HighBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c206_w07_item67_Simple_LargeFS_HighBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c206_w08_item68_Simple_LargeFS_LowBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c206_w09_item69_Simple_LargeFS_LowBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c206_w10_item610_Simple_LargeFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c206_w11_item611_Simple_LargeFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c206_w12_item612_Simple_LargeFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c206_w13_item613_Simple_LargeFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  NW_c206_w14_item614_Simple_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c206_w15_item615_Simple_LargeFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  NW_c206_w16_item616_Simple_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c206_w17_item617_Simple_LargeFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  NW_c206_w18_item618_Simple_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c206_w19_item619_Simple_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c206_w20_item620_Simple_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.4
+    Range: 0 - 1
+  NW_c206_w21_item621_Simple_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  NW_c206_w22_item622_Simple_LargeFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  NW_c206_w23_item623_Simple_LargeFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c206_w24_item624_Simple_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  NW_c206_w25_item625_Simple_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c201_w01_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c201_w02_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w03_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w04_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c201_w05_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c201_w06_SmallFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w07_SmallFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w08_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w09_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w10_SmallFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w11_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c201_w12_SmallFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w13_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w14_SmallFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w15_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w16_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w17_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w18_SmallFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  W_c201_w19_CHECK_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c201_w20_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c201_w21_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c201_w22_SmallFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w23_SmallFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w24_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c201_w25_SmallFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  W_c201_w26_SmallFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w27_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c201_w28_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w29_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w30_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c201_w31_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w32_SmallFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  W_c201_w33_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w34_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c201_w35_SmallFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w36_SmallFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w37_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c201_w38_SmallFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  W_c201_w39_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w40_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w41_SmallFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w42_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w43_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c201_w44_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w45_SmallFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w46_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w47_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w48_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c201_w49_SmallFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c201_w50_SmallFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w01_LargeFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w02_LargeFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w03_LargeFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w04_LargeFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w05_LargeFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w06_LargeFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w07_LargeFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  W_c202_w08_LargeFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w09_LargeFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w10_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w11_LargeFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  W_c202_w12_LargeFS_HighBF 
+    N:     35
+    Mean:  0.8
+    SD:    0.4
+    Range: 0 - 1
+  W_c202_w13_LargeFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  W_c202_w14_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w15_LargeFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w16_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c202_w17_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w18_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c202_w19_LargeFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  W_c202_w20_LargeFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w21_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w22_LargeFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w23_LargeFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w24_LargeFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w25_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w26_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w27_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c202_w28_LargeFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w29_LargeFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w30_LargeFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w31_LargeFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c202_w32_LargeFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.0
+    Range: 1 - 1
+  W_c202_w33_LargeFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w34_LargeFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w35_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w36_LargeFS_HighBF 
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w37_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c202_w38_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w39_LargeFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c202_w40_LargeFS_LowBF
+    N:     35
+    Mean:  0.8
+    SD:    0.4
+    Range: 0 - 1
+  W_c202_w41_LargeFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w42_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w43_LargeFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w44_LargeFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w45_LargeFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w46_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c202_w47_LargeFS_HighBF 
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1
+  W_c202_w48_LargeFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w49_LargeFS_LowBF
+    N:     35
+    Mean:  1.0
+    SD:    0.2
+    Range: 0 - 1
+  W_c202_w50_LargeFS_LowBF
+    N:     35
+    Mean:  0.9
+    SD:    0.3
+    Range: 0 - 1

@@ -1,0 +1,321 @@
+Loading required package: Matrix
+
+Attaching package: 'lmerTest'
+
+The following object is masked from 'package:lme4':
+
+    lmer
+
+The following object is masked from 'package:stats':
+
+    step
+
+N participants in ERP sample: 60 
+Importance of components:
+                          PC1    PC2    PC3
+Standard deviation     1.2722 0.9278 0.7216
+Proportion of Variance 0.5395 0.2869 0.1736
+Cumulative Proportion  0.5395 0.8264 1.0000
+            PC1        PC2        PC3
+z_vcb 0.6486277  0.2264815  0.7266279
+z_spl 0.4348357 -0.8938196 -0.1095648
+z_art 0.6246599  0.3870306 -0.6782384
+r(new LP, original Dim.1) = 0.999 
+r(new OS, original Dim.2) = 0.994 
+r(LP, OS) in analysed sample = 0 
+, , family_size = large
+
+           complexity
+time_window complex simple
+       N250       9      9
+       N400       9      9
+
+, , family_size = small
+
+           complexity
+time_window complex simple
+       N250       9      9
+       N400       9      9
+
+
+Random effects used: cpx * OS * Laterality * Anteriority + fs + cpx:fs + cpx:LP + LP + (1 + cpx * fs | SubjID) + (1 | SubjID:chlabel) 
+
+Random effects used: cpx * OS * Laterality * Anteriority + fs + cpx:fs + cpx:LP + LP + (1 + cpx * fs | SubjID) + (1 | SubjID:chlabel) 
+
+
+====================  Nonwords N250  ====================
+ Groups         Name        Std.Dev. Corr                
+ SubjID:chlabel (Intercept) 1.3056                       
+ SubjID         (Intercept) 2.2055                       
+                cpx         1.8109    0.200              
+                fs          1.6891    0.198  0.160       
+                cpx:fs      3.3658   -0.028  0.084  0.092
+ Residual                   1.1344                       
+
+Terms involving cpx (Type III, Satterthwaite):
+                          term df1     df2    F      p eta_p2
+                           cpx   1   57.11 1.23 0.2720  0.021
+                        cpx:OS   1   57.00 0.03 0.8600  0.001
+                cpx:Laterality   2 1424.00 0.19 0.8290  0.000
+               cpx:Anteriority   2 1424.00 0.76 0.4690  0.001
+                        cpx:fs   1   59.00 2.94 0.0917  0.047
+                        cpx:LP   1   57.00 2.75 0.1030  0.046
+             cpx:OS:Laterality   2 1424.00 0.14 0.8670  0.000
+            cpx:OS:Anteriority   2 1424.00 0.04 0.9590  0.000
+    cpx:Laterality:Anteriority   4 1424.00 0.11 0.9780  0.000
+ cpx:OS:Laterality:Anteriority   4 1424.00 0.34 0.8490  0.001
+
+No significant term involving cpx x OS: no follow-ups.
+
+
+====================  Nonwords N400  ====================
+ Groups         Name        Std.Dev. Corr                
+ SubjID:chlabel (Intercept) 1.9722                       
+ SubjID         (Intercept) 2.9719                       
+                cpx         1.6793   -0.088              
+                fs          1.8972    0.010  0.030       
+                cpx:fs      4.2757   -0.284  0.108 -0.020
+ Residual                   1.1647                       
+
+Terms involving cpx (Type III, Satterthwaite):
+                          term df1     df2    F      p eta_p2
+                           cpx   1   57.03 4.00 0.0501  0.066
+                        cpx:OS   1   57.00 0.72 0.4010  0.012
+                cpx:Laterality   2 1424.00 1.30 0.2730  0.002
+               cpx:Anteriority   2 1424.00 1.06 0.3470  0.001
+                        cpx:fs   1   59.00 0.07 0.7880  0.001
+                        cpx:LP   1   57.00 0.36 0.5490  0.006
+             cpx:OS:Laterality   2 1424.00 2.22 0.1090  0.003
+            cpx:OS:Anteriority   2 1424.00 0.57 0.5680  0.001
+    cpx:Laterality:Anteriority   4 1424.00 0.18 0.9490  0.001
+ cpx:OS:Laterality:Anteriority   4 1424.00 0.74 0.5630  0.002
+
+No significant term involving cpx x OS: no follow-ups.
+
+Random effects used: cpx * OS * win * Laterality * Anteriority + fs * cpx * win + cpx:LP + cpx:LP:win + LP + LP:win + (1 + cpx * win | SubjID) + (1 | SubjID:chlabel) + (1 | SubjID:chlabel:win) 
+
+
+====================  Nonwords N250 vs N400 (combined)  ====================
+ Groups             Name        Std.Dev. Corr                
+ SubjID:chlabel:win (Intercept) 0.49349                      
+ SubjID:chlabel     (Intercept) 1.39894                      
+ SubjID             (Intercept) 2.25545                      
+                    cpx         1.56506   0.065              
+                    win         2.65729   0.351 -0.182       
+                    cpx:win     1.16130  -0.185 -0.125 -0.065
+ Residual                       1.92544                      
+
+Terms involving cpx (Type III, Satterthwaite):
+                              term df1  df2     F        p eta_p2
+                           cpx:win   1   57  0.90 3.47e-01  0.016
+                        cpx:OS:win   1   57  0.65 4.25e-01  0.011
+                cpx:win:Laterality   2 3084  0.11 8.93e-01  0.000
+               cpx:win:Anteriority   2 3084  0.06 9.38e-01  0.000
+                        cpx:win:fs   1 3084 15.26 9.58e-05  0.005
+                        cpx:win:LP   1   57  1.63 2.07e-01  0.028
+             cpx:OS:win:Laterality   2 3084  0.39 6.78e-01  0.000
+            cpx:OS:win:Anteriority   2 3084  0.16 8.54e-01  0.000
+    cpx:win:Laterality:Anteriority   4 3084  0.02 9.99e-01  0.000
+ cpx:OS:win:Laterality:Anteriority   4 3084  0.02 9.99e-01  0.000
+
+No significant term involving cpx x OS: no follow-ups.
+NOTE: Results may be misleading due to involvement in interactions
+
+OS slope by complexity and window (win -0.5 = N250, +0.5 = N400):
+  cpx  win OS.trend    SE df lower.CL upper.CL t.ratio p.value
+ -0.5 -0.5    0.364 0.318 57  -0.2734     1.00   1.144  0.2575
+  0.5 -0.5    0.410 0.365 57  -0.3201     1.14   1.124  0.2656
+ -0.5  0.5    0.617 0.454 57  -0.2926     1.53   1.359  0.1796
+  0.5  0.5    0.830 0.435 57  -0.0414     1.70   1.907  0.0615
+
+Results are averaged over the levels of: Laterality, Anteriority, fs 
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+Complexity x OS (slope difference) in each window:
+win = -0.5:
+ contrast           estimate    SE df lower.CL upper.CL t.ratio p.value
+ cpx0.5 - (cpx-0.5)   0.0457 0.260 57   -0.474    0.566   0.176  0.8608
+
+win =  0.5:
+ contrast           estimate    SE df lower.CL upper.CL t.ratio p.value
+ cpx0.5 - (cpx-0.5)   0.2121 0.242 57   -0.272    0.696   0.877  0.3843
+
+Results are averaged over the levels of: Laterality, Anteriority, fs 
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / non-convergent): cpx * OS * win + fs * cpx * win + cpx:LP + cpx:LP:win + LP + LP:win + (1 + cpx * win | SubjID) 
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / non-convergent): cpx * OS * win + fs * cpx * win + cpx:LP + cpx:LP:win + LP + LP:win + (1 + cpx * win || SubjID) 
+
+Random effects used: cpx * OS * win + fs * cpx * win + cpx:LP + cpx:LP:win + LP + LP:win + (1 + cpx + win || SubjID) 
+
+
+==================== Nonwords grid-averaged ====================
+       term df1 df2    F     p eta_p2
+        cpx   1  57 2.85 0.097  0.048
+     cpx:OS   1  57 0.32 0.575  0.006
+    cpx:win   1 293 0.31 0.576  0.001
+     cpx:fs   1 293 0.90 0.344  0.003
+     cpx:LP   1  57 1.70 0.198  0.029
+ cpx:OS:win   1 293 0.23 0.635  0.001
+ cpx:win:fs   1 293 2.01 0.157  0.007
+ cpx:win:LP   1 293 0.57 0.452  0.002
+
+Random effects used: bf * OS * Laterality * Anteriority + fs + bf:fs + bf:LP + LP + (1 + bf * fs | SubjID) + (1 | SubjID:chlabel) 
+
+Random effects used: bf * OS * Laterality * Anteriority + fs + bf:fs + bf:LP + LP + (1 + bf * fs | SubjID) + (1 | SubjID:chlabel) 
+
+
+====================  Words N250  ====================
+ Groups         Name        Std.Dev. Corr                
+ SubjID:chlabel (Intercept) 1.2338                       
+ SubjID         (Intercept) 2.4591                       
+                bf          1.7025   -0.158              
+                fs          1.9137   -0.205  0.283       
+                bf:fs       3.9778   -0.233  0.356  0.277
+ Residual                   1.0764                       
+
+Terms involving bf (Type III, Satterthwaite):
+                         term df1     df2    F     p eta_p2
+                           bf   1   57.45 0.86 0.357  0.015
+                        bf:OS   1   57.00 0.08 0.773  0.001
+                bf:Laterality   2 1424.00 0.49 0.616  0.001
+               bf:Anteriority   2 1424.00 0.28 0.759  0.000
+                        bf:fs   1   59.00 0.36 0.553  0.006
+                        bf:LP   1   57.00 0.16 0.692  0.003
+             bf:OS:Laterality   2 1424.00 1.29 0.276  0.002
+            bf:OS:Anteriority   2 1424.00 0.03 0.970  0.000
+    bf:Laterality:Anteriority   4 1424.00 0.44 0.780  0.001
+ bf:OS:Laterality:Anteriority   4 1424.00 0.08 0.990  0.000
+
+No significant term involving bf x OS: no follow-ups.
+
+
+====================  Words N400  ====================
+ Groups         Name        Std.Dev. Corr                
+ SubjID:chlabel (Intercept) 1.7831                       
+ SubjID         (Intercept) 2.7181                       
+                bf          1.6195    0.091              
+                fs          1.8502   -0.157  0.284       
+                bf:fs       3.2287   -0.123 -0.106  0.009
+ Residual                   1.1458                       
+
+Terms involving bf (Type III, Satterthwaite):
+                         term df1     df2    F      p eta_p2
+                           bf   1   57.23 0.30 0.5880  0.005
+                        bf:OS   1   57.00 1.42 0.2390  0.024
+                bf:Laterality   2 1424.00 0.43 0.6530  0.001
+               bf:Anteriority   2 1424.00 2.30 0.1010  0.003
+                        bf:fs   1   59.00 4.32 0.0419  0.068
+                        bf:LP   1   57.00 0.03 0.8710  0.000
+             bf:OS:Laterality   2 1424.00 2.46 0.0854  0.003
+            bf:OS:Anteriority   2 1424.00 3.80 0.0227  0.005
+    bf:Laterality:Anteriority   4 1424.00 0.81 0.5180  0.002
+ bf:OS:Laterality:Anteriority   4 1424.00 0.25 0.9070  0.001
+
+Follow-ups for: bf:OS:Anteriority 
+NOTE: Results may be misleading due to involvement in interactions
+NOTE: Results may be misleading due to involvement in interactions
+$`bf:OS:Anteriority`
+$`bf:OS:Anteriority`$OS_slopes
+   bf Anteriority OS.trend    SE   df lower.CL upper.CL t.ratio p.value
+ -0.5 Frontal        0.497 0.408 70.4  -0.3164     1.31   1.219  0.2271
+  0.5 Frontal        0.948 0.433 68.7   0.0841     1.81   2.189  0.0320
+ -0.5 Central        0.855 0.408 70.4   0.0411     1.67   2.095  0.0398
+  0.5 Central        1.113 0.433 68.7   0.2494     1.98   2.571  0.0123
+ -0.5 Parietal       0.935 0.408 70.4   0.1214     1.75   2.292  0.0249
+  0.5 Parietal       1.024 0.433 68.7   0.1605     1.89   2.366  0.0208
+
+Results are averaged over the levels of: Laterality, fs 
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+$`bf:OS:Anteriority`$slope_difference
+Anteriority = Frontal:
+ contrast         estimate    SE   df lower.CL upper.CL t.ratio p.value
+ bf0.5 - (bf-0.5)   0.4508 0.236 70.8  -0.0198    0.921   1.910  0.0602
+
+Anteriority = Central:
+ contrast         estimate    SE   df lower.CL upper.CL t.ratio p.value
+ bf0.5 - (bf-0.5)   0.2585 0.236 70.8  -0.2120    0.729   1.096  0.2770
+
+Anteriority = Parietal:
+ contrast         estimate    SE   df lower.CL upper.CL t.ratio p.value
+ bf0.5 - (bf-0.5)   0.0892 0.236 70.8  -0.3813    0.560   0.378  0.7065
+
+Results are averaged over the levels of: Laterality, fs 
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+$`bf:OS:Anteriority`$effect_at_OS
+OS = -0.928, Anteriority = Frontal:
+ contrast         estimate    SE   df lower.CL upper.CL t.ratio p.value
+ bf0.5 - (bf-0.5)  -0.4495 0.315 73.3   -1.076    0.177  -1.429  0.1573
+
+OS =  0.000, Anteriority = Frontal:
+ contrast         estimate    SE   df lower.CL upper.CL t.ratio p.value
+ bf0.5 - (bf-0.5)  -0.0313 0.226 69.9   -0.482    0.419  -0.138  0.8903
+
+OS =  0.928, Anteriority = Frontal:
+ contrast         estimate    SE   df lower.CL upper.CL t.ratio p.value
+ bf0.5 - (bf-0.5)   0.3869 0.315 73.3   -0.240    1.014   1.230  0.2226
+
+OS = -0.928, Anteriority = Central:
+ contrast         estimate    SE   df lower.CL upper.CL t.ratio p.value
+ bf0.5 - (bf-0.5)  -0.0645 0.315 73.3   -0.691    0.562  -0.205  0.8381
+
+OS =  0.000, Anteriority = Central:
+ contrast         estimate    SE   df lower.CL upper.CL t.ratio p.value
+ bf0.5 - (bf-0.5)   0.1754 0.226 69.9   -0.275    0.626   0.776  0.4401
+
+OS =  0.928, Anteriority = Central:
+ contrast         estimate    SE   df lower.CL upper.CL t.ratio p.value
+ bf0.5 - (bf-0.5)   0.4152 0.315 73.3   -0.212    1.042   1.320  0.1909
+
+OS = -0.928, Anteriority = Parietal:
+ contrast         estimate    SE   df lower.CL upper.CL t.ratio p.value
+ bf0.5 - (bf-0.5)   0.1244 0.315 73.3   -0.502    0.751   0.396  0.6935
+
+OS =  0.000, Anteriority = Parietal:
+ contrast         estimate    SE   df lower.CL upper.CL t.ratio p.value
+ bf0.5 - (bf-0.5)   0.2072 0.226 69.9   -0.243    0.658   0.918  0.3620
+
+OS =  0.928, Anteriority = Parietal:
+ contrast         estimate    SE   df lower.CL upper.CL t.ratio p.value
+ bf0.5 - (bf-0.5)   0.2900 0.315 73.3   -0.337    0.917   0.922  0.3596
+
+Results are averaged over the levels of: Laterality, fs 
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+
+
+Random effects used: bf * OS * win * Laterality * Anteriority + fs * bf * win + bf:LP + bf:LP:win + LP + LP:win + (1 + bf * win | SubjID) + (1 | SubjID:chlabel) + (1 | SubjID:chlabel:win) 
+
+
+====================  Words N250 vs N400 (combined)  ====================
+ Groups             Name        Std.Dev. Corr                
+ SubjID:chlabel:win (Intercept) 0.2094                       
+ SubjID:chlabel     (Intercept) 1.3113                       
+ SubjID             (Intercept) 2.2898                       
+                    bf          1.4768   -0.032              
+                    win         2.4345    0.136  0.042       
+                    bf:win      1.1452    0.351 -0.079 -0.044
+ Residual                       1.8936                       
+
+Terms involving bf (Type III, Satterthwaite):
+                             term df1     df2    F      p eta_p2
+                           bf:win   1   57.00 3.02 0.0879  0.050
+                        bf:OS:win   1   57.00 0.65 0.4240  0.011
+                bf:win:Laterality   2 3084.01 0.02 0.9770  0.000
+               bf:win:Anteriority   2 3084.01 0.19 0.8260  0.000
+                        bf:win:fs   1 3084.01 6.32 0.0120  0.002
+                        bf:win:LP   1   57.00 0.00 0.9840  0.000
+             bf:OS:win:Laterality   2 3084.01 0.22 0.8050  0.000
+            bf:OS:win:Anteriority   2 3084.01 0.61 0.5410  0.000
+    bf:win:Laterality:Anteriority   4 3084.01 0.02 0.9990  0.000
+ bf:OS:win:Laterality:Anteriority   4 3084.01 0.03 0.9980  0.000
+
+No significant term involving bf x OS: no follow-ups.

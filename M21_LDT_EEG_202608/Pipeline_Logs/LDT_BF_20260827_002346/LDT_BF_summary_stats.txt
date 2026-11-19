@@ -1,0 +1,94 @@
+Summary statistics for Methods section
+Study:    Task: LDT
+Run: 27-Aug-2026 00:23:52
+
+--- Per-subject processing time ---
+  N subjects: 1
+  Mean:  0m 06s
+  SD:    0.0 s
+  Range: 0m 06s - 0m 06s
+
+--- Total pipeline runtime ---
+  0m 06s (0.1 minutes)
+
+--- Accepted trials per condition ---
+  Critical Word Small Family
+    N:     1
+    Mean:  49.0
+    SD:    0.0
+    Range: 49 - 49
+  Critical Word Large Family
+    N:     1
+    Mean:  48.0
+    SD:    0.0
+    Range: 48 - 48
+  Nonword Complex HighBF 1 (residualized) 
+    N:     1
+    Mean:  12.0
+    SD:    0.0
+    Range: 12 - 12
+  Nonword Complex LowBF 1 (residualized)
+    N:     1
+    Mean:  13.0
+    SD:    0.0
+    Range: 13 - 13
+  Nonword Simple HighBF 1 (residualized)
+    N:     1
+    Mean:  11.0
+    SD:    0.0
+    Range: 11 - 11
+  Nonword Simple LowBF 1 (residualized) 
+    N:     1
+    Mean:  12.0
+    SD:    0.0
+    Range: 12 - 12
+  filler word 
+    N:     1
+    Mean:  44.0
+    SD:    0.0
+    Range: 44 - 44
+  filler nonword
+    N:     1
+    Mean:  47.0
+    SD:    0.0
+    Range: 47 - 47
+  Critical word small FS High BF (residualized) 
+    N:     1
+    Mean:  24.0
+    SD:    0.0
+    Range: 24 - 24
+  Critical word small FS Low BF (residualized)
+    N:     1
+    Mean:  25.0
+    SD:    0.0
+    Range: 25 - 25
+  Critical word large FS High BF (residualized) 
+    N:     1
+    Mean:  25.0
+    SD:    0.0
+    Range: 25 - 25
+  Critical word large FS Low BF (residualized)
+    N:     1
+    Mean:  23.0
+    SD:    0.0
+    Range: 23 - 23
+  Nonword Complex HighBF 2 (residualized) 
+    N:     1
+    Mean:  13.0
+    SD:    0.0
+    Range: 13 - 13
+  Nonword Complex LowBF 2 (residualized)
+    N:     1
+    Mean:  12.0
+    SD:    0.0
+    Range: 12 - 12
+  Nonword Simple HighBF 2 (residualized)
+    N:     1
+    Mean:  12.0
+    SD:    0.0
+    Range: 12 - 12
+  Nonword Simple LowBF 2 (residualized) 
+    N:     1
+    Mean:  10.0
+    SD:    0.0
+    Range: 10 - 10

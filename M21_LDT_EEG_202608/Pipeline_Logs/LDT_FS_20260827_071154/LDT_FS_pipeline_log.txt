@@ -1,0 +1,395 @@
+Pipeline log — LDT_FS
+Run: 27-Aug-2026 07:11:54
+Location: hc   Channels: 32   Srate: 200 Hz
+Epoch: [-200 1000] ms   ARJ threshold: +/-100 uV   ARJ window: [-100 600] ms
+
+
+--- Subject S105 ---
+  Loaded: S105_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 2 component(s) removed (3, 5)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S105_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 50  50  25  25  25  25  50  50  24  26  26  24
+  Stage 6: subject completed in 91.5 s (1m 31s)
+  COMPLETED
+
+--- Subject S107 ---
+  Loaded: S107_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 3 component(s) removed (1, 2, 23)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S107_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 50  50  25  25  25  25  50  49  24  26  26  24
+  Stage 6: subject completed in 92.8 s (1m 33s)
+  COMPLETED
+
+--- Subject S109 ---
+  Loaded: S109_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 1 channel(s): T8
+  Stage 4: 3 component(s) removed (1, 2, 7)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S109_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 50  48  22  25  24  24  49  49  24  26  25  23
+  Stage 6: subject completed in 86.3 s (1m 26s)
+  COMPLETED
+
+--- Subject S111 ---
+  Loaded: S111_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 2 component(s) removed (1, 6)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S111_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 38  49  23  24  24  22  45  46  18  20  26  23
+  Stage 6: subject completed in 99.6 s (1m 40s)
+  COMPLETED
+
+--- Subject S113 ---
+  Loaded: S113_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 2 channel(s): O1, O2
+  Stage 4: 1 component(s) removed (2)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S113_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 48  48  25  25  24  23  49  49  22  26  25  23
+  Stage 6: subject completed in 93.9 s (1m 34s)
+  COMPLETED
+
+--- Subject S115 ---
+  Loaded: S115_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 3 component(s) removed (2, 9, 16)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S115_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 32  35  21  18  15  20  31  38  16  16  19  16
+  Stage 6: subject completed in 68.0 s (1m 08s)
+  COMPLETED
+
+--- Subject S117 ---
+  Loaded: S117_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 2 component(s) removed (5, 11)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S117_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 49  50  25  24  25  25  49  48  23  26  26  24
+  Stage 6: subject completed in 86.5 s (1m 26s)
+  COMPLETED
+
+--- Subject S119 ---
+  Loaded: S119_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 2 channel(s): T7, T8
+  Stage 4: 2 component(s) removed (3, 11)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S119_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 47  50  24  22  25  23  48  46  22  25  26  24
+  Stage 6: subject completed in 81.4 s (1m 21s)
+  COMPLETED
+
+--- Subject S121 ---
+  Loaded: S121_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 2 component(s) removed (1, 3)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S121_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 50  50  24  25  25  24  50  50  24  26  26  24
+  Stage 6: subject completed in 82.6 s (1m 23s)
+  COMPLETED
+
+--- Subject S123 ---
+  Loaded: S123_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 1 channel(s): T8
+  Stage 4: 2 component(s) removed (1, 5)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S123_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 39  47  18  23  21  22  42  42  23  16  25  22
+  Stage 6: subject completed in 89.5 s (1m 29s)
+  COMPLETED
+
+--- Subject S125 ---
+  Loaded: S125_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 3 component(s) removed (4, 8, 9)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S125_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 45  47  24  25  23  23  45  45  23  22  24  23
+  Stage 6: subject completed in 90.1 s (1m 30s)
+  COMPLETED
+
+--- Subject S127 ---
+  Loaded: S127_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 3 component(s) removed (3, 6, 21)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S127_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 49  49  25  24  25  25  50  50  23  26  25  24
+  Stage 6: subject completed in 92.6 s (1m 33s)
+  COMPLETED
+
+--- Subject S129 ---
+  Loaded: S129_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 1 component(s) removed (2)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S129_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 50  50  25  25  25  25  50  51  24  26  26  24
+  Stage 6: subject completed in 120.4 s (2m 00s)
+  COMPLETED
+
+--- Subject S131 ---
+  Loaded: S131_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 2 component(s) removed (2, 3)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S131_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 26  31  14  16  16  14  23  23  15  11  18  13
+  Stage 6: subject completed in 119.4 s (1m 59s)
+  COMPLETED
+
+--- Subject S135 ---
+  Loaded: S135_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 1 channel(s): T7
+  Stage 4: 2 component(s) removed (1, 3)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S135_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 51  51  25  26  25  25  48  49  25  26  27  24
+  Stage 6: subject completed in 170.2 s (2m 50s)
+  COMPLETED
+
+--- Subject S138 ---
+  Loaded: S138_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 3 component(s) removed (2, 3, 4)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S138_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 50  49  25  24  24  20  47  49  24  26  25  24
+  Stage 6: subject completed in 91.0 s (1m 31s)
+  COMPLETED
+
+--- Subject S140 ---
+  Loaded: S140_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 3 component(s) removed (2, 3, 5)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S140_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 48  50  25  24  25  25  50  50  22  26  26  24
+  Stage 6: subject completed in 125.8 s (2m 06s)
+  COMPLETED
+
+--- Subject S142 ---
+  Loaded: S142_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 1 channel(s): CP1
+  Stage 4: 1 component(s) removed (2)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S142_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 43  47  20  25  25  25  42  47  17  23  21  23
+  Stage 6: subject completed in 289.9 s (4m 50s)
+  COMPLETED
+
+--- Subject S144 ---
+  Loaded: S144_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 2 component(s) removed (1, 2)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S144_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 48  49  22  25  26  26  49  50  24  24  24  25
+  Stage 6: subject completed in 112.8 s (1m 53s)
+  COMPLETED
+
+--- Subject S147 ---
+  Loaded: S147_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 1 component(s) removed (7)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S147_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 50  49  25  25  25  25  50  48  24  26  25  24
+  Stage 6: subject completed in 108.3 s (1m 48s)
+  COMPLETED
+
+--- Subject S153 ---
+  Loaded: S153_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 1 channel(s): T7
+  Stage 4: 3 component(s) removed (1, 5, 9)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S153_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 48  49  25  24  24  24  49  49  23  25  25  24
+  Stage 6: subject completed in 106.6 s (1m 47s)
+  COMPLETED
+
+--- Subject S155 ---
+  Loaded: S155_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 2 component(s) removed (1, 25)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S155_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 50  50  25  23  24  25  50  47  24  26  26  24
+  Stage 6: subject completed in 112.1 s (1m 52s)
+  COMPLETED
+
+--- Subject S159 ---
+  Loaded: S159_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 3 component(s) removed (1, 2, 7)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S159_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 49  50  25  25  25  25  50  47  24  25  26  24
+  Stage 6: subject completed in 99.4 s (1m 39s)
+  COMPLETED
+
+--- Subject S163 ---
+  Loaded: S163_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 1 component(s) removed (1)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S163_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 48  50  24  25  25  25  50  49  22  26  26  24
+  Stage 6: subject completed in 114.7 s (1m 55s)
+  COMPLETED
+
+--- Subject S167 ---
+  Loaded: S167_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 2 component(s) removed (2, 6)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S167_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 50  49  25  25  25  25  49  48  24  26  26  23
+  Stage 6: subject completed in 111.8 s (1m 52s)
+  COMPLETED
+
+--- Subject S170 ---
+  Loaded: S170_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 6 component(s) removed (1, 2, 4, 6, 9, 12)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S170_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 46  44  19  21  23  25  44  47  23  23  22  22
+  Stage 6: subject completed in 116.6 s (1m 57s)
+  COMPLETED
+
+--- Subject S171 ---
+  Loaded: S171_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 1 component(s) removed (4)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S171_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 48  50  24  25  25  25  49  49  24  24  26  24
+  Stage 6: subject completed in 133.8 s (2m 14s)
+  COMPLETED
+
+--- Subject S173 ---
+  Loaded: S173_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 3 component(s) removed (2, 5, 23)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S173_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 49  50  25  25  23  25  50  50  24  25  26  24
+  Stage 6: subject completed in 122.0 s (2m 02s)
+  COMPLETED
+
+--- Subject S175 ---
+  Loaded: S175_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 0 component(s) removed (none)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S175_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 50  49  25  25  25  25  49  48  24  26  26  23
+  Stage 6: subject completed in 108.7 s (1m 49s)
+  COMPLETED
+
+--- Subject S177 ---
+  Loaded: S177_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 2 component(s) removed (2, 8)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S177_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 2b done: bins assigned (FS)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 48  49  23  23  25  24  49  48  24  24  26  23
+  Stage 6: subject completed in 122.2 s (2m 02s)
+  COMPLETED

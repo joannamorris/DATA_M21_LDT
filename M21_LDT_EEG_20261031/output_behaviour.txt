@@ -1,0 +1,130 @@
+Loading required package: Matrix
+
+Attaching package: 'lmerTest'
+
+The following object is masked from 'package:lme4':
+
+    lmer
+
+The following object is masked from 'package:stats':
+
+    step
+
+Participants: 57 
+Nonword items: 100  Word items: 99 
+Scored trials: nonwords 5533  words 5568 
+
+Nonwords: accuracy (proportion) and correct RT (ms), mean of participant means:
+  Complexity     acc.M    acc.SD      rt.M     rt.SD
+1    Complex 0.6313610 0.1645589 728.54967  75.87249
+2     Simple 0.8362151 0.1412388 699.04718  72.83081
+
+Words by family size group (201 small, 202 large):
+     FS      acc.M     acc.SD      rt.M     rt.SD
+1 large 0.88761398 0.06715852 600.97644  63.65490
+2 small 0.89132595 0.07863743 622.92045  60.39761
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 + cpx | SubjID) + (1 | ItemID) 
+
+Random effects used: (1 + cpx || SubjID) + (1 | ItemID) 
+
+
+====================  Nonwords accuracy (logistic)  ====================
+ Groups   Name        Std.Dev.
+ ItemID   (Intercept) 0.628429
+ SubjID   cpx         0.050125
+ SubjID.1 (Intercept) 0.711046
+            Estimate Std. Error  z value  Pr(>|z|)
+(Intercept)  1.31800    0.12000  10.9900 4.329e-28
+cpx         -1.33600    0.07496 -17.8300 4.329e-71
+zLogBF      -0.27670    0.09354  -2.9580 3.092e-03
+zLogFS       0.02753    0.09136   0.3013 7.632e-01
+OS           0.29000    0.10770   2.6930 7.078e-03
+LP           0.27760    0.08134   3.4130 6.420e-04
+
+Accuracy by complexity (probability scale):
+  cpx  prob     SE  df asymp.LCL asymp.UCL
+ -0.5 0.879 0.0137 Inf     0.850     0.904
+  0.5 0.657 0.0274 Inf     0.601     0.709
+
+Confidence level used: 0.95 
+Intervals are back-transformed from the logit scale 
+
+Random effects used: (1 + cpx | SubjID) + (1 + cpx | ItemID) 
+
+
+====================  Nonwords log RT (correct trials)  ====================
+ Groups   Name        Std.Dev. Corr 
+ ItemID   (Intercept) 0.038041      
+          cpx         0.056418 0.005
+ SubjID   (Intercept) 0.104695      
+          cpx         0.022879 0.066
+ Residual             0.143548      
+            Estimate Std. Error     df t value   Pr(>|t|)
+(Intercept)  6.56000   0.014590  62.01 449.700 1.149e-110
+cpx          0.04937   0.008012  81.85   6.163  2.560e-08
+zLogBF       0.02258   0.005905 100.60   3.824  2.281e-04
+zLogFS      -0.01057   0.005805  96.60  -1.821  7.171e-02
+OS          -0.02520   0.015010  54.14  -1.679  9.895e-02
+LP          -0.01425   0.011380  54.38  -1.252  2.160e-01
+
+RT by complexity (ms, back-transformed):
+  cpx emmean   SE   df lower.CL upper.CL t.ratio p.value
+ -0.5    687 10.3 65.5      666      707  66.527  <.0001
+  0.5    721 11.1 65.1      699      744  65.123  <.0001
+
+Degrees-of-freedom method: inherited from satterthwaite when re-gridding 
+Confidence level used: 0.95 
+Complex / simple RT ratio:
+ contrast           ratio      SE   df lower.CL upper.CL null t.ratio p.value
+ cpx0.5 / (cpx-0.5)  1.05 0.00842 81.8     1.03     1.07    1   6.163  <.0001
+
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+Intervals are back-transformed from the log scale 
+Tests are performed on the log scale 
+
+Random effects used: (1 | SubjID) + (1 | WordID) 
+
+
+====================  Words accuracy (logistic)  ====================
+ Groups Name        Std.Dev.
+ WordID (Intercept) 0.72469 
+ SubjID (Intercept) 0.60953 
+                  Estimate Std. Error z value  Pr(>|z|)
+(Intercept)        2.49300    0.12280 20.3100 1.143e-91
+z_logFS            0.13130    0.08993  1.4600 1.443e-01
+z_logBF            0.23520    0.09713  2.4210 1.547e-02
+z_Log10WF          0.29970    0.09660  3.1030 1.917e-03
+z_WholeFormLength -0.05318    0.08977 -0.5924 5.536e-01
+OS                 0.11720    0.10140  1.1560 2.477e-01
+LP                 0.10580    0.07521  1.4060 1.597e-01
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 + z_logFS + z_logBF | SubjID) + (1 | WordID) 
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 + z_logFS + z_logBF || SubjID) + (1 | WordID) 
+
+Random effects used: (1 | SubjID) + (1 | WordID) 
+
+
+====================  Words log RT (correct trials)  ====================
+ Groups   Name        Std.Dev.
+ WordID   (Intercept) 0.037020
+ SubjID   (Intercept) 0.099651
+ Residual             0.168146
+                   Estimate Std. Error    df  t value   Pr(>|t|)
+(Intercept)        6.399000   0.013930 62.06 459.5000 2.592e-111
+z_logFS           -0.013820   0.004514 89.84  -3.0610  2.911e-03
+z_logBF           -0.013150   0.005138 96.85  -2.5600  1.202e-02
+z_Log10WF         -0.019820   0.004928 91.06  -4.0220  1.189e-04
+z_WholeFormLength  0.014800   0.004580 91.74   3.2320  1.706e-03
+OS                -0.021250   0.014320 53.76  -1.4840  1.436e-01
+LP                -0.005191   0.010850 53.88  -0.4782  6.344e-01
+
+
+==================== Split-half reliability (behaviour) ====================
+                                            median  lower upper
+Nonwords: complexity effect on RT (correct)  0.326  0.013 0.550
+Nonwords: complexity effect on accuracy      0.099 -0.337 0.413
+Words: family size effect on RT (correct)    0.193 -0.160 0.463
+Words: family size effect on accuracy        0.190 -0.215 0.476

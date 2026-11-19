@@ -1,0 +1,14 @@
+Pipeline log — M21_LDT
+Run: 31-Oct-2026 18:51:00
+Location: hc   Channels: 32   Srate: 200 Hz
+Epoch: [-200 1000] ms   ARJ threshold: +/-100 uV   ARJ window: [-100 600] ms
+
+force_rerun = 0
+MATLAB 25.1.0.2943329 (R2025a)
+runica in use: /Users/jmorris/Documents/MATLAB/eeglab2026.1.0/functions/sigprocfunc/runica.m
+
+
+--- Subject S101 ---
+  Loaded: S101_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed

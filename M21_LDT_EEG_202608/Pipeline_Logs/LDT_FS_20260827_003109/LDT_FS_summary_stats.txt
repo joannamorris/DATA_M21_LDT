@@ -1,0 +1,80 @@
+Summary statistics for Methods section
+Study:    Task: LDT
+Run: 27-Aug-2026 02:09:08
+
+--- Per-subject processing time ---
+  N subjects: 35
+  Mean:  1m 38s
+  SD:    27.0 s
+  Range: 0m 54s - 2m 56s
+
+--- Total pipeline runtime ---
+  57m 03s (57.1 minutes)
+
+--- ICA components removed ---
+  N subjects: 35
+  Mean:  1.9
+  SD:    1.0
+  Range: 0 - 4
+
+--- Accepted trials per condition ---
+  Critical word small family
+    N:     35
+    Mean:  47.2
+    SD:    6.1
+    Range: 19 - 50
+  Critical word large family
+    N:     35
+    Mean:  47.2
+    SD:    5.2
+    Range: 25 - 50
+  nonword small complex 
+    N:     35
+    Mean:  24.0
+    SD:    2.5
+    Range: 11 - 25
+  nonword large complex 
+    N:     35
+    Mean:  23.5
+    SD:    3.0
+    Range: 13 - 25
+  nonword small simple
+    N:     35
+    Mean:  24.0
+    SD:    2.0
+    Range: 16 - 25
+  nonword large simple
+    N:     35
+    Mean:  23.4
+    SD:    2.8
+    Range: 11 - 25
+  filler word 
+    N:     35
+    Mean:  47.1
+    SD:    5.3
+    Range: 23 - 50
+  filler nonword
+    N:     35
+    Mean:  47.3
+    SD:    4.8
+    Range: 28 - 50
+  Critical word small FS High BF (residualized) 
+    N:     35
+    Mean:  22.6
+    SD:    3.1
+    Range: 9 - 24
+  Critical word small FS Low BF (residualized)
+    N:     35
+    Mean:  24.6
+    SD:    3.1
+    Range: 10 - 26
+  Critical word large FS High BF (residualized) 
+    N:     35
+    Mean:  24.4
+    SD:    2.8
+    Range: 14 - 26
+  Critical word large FS Low BF (residualized)
+    N:     35
+    Mean:  22.8
+    SD:    2.6
+    Range: 11 - 24

@@ -1,0 +1,563 @@
+Pipeline log — LDT
+Run: 31-Oct-2026 19:10:57
+Location: hc   Channels: 32   Srate: 200 Hz
+Epoch: [-200 1000] ms   ARJ threshold: +/-100 uV   ARJ window: [-100 600] ms
+
+force_rerun = 0
+MATLAB 25.1.0.2943329 (R2025a)
+runica in use: /Users/jmorris/Documents/MATLAB/eeglab2026.1.0/functions/sigprocfunc/runica.m
+
+
+--- Subject S101 ---
+  Checkpoint found: S101_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1
+  Stage 7: subject completed in 8.2 s (0m 08s)
+  COMPLETED
+
+--- Subject S104 ---
+  Loaded: S104_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 1 channel(s): T8
+  Stage 4: 2 component(s) removed (4, 5)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S104_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 104.9 s (1m 45s)
+  COMPLETED
+
+--- Subject S106 ---
+  Loaded: S106_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 3 channel(s): O1, O2, P8
+  Stage 4: 1 component(s) removed (1)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S106_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 193 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 193 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0
+  Stage 7: subject completed in 81.2 s (1m 21s)
+  COMPLETED
+
+--- Subject S108 ---
+  Loaded: S108_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 1 channel(s): T8
+  Stage 4: 2 component(s) removed (1, 7)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S108_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  0  1  1  1  1  1  1  0  1  1  1  0  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  0  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  0  1  1  1  1  1  0  1  1  1  1
+  Stage 7: subject completed in 90.8 s (1m 31s)
+  COMPLETED
+
+--- Subject S110 ---
+  Loaded: S110_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 1 channel(s): O1
+  Stage 4: 2 component(s) removed (1, 4)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S110_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  0  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1
+  Stage 7: subject completed in 94.0 s (1m 34s)
+  COMPLETED
+
+--- Subject S112 ---
+  Loaded: S112_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 2 component(s) removed (1, 5)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S112_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 94.4 s (1m 34s)
+  COMPLETED
+
+--- Subject S114 ---
+  Loaded: S114_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 2 component(s) removed (1, 2)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S114_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 92.7 s (1m 33s)
+  COMPLETED
+
+--- Subject S116 ---
+  Loaded: S116_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 4 component(s) removed (1, 3, 4, 7)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S116_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 87.7 s (1m 28s)
+  COMPLETED
+
+--- Subject S118 ---
+  Loaded: S118_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 2 component(s) removed (4, 5)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S118_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 86.8 s (1m 27s)
+  COMPLETED
+
+--- Subject S120 ---
+  Loaded: S120_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 3 component(s) removed (1, 2, 9)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S120_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 81.9 s (1m 22s)
+  COMPLETED
+
+--- Subject S122 ---
+  Loaded: S122_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 1 component(s) removed (2)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S122_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 100.6 s (1m 41s)
+  COMPLETED
+
+--- Subject S124 ---
+  Loaded: S124_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 0 component(s) removed (none)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S124_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  0  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1
+  Stage 7: subject completed in 96.3 s (1m 36s)
+  COMPLETED
+
+--- Subject S126 ---
+  Loaded: S126_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 2 channel(s): T7, T8
+  Stage 4: 1 component(s) removed (1)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S126_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 85.4 s (1m 25s)
+  COMPLETED
+
+--- Subject S128 ---
+  Loaded: S128_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 1 channel(s): O1
+  Stage 4: 1 component(s) removed (11)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S128_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  0  1  1  1  0  0  1  0  1  1  1  1  0  1  1  1  1  1  1  1  0  0  1  1  1  1  1  1  1  1  1  0  1  1  1  0  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  0  1  1  0  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  0  1  1  0  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  0  1  0  0  0  1  1  0  1  1  1  1  0  1  1  1  1  0  1  1  1  1  1  0  1  1  1  1  1  0  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  0  0  1  1  0  1  1  1  0  1  1  1
+  Stage 7: subject completed in 98.0 s (1m 38s)
+  COMPLETED
+
+--- Subject S130 ---
+  Loaded: S130_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 2 component(s) removed (1, 8)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S130_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 96.6 s (1m 37s)
+  COMPLETED
+
+--- Subject S132 ---
+  Loaded: S132_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 0 component(s) removed (none)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S132_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  0  1  0  1  1  0  1  0  0  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  0  1  1  1  1  1  1  1  1  0  1  0  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  0  1  1  1  0  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  0  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  0  1  1  1  1  0  1  1  1  1  1  0  0  1  1  1  1  1  1  0  1  1  1  1  1  1  0  1  1  1  0  0  1  1  1
+  Stage 7: subject completed in 97.9 s (1m 38s)
+  COMPLETED
+
+--- Subject S134 ---
+  Loaded: S134_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 2 component(s) removed (2, 6)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S134_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 81.7 s (1m 22s)
+  COMPLETED
+
+--- Subject S136 ---
+  Loaded: S136_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 2 channel(s): O2, T8
+  Stage 4: 2 component(s) removed (1, 19)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S136_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 79.8 s (1m 20s)
+  COMPLETED
+
+--- Subject S139 ---
+  Loaded: S139_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 3 component(s) removed (1, 2, 4)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S139_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 76.3 s (1m 16s)
+  COMPLETED
+
+--- Subject S141 ---
+  Loaded: S141_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 1 channel(s): T8
+  Stage 4: 3 component(s) removed (1, 8, 20)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S141_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 79.7 s (1m 20s)
+  COMPLETED
+
+--- Subject S143 ---
+  Loaded: S143_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 1 channel(s): T8
+  Stage 4: 3 component(s) removed (1, 3, 9)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S143_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 81.7 s (1m 22s)
+  COMPLETED
+
+--- Subject S145 ---
+  Loaded: S145_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 0 component(s) removed (none)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S145_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  0  1  1  1  1  1  0  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  0  1  1  0  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  0  1  0  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 80.7 s (1m 21s)
+  COMPLETED
+
+--- Subject S146 ---
+  Loaded: S146_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 2 component(s) removed (2, 4)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S146_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 100.5 s (1m 40s)
+  COMPLETED
+
+--- Subject S150 ---
+  Loaded: S150_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 1 channel(s): T8
+  Stage 4: 2 component(s) removed (1, 4)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S150_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 83.0 s (1m 23s)
+  COMPLETED
+
+--- Subject S152 ---
+  Loaded: S152_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 2 component(s) removed (1, 10)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S152_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1
+  Stage 7: subject completed in 85.8 s (1m 26s)
+  COMPLETED
+
+--- Subject S154 ---
+  Loaded: S154_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 1 channel(s): FP1
+  Stage 4: 3 component(s) removed (1, 3, 5)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S154_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 98 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 98 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  0  0  1  1  0  1  0  1  0  0  1  0  0  1  0  1  1  1  1  0  0  0  0  0  0  0  1  1  0  1  0  0  0  1  1  0  1  1  1  0  1  0  1  0  1  0  1  1  0  1  1  0  1  0  1  1  1  1  1  0  1  1  0  1  1  0  1  1  0  1  0  0  1  0  1  0  0  0  1  0  0  0  1  0  0  1  1  1  1  1  0  0  0  1  1  0  0  1  0  0  1  0  0  0  0  1  0  1  0  0  0  0  0  0  1  1  0  0  0  1  0  1  1  0  1  0  1  0  0  1  1  0  0  0  1  1  0  0  0  0  0  1  1  1  0  1  0  1  1  1  1  0  0  1  1  1  0  0  1  0  1  1  1  1  1  0  1  0  1  0  1  1  1  0  0  1  0  1  0  1  0  0  0  1  0  0  0  0  1  1  1  0  0  0  0  0  1  0
+  Stage 7: subject completed in 55.3 s (0m 55s)
+  COMPLETED
+
+--- Subject S156 ---
+  Loaded: S156_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 1 component(s) removed (2)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S156_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 90.4 s (1m 30s)
+  COMPLETED
+
+--- Subject S158 ---
+  Loaded: S158_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 1 channel(s): T7
+  Stage 4: 1 component(s) removed (5)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S158_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  0  1  1  1  1  1  0  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  0  1  1  1  0  1  0  0  0  0  0  1  1  0  1  0  0  0  1  0  1  0  0  1  1  1  1  1  0  1  1  0  1  1  1  1  1  1  1  1  1  1  0  1  0  1  0  1  0  1  1  1  1  1  0  0  0  1  0  1  1  1  1  1  1  1  0  0  1  0  1  0  0  1  1  0  1  0  0  1  0  1  1  1  1  1  0  1  0  0  1  0  1  1  0  1  0  0  1  1  1  1  1  1  0  1  1  1  1  1  1  0  1  0  1  1  1  1  0  1  1  1  1  1  1  0  1  1  1  0  1  0  1  1  0  0  1  1  1  1  1  1  1  1  1  1  1  1  0  1  0  1  1  0  0  1  0  1  0  1  1  1  1  1  1  1  1  0
+  Stage 7: subject completed in 77.2 s (1m 17s)
+  COMPLETED
+
+--- Subject S160 ---
+  Loaded: S160_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 2 component(s) removed (1, 3)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S160_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 93.8 s (1m 34s)
+  COMPLETED
+
+--- Subject S162 ---
+  Loaded: S162_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 1 channel(s): T7
+  Stage 4: 1 component(s) removed (2)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S162_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 82.6 s (1m 23s)
+  COMPLETED
+
+--- Subject S168 ---
+  Loaded: S168_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 1 channel(s): T8
+  Stage 4: 3 component(s) removed (1, 2, 3)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S168_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 82.1 s (1m 22s)
+  COMPLETED
+
+--- Subject S169 ---
+  Loaded: S169_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 3 component(s) removed (2, 3, 9)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S169_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  0  0  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  0  1  1  1  1  0  1  1  1
+  Stage 7: subject completed in 90.1 s (1m 30s)
+  COMPLETED
+
+--- Subject S172 ---
+  Loaded: S172_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 2 component(s) removed (1, 5)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S172_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 80.8 s (1m 21s)
+  COMPLETED
+
+--- Subject S174 ---
+  Loaded: S174_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: removed 1 channel(s): FC6
+  Stage 4: 1 component(s) removed (3)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S174_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  Stage 7: subject completed in 79.5 s (1m 19s)
+  COMPLETED
+
+--- Subject S176 ---
+  Loaded: S176_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 2 component(s) removed (1, 9)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S176_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6: 199 events assigned to bins (199 bins defined).
+  Stage 6 done: bins assigned
+  Stage 7: 199 epochs created
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 7: accepted trials per bin: 1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  0  1  0  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  0  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  1  1  1  1  1  1  1  1  1  0  1  1  1  0  1  1  1  1  1  0  1  1  1  0  1  1  1  1  0  0  0  0  0  1  1  1  1  1  1  1  1  1  1  1  1  0  1  0  1  1  1  1  0  1  1  1  1  0
+  Stage 7: subject completed in 89.9 s (1m 30s)
+  COMPLETED

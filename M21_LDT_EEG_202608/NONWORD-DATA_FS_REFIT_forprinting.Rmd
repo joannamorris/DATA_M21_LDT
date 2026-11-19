@@ -1,0 +1,487 @@
+---
+title: "M21 NONWORD DATA WITH MORPHOLOGICAL FAMILY SIZE COVARIATE"
+author: "Joanna Morris"
+date: "`r Sys.Date()`"
+output: 
+  bookdown::pdf_document2:
+    latex_engine: xelatex
+    toc: true
+    toc_depth: 4
+    number_sections: true
+header-includes:
+  - \setcounter{secnumdepth}{3}
+editor_options: 
+  chunk_output_type: inline
+---
+
+\scriptsize
+
+# Setup {-}
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      error = FALSE,
+                      comment = "||",
+                      fig.height = 4,
+                      fig.width = 7)
+options(width = 150)
+```
+
+## Load libraries {-}
+
+```{r load_libraries, echo=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(ggeffects)
+library(lme4)
+library(afex)
+library(gridExtra)
+library(MuMIn)
+library(pbkrtest)
+library(effectsize)
+library(performance)
+library(cowplot)  # for use with `plot_grid(x,x,ncol = x)` function
+library(e1071) # for use with `skewness()` function
+library(lmerTest)
+library(emmeans)
+# emm_options(lmer.df = "satterthwaite")
+```
+
+## Set emmeans options {-}
+
+```{r emmeans_options}
+emm_options(lmer.df = "satterthwaite", lmerTest.limit = 20000)
+```
+
+# Functions {-}
+
+
+```{r echo=FALSE}
+## Define  interaction table functions {-}
+
+compact_emm_table <- function(emm_object,
+                              by_var,
+                              condition_prefix = NULL,
+                              reverse = FALSE,      # TRUE = later level minus earlier (revpairwise)
+                              adjust = NULL,        # NULL = emmeans default; e.g. "none", "tukey", "holm"
+                              digits_est = 2,
+                              digits_df = 1,
+                              digits_p = 3,
+                              digits_by = 2) {      # decimals shown for numeric by-values (e.g. OS, LP)
+
+  emm_df <- summary(emm_object) |> as.data.frame()
+
+  # by_var can be one bare name (by_var = OS) or several (by_var = c(family_size, OS))
+  by_names <- names(tidyselect::eval_select(rlang::enquo(by_var), emm_df))
+
+  contrast_df <- if (is.null(adjust)) {
+    pairs(emm_object, reverse = reverse)
+  } else {
+    pairs(emm_object, reverse = reverse, adjust = adjust)
+  }
+  contrast_df <- contrast_df |> summary() |> as.data.frame()
+
+  # Exclude BOTH Satterthwaite/KR-style and asymptotic-style CI/df column names
+  non_focal_cols <- c(by_names, "emmean", "SE", "df",
+                      "lower.CL", "upper.CL",
+                      "asymp.LCL", "asymp.UCL")
+  focal_vars <- setdiff(names(emm_df), non_focal_cols)
+
+  # Detect whichever CI column names are actually present
+  lcl_col <- intersect(c("lower.CL", "asymp.LCL"), names(emm_df))
+  ucl_col <- intersect(c("upper.CL", "asymp.UCL"), names(emm_df))
+
+  # Condition label: a bare value (single by-variable, no prefix, as before),
+  # "prefix = value" (single by-variable with prefix), or
+  # "name = value, name = value" (several by-variables)
+  fmt_by <- function(x) {
+    if (is.numeric(x)) formatC(x, format = "f", digits = digits_by) else as.character(x)
+  }
+  make_condition <- function(df) {
+    if (length(by_names) == 1) {
+      v <- fmt_by(df[[by_names]])
+      if (is.null(condition_prefix)) v else paste(condition_prefix, "=", v)
+    } else {
+      parts <- lapply(by_names, function(n) paste(n, "=", fmt_by(df[[n]])))
+      do.call(paste, c(parts, sep = ", "))
+    }
+  }
+
+  emm_part <- emm_df |>
+    rowwise() |>
+    mutate(Comparison = paste(c_across(all_of(focal_vars)), collapse = " ")) |>
+    ungroup() |>
+    mutate(Condition = make_condition(pick(everything()))) |>
+    transmute(
+      across(all_of(by_names)),          # kept temporarily for sorting
+      Comparison,
+      Condition,
+      Estimate = emmean,
+      SE,
+      df,
+      lower.CL = if (length(lcl_col) > 0) .data[[lcl_col]] else NA_real_,
+      upper.CL = if (length(ucl_col) > 0) .data[[ucl_col]] else NA_real_,
+      t.ratio = NA_real_,
+      p.value = NA_real_
+    )
+
+  # Detect whichever test-statistic column name is present (t.ratio vs z.ratio)
+  ratio_col <- intersect(c("t.ratio", "z.ratio"), names(contrast_df))
+
+  contrast_part <- contrast_df |>
+    mutate(Comparison = as.character(contrast),
+           Condition  = make_condition(pick(everything()))) |>
+    transmute(
+      across(all_of(by_names)),
+      Comparison,
+      Condition,
+      Estimate = estimate,
+      SE,
+      df,
+      lower.CL = NA_real_,
+      upper.CL = NA_real_,
+      t.ratio = if (length(ratio_col) > 0) .data[[ratio_col]] else NA_real_,
+      p.value
+    )
+
+  # Sort by the by-variables' actual values (numeric order for OS/LP, level
+  # order for factors), not by the text label, then drop them
+  bind_rows(emm_part, contrast_part) |>
+    arrange(across(all_of(by_names)), Comparison) |>
+    select(-all_of(by_names)) |>
+    mutate(
+      Estimate = round(Estimate, digits_est),
+      SE       = round(SE, digits_est),
+      df       = round(df, digits_df),
+      lower.CL = round(lower.CL, digits_est),
+      upper.CL = round(upper.CL, digits_est),
+      t.ratio  = round(t.ratio, digits_est),
+      p.value  = round(p.value, digits_p)
+    )
+}
+
+
+```
+
+
+```{r }
+# =============================================================================
+# m21_ldt -- refit all nonword analyses after applying the LDT exclusions
+#   Excluded: S130, S132, S133 (over age); S137, S157 (English not native);
+#             S140 (no responses to experimental nonwords)
+#   Expected samples: RT N = 62, ERP N = 60 (RT sample minus S103, S165: no EEG)
+#
+# Files needed in the working directory:
+#   rt_nwords_frq.csv, erp_fs_dmg.csv, demo_lang_vsl_pca_hc.csv,
+#   rt_data_hc_A.csv, rt_data_hc_B_fixed.csv
+#
+# All printed output is also written to refit_option1_output.txt
+# =============================================================================
+
+library(tidyverse)
+library(lme4)
+library(lmerTest)
+library(emmeans)
+library(effectsize)    # eta_squared()
+library(performance)   # r2_nakagawa()
+
+emm_options(lmer.df = "satterthwaite", lmerTest.limit = 20000)
+
+# -----------------------------------------------------------------------------
+# Switch: keep the existing PCA scores (computed on 68 participants), or rerun
+# the PCA on the analysed sample (N = 62). Run once with each setting if you
+# want to compare.
+# -----------------------------------------------------------------------------
+rerun_pca <- TRUE   # chosen version: PCA rerun on the analysed sample (N = 62)
+
+excluded <- c("S130", "S132", "S133", "S137", "S157", "S140")
+
+cat("rerun_pca =", rerun_pca, "\n")
+
+hdr <- function(x) cat("\n\n", strrep("=", 75), "\n", x, "\n", strrep("=", 75), "\n", sep = "")
+
+```
+
+file:///Users/jmorris/Git/DATA_M21_LDT/M21_LDT_EEG_202608/CSV_FILES/
+
+```{r}
+# =============================================================================
+# 1. PCA scores
+# =============================================================================
+demo <- read_csv("CSV_FILES/demo_lang_vsl_pca_hc.csv", show_col_types = FALSE) |>
+  filter(str_detect(SubjID, "^S1"))
+
+rt_ids <- read_csv("CSV_FILES/rt_nwords_frq.csv", show_col_types = FALSE) |>
+  filter(!is.na(Dim.1), !is.na(Dim.2), !SubjID %in% excluded) |>
+  distinct(SubjID) |> pull(SubjID)
+
+if (rerun_pca) {
+  library(FactoMineR)  # the original scores were computed with FactoMineR::PCA
+  pca_dat <- demo |>
+    filter(SubjID %in% rt_ids) |>
+    transmute(SubjID,
+              z_vcb = as.numeric(scale(vcb_perc)),
+              z_spl = as.numeric(scale(spl_perc)),
+              z_art = as.numeric(scale(art_diff)))
+  stopifnot(nrow(pca_dat) == 62, !anyNA(pca_dat))
+
+  hdr("PCA on the analysed sample")
+  print(cor.test(pca_dat$z_vcb, pca_dat$z_spl))
+  print(cor.test(pca_dat$z_vcb, pca_dat$z_art))
+  print(cor.test(pca_dat$z_spl, pca_dat$z_art))
+
+  pca <- PCA(pca_dat[, c("z_vcb", "z_spl", "z_art")], scale.unit = TRUE,
+             ncp = 2, graph = FALSE)
+  print(pca$eig)
+  load <- pca$var$coord               # loadings (correlations with components)
+  scr  <- pca$ind$coord
+
+  # Fix signs: vocabulary loads positively on Dim 1 (LP),
+  #            spelling loads positively on Dim 2 (OS)
+  if (load["z_vcb", 1] < 0) { load[, 1] <- -load[, 1]; scr[, 1] <- -scr[, 1] }
+  if (load["z_spl", 2] < 0) { load[, 2] <- -load[, 2]; scr[, 2] <- -scr[, 2] }
+  cat("\nLoadings after sign alignment:\n"); print(round(load, 2))
+
+  scores <- tibble(SubjID = pca_dat$SubjID, LP = scr[, 1], OS = scr[, 2])
+  cat("\nCorrelation of new with old scores (same participants):\n")
+  old <- demo |> select(SubjID, Dim.1, Dim.2) |> inner_join(scores, by = "SubjID")
+  print(round(c(LP = cor(old$Dim.1, old$LP), OS = cor(old$Dim.2, old$OS)), 3))
+} else {
+  scores <- demo |> transmute(SubjID, LP = Dim.1, OS = Dim.2) |>
+    filter(!is.na(LP), !is.na(OS))
+}
+```
+
+```{r}
+# =============================================================================
+# 2. Data
+# =============================================================================
+rt_nw <- read_csv("CSV_FILES/rt_nwords_frq.csv", show_col_types = FALSE) |>
+  filter(correct == 1, !SubjID %in% excluded,
+         !is.na(Dim.1), !is.na(Dim.2), !is.na(LogBF), !is.na(LogFS)) |>
+  select(-any_of(c("Dim.1", "Dim.2"))) |>
+  inner_join(scores, by = "SubjID") |>
+  mutate(SubjID = factor(SubjID),
+         ItemID = factor(ItemID),
+         complexity = factor(complexity, levels = c("SIMP", "COMP"),
+                             labels = c("Simple", "Complex")),
+         logRT  = log(response_time),
+         zLogBF = as.numeric(scale(LogBF)),
+         zLogFS = as.numeric(scale(LogFS)))
+contrasts(rt_nw$complexity) <- c(-0.5, 0.5)
+
+erp <- read_csv("CSV_FILES/erp_fs_dmg.csv", show_col_types = FALSE) |>
+  filter(lexical_status == "nonword", !SubjID %in% excluded,
+         !is.na(Dim.1), !is.na(Dim.2)) |>
+  select(-any_of(c("Dim.1", "Dim.2"))) |>
+  inner_join(scores, by = "SubjID") |>
+  mutate(SubjID = factor(SubjID),
+         chlabel = factor(chlabel),
+         family_size = factor(family_size, levels = c("small", "large")),
+         complexity  = factor(complexity,  levels = c("simple", "complex")),
+         time_window = factor(time_window, levels = c("N250", "N400")))
+contrasts(erp$complexity)  <- c(-0.5, 0.5)
+contrasts(erp$family_size) <- c(-0.5, 0.5)
+contrasts(erp$time_window) <- c(-0.5, 0.5)
+
+hdr("Sample checks")
+cat("RT participants: ", n_distinct(rt_nw$SubjID), " (expected 62)\n")
+cat("RT trials:       ", nrow(rt_nw), "\n")
+cat("ERP participants:", n_distinct(erp$SubjID), " (expected 60)\n")
+print(table(erp$time_window))
+cat("RT participants not in ERP: ",
+    setdiff(levels(rt_nw$SubjID), levels(erp$SubjID)), " (expected S103 S165)\n")
+stopifnot(n_distinct(rt_nw$SubjID) == 62, n_distinct(erp$SubjID) == 60)
+
+# Representative levels for follow-ups: ERP-sample mean and +/- 1 SD
+subj_erp <- erp |> distinct(SubjID, LP, OS)
+lp_vals <- mean(subj_erp$LP) + c(-1, 0, 1) * sd(subj_erp$LP)
+os_vals <- mean(subj_erp$OS) + c(-1, 0, 1) * sd(subj_erp$OS)
+cat("\nERP sample: LP mean/SD =", round(mean(subj_erp$LP), 3), round(sd(subj_erp$LP), 3),
+    "; OS mean/SD =", round(mean(subj_erp$OS), 3), round(sd(subj_erp$OS), 3), "\n")
+cat("lp_vals:", round(lp_vals, 3), "\nos_vals:", round(os_vals, 3), "\n")
+subj_rt <- rt_nw |> distinct(SubjID, LP, OS)
+cat("RT sample:  LP mean/SD =", round(mean(subj_rt$LP), 3), round(sd(subj_rt$LP), 3),
+    "; OS mean/SD =", round(mean(subj_rt$OS), 3), round(sd(subj_rt$OS), 3), "\n")
+```
+
+```{r}
+# =============================================================================
+# 3. Nonword accuracy (raw files), analysed RT sample, faulty items removed
+# =============================================================================
+hdr("Nonword accuracy and timeouts (RT sample, excluding ime/boil/trueness)")
+raw <- bind_rows(
+  read_csv("CSV_FILES/rt_data_hc_A.csv",       col_types = cols(.default = "c"), na = character()),
+  read_csv("CSV_FILES/rt_data_hc_B_fixed.csv", col_types = cols(.default = "c"), na = character())
+) |>
+  filter(str_starts(targ_type, "NW_"),
+         subject_nr %in% levels(rt_nw$SubjID),
+         !str_trim(str_to_lower(target)) %in% c("ime", "boil", "trueness")) |>
+  mutate(cx = if_else(str_ends(targ_type, "COMP"), "Complex", "Simple"))
+
+acc <- function(d) d |> summarise(n = n(),
+                                  pct_correct = round(100 * mean(correct == "1"), 1),
+                                  pct_timeout = round(100 * mean(response == "None"), 1))
+print(acc(raw)); print(raw |> group_by(cx) |> acc())
+```
+
+```{r}
+# =============================================================================
+# 4. RT model
+# =============================================================================
+hdr("RT model")
+m_rt <- lmer(logRT ~ complexity + zLogBF + zLogFS + OS + LP +
+               (1 + complexity | SubjID) + (1 | ItemID),
+             data = rt_nw, control = lmerControl(optimizer = "bobyqa"))
+print(summary(m_rt))
+print(eta_squared(m_rt, partial = TRUE))
+print(r2_nakagawa(m_rt))
+emm_rt <- summary(emmeans(m_rt, ~ complexity)) |>
+  mutate(ms = exp(emmean), lo_ms = exp(lower.CL), hi_ms = exp(upper.CL))
+print(emm_rt)
+cat("Complex - Simple (ms):", round(diff(emm_rt$ms), 1), "\n")
+```
+
+```{r}
+# =============================================================================
+# 5. Separate ERP models
+# =============================================================================
+fit_window <- function(win, reml = TRUE, f = value ~ complexity * family_size * LP * OS +
+                         (1 | SubjID) + (1 | SubjID:chlabel)) {
+  lmer(f, data = filter(erp, time_window == win), REML = reml,
+       control = lmerControl(optimizer = "bobyqa"))
+}
+
+probe <- function(m, win) {
+  hdr(paste(win, "model"))
+  print(summary(m))
+  print(eta_squared(m, partial = TRUE))
+  print(r2_nakagawa(m))
+
+  # Four-way LRT (ML fits)
+  f_full <- value ~ complexity * family_size * LP * OS + (1 | SubjID) + (1 | SubjID:chlabel)
+  f_red  <- update(f_full, . ~ . - complexity:family_size:LP:OS)
+  m_red_ml  <- fit_window(win, FALSE, f_red)
+  m_full_ml <- fit_window(win, FALSE, f_full)
+  cat("\n--", win, ": LRT for the four-way term --\n")
+  print(anova(m_red_ml, m_full_ml))
+
+  cat("\n--", win, ": complexity EMMs (averaged over family size) --\n")
+  print(emmeans(m, ~ complexity))
+
+  cat("\n--", win, ": complexity effect by family size, both dims at sample mean --\n")
+  print(emmeans(m, ~ complexity | family_size,
+                at = list(LP = lp_vals[2], OS = os_vals[2])) |>
+          contrast("revpairwise"))
+
+  cat("\n--", win, ": complexity effect averaged over FS, across OS (LP at mean) --\n")
+  print(emmeans(m, ~ complexity | OS, at = list(OS = os_vals, LP = lp_vals[2])) |>
+          contrast("revpairwise"))
+
+  cat("\n--", win, ": OS slope of complexity effect at each LP (avg over FS) --\n")
+  print(emtrends(m, ~ complexity | LP, var = "OS", at = list(LP = lp_vals)) |>
+          contrast("revpairwise"))
+
+  for (dim in c("LP", "OS")) {
+    vals  <- if (dim == "LP") lp_vals else os_vals
+    other <- if (dim == "LP") list(OS = os_vals[2]) else list(LP = lp_vals[2])
+    at    <- c(setNames(list(vals), dim), other)
+
+    cat("\n--", win, ": complexity effect by family size across", dim, "--\n")
+    print(emmeans(m, as.formula(paste("~ complexity | family_size *", dim)),
+                  at = at, nesting = NULL) |>
+            contrast("revpairwise") |> summary(infer = TRUE))
+
+    cat("\n--", win, ": cell means across", dim, "--\n")
+    print(emmeans(m, as.formula(paste("~ complexity * family_size |", dim)),
+                  at = at, nesting = NULL))
+
+    cat("\n--", win, ": Complexity x FS contrast across", dim, "--\n")
+    print(emmeans(m, as.formula(paste("~ complexity * family_size |", dim)),
+                  at = at, nesting = NULL) |>
+            contrast(interaction = "revpairwise"))
+
+    cat("\n--", win, ":", dim, "slope of complexity effect by family size --\n")
+    print(emtrends(m, ~ complexity | family_size, var = dim, at = other) |>
+            contrast("revpairwise"))
+
+    cat("\n--", win, ":", dim, "slope of the Complexity x FS contrast --\n")
+    print(emtrends(m, ~ complexity * family_size, var = dim, at = other) |>
+            contrast(interaction = "revpairwise"))
+  }
+
+  cat("\n--", win, ": Complexity x FS contrast over the LP x OS grid --\n")
+  print(emmeans(m, ~ complexity * family_size | LP * OS,
+                at = list(LP = lp_vals, OS = os_vals), nesting = NULL) |>
+          contrast(interaction = "revpairwise") |> summary(infer = TRUE))
+
+  cat("\n--", win, ": OS slope of Complexity x FS at each LP --\n")
+  print(emtrends(m, ~ complexity * family_size | LP, var = "OS",
+                 at = list(LP = lp_vals)) |> contrast(interaction = "revpairwise"))
+  cat("\n--", win, ": LP slope of Complexity x FS at each OS --\n")
+  print(emtrends(m, ~ complexity * family_size | OS, var = "LP",
+                 at = list(OS = os_vals)) |> contrast(interaction = "revpairwise"))
+}
+
+m_n250 <- fit_window("N250"); probe(m_n250, "N250")
+m_n400 <- fit_window("N400"); probe(m_n400, "N400")
+```
+
+```{r}
+# =============================================================================
+# 6. Combined model (both windows)
+# =============================================================================
+hdr("Combined N250 + N400 model")
+re <- "(1 | SubjID) + (1 | SubjID:time_window) + (1 | SubjID:chlabel) + (1 | SubjID:chlabel:time_window)"
+f_tw <- as.formula(paste("value ~ complexity * family_size * LP * OS * time_window +", re))
+
+m_tw <- lmer(f_tw, data = erp, REML = TRUE, control = lmerControl(optimizer = "bobyqa"))
+print(summary(m_tw))
+
+fixed_terms <- attr(terms(f_tw), "term.labels")
+fixed_terms <- fixed_terms[!grepl("\\|", fixed_terms)]
+has <- function(term, var) var %in% strsplit(term, ":")[[1]]
+drop_window_terms <- function(var) {
+  keep <- fixed_terms[!(sapply(fixed_terms, has, var = var) &
+                        sapply(fixed_terms, has, var = "time_window"))]
+  as.formula(paste("value ~", paste(keep, collapse = " + "), "+", re))
+}
+m_tw_ml <- lmer(f_tw, data = erp, REML = FALSE, control = lmerControl(optimizer = "bobyqa"))
+m_noOSxTW <- lmer(drop_window_terms("OS"), data = erp, REML = FALSE,
+                  control = lmerControl(optimizer = "bobyqa"))
+m_noLPxTW <- lmer(drop_window_terms("LP"), data = erp, REML = FALSE,
+                  control = lmerControl(optimizer = "bobyqa"))
+cat("\n-- Omnibus: OS x window terms (8 df) --\n"); print(anova(m_noOSxTW, m_tw_ml))
+cat("\n-- Omnibus: LP x window terms (8 df) --\n"); print(anova(m_noLPxTW, m_tw_ml))
+
+lp_m <- lp_vals[2]; os_m <- os_vals[2]
+cat("\n-- OS slope of complexity effect, by family size and window (LP at mean) --\n")
+print(emtrends(m_tw, ~ complexity | family_size * time_window, var = "OS",
+               at = list(LP = lp_m)) |> contrast("revpairwise"))
+print(emtrends(m_tw, ~ complexity * time_window | family_size, var = "OS",
+               at = list(LP = lp_m)) |> contrast(interaction = "revpairwise"))
+
+cat("\n-- LP slope of complexity effect, by window (OS at mean, avg over FS) --\n")
+print(emtrends(m_tw, ~ complexity | time_window, var = "LP",
+               at = list(OS = os_m)) |> contrast("revpairwise"))
+print(emtrends(m_tw, ~ complexity * time_window, var = "LP",
+               at = list(OS = os_m)) |> contrast(interaction = "revpairwise"))
+
+cat("\n-- LP slope of family size effect, by window (OS at mean, avg over complexity) --\n")
+print(emtrends(m_tw, ~ family_size | time_window, var = "LP",
+               at = list(OS = os_m)) |> contrast("revpairwise"))
+print(emtrends(m_tw, ~ family_size * time_window, var = "LP",
+               at = list(OS = os_m)) |> contrast(interaction = "revpairwise"))
+
+cat("\n-- LP slope of complexity effect, by family size and window (OS at mean) --\n")
+print(emtrends(m_tw, ~ complexity | family_size * time_window, var = "LP",
+               at = list(OS = os_m)) |> contrast("revpairwise"))
+print(emtrends(m_tw, ~ complexity * time_window | family_size, var = "LP",
+               at = list(OS = os_m)) |> contrast(interaction = "revpairwise"))
+
+
+saveRDS(list(m_rt = m_rt, m_n250 = m_n250, m_n400 = m_n400, m_tw = m_tw),
+        sprintf("refit_option1_models_pca%s.rds", if (rerun_pca) "62" else "68"))
+
+```
+

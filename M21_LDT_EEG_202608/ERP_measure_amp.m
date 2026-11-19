@@ -51,12 +51,12 @@ dims     = [1 72];
 
 definput = { ...
     '', ...
-    '', ...
+    'LDT', ...
     'hc', ...
-    'subjectlist.txt', ...
-    '', ...
-    '1', ...
-    '[300 500]', ...
+    'hc_subjlist_AB.txt', ...
+    'BF_binop', ...
+    '[9:12, 17:20]', ...
+    '[200 300]', ...
     '[-200 0]'};
 
 my_input = inputdlg(prompt, dlgtitle, dims, definput);
@@ -179,6 +179,30 @@ output_fname = fullfile( ...
         fmt(baseline(1)), ...
         fmt(baseline(2))));
 
+%% -------------------------------------------------------------------------
+%  Avoid overwriting a pre-existing output file
+%
+%  output_fname is built only from the measurement/baseline windows, so
+%  re-running with a different subject list (but the same windows) would
+%  otherwise silently overwrite a previous run's output. If a file
+%  already exists at that path, append a timestamp to keep this run's
+%  output separate.
+% -------------------------------------------------------------------------
+
+if isfile(output_fname)
+
+    [out_dir, out_base, out_ext] = fileparts(output_fname);
+    run_timestamp = datestr(now, 'yyyymmdd_HHMMSS'); %#ok<TNOW1,DATST>
+
+    original_fname = output_fname;
+    output_fname = fullfile(out_dir, ...
+        sprintf('%s_%s%s', out_base, run_timestamp, out_ext));
+
+    fprintf(['\nNote: output file already exists, so this run will not ' ...
+        'overwrite it:\n  %s\nWriting this run to:\n  %s\n'], ...
+        original_fname, output_fname);
+end
+
 erp_list_fname = fullfile(DIR, 'erp_file_list.txt');
 
 fprintf('\n========================================\n');
@@ -272,4 +296,87 @@ end
 
 fprintf('\nAmplitude measurement complete.\n');
 fprintf('ERP files included: %d\n', length(valid_files));
-fprintf('Saved: %s\n', output_fname);
+
+%% -------------------------------------------------------------------------
+%  Locate the file pop_geterpvalues actually wrote
+%
+%  pop_geterpvalues silently forces a .txt extension on 'long' format
+%  output even when 'Filename' is given with a .csv extension, so the
+%  file actually written may sit at the .txt sibling path rather than
+%  output_fname itself. Detect this and rename it to the intended .csv
+%  path before doing anything else.
+% -------------------------------------------------------------------------
+
+[out_dir, out_base, ~] = fileparts(output_fname);
+alt_txt_fname = fullfile(out_dir, [out_base '.txt']);
+
+if isfile(output_fname)
+    % pop_geterpvalues respected the .csv filename as given
+
+elseif isfile(alt_txt_fname)
+
+    fprintf(['\nNote: pop_geterpvalues wrote output as .txt; ' ...
+        'renaming to .csv:\n  %s\n  -> %s\n'], alt_txt_fname, output_fname);
+
+    movefile(alt_txt_fname, output_fname);
+
+else
+    error(['Could not locate the file written by pop_geterpvalues.\n' ...
+        'Checked:\n  %s\n  %s'], output_fname, alt_txt_fname);
+end
+
+%% -------------------------------------------------------------------------
+%  Clean output: enforce true comma-separated CSV, strip leading/trailing
+%  whitespace from every field
+%
+%  pop_geterpvalues writes 'long' format output as a whitespace/tab-padded
+%  text file, so this step re-parses the raw output and rewrites it as a
+%  proper comma-delimited file with no leading or trailing spaces around
+%  any value.
+% -------------------------------------------------------------------------
+
+fprintf('\nCleaning output formatting (CSV, trimmed fields)...\n');
+
+fid_in = fopen(output_fname, 'r');
+
+if fid_in == -1
+    error('Could not reopen output file for cleanup: %s', output_fname);
+end
+
+raw_lines = {};
+line = fgetl(fid_in);
+
+while ischar(line)
+    raw_lines{end+1} = line; %#ok<AGROW>
+    line = fgetl(fid_in);
+end
+
+fclose(fid_in);
+
+fid_out = fopen(output_fname, 'w');
+
+if fid_out == -1
+    error('Could not reopen output file for writing cleaned data: %s', ...
+        output_fname);
+end
+
+for i = 1:length(raw_lines)
+
+    this_line = strtrim(raw_lines{i});
+
+    if isempty(this_line)
+        continue
+    end
+
+    % Split on any run of whitespace (spaces and/or tabs), then trim each
+    % field individually before re-joining with commas
+    fields = strsplit(this_line);
+    fields = strtrim(fields);
+
+    fprintf(fid_out, '%s\n', strjoin(fields, ','));
+
+end
+
+fclose(fid_out);
+
+fprintf('Saved (cleaned CSV): %s\n', output_fname);

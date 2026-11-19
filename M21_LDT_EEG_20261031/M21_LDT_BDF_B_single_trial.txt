@@ -1,0 +1,792 @@
+Bin 1
+NW_c203_w01_item31_Simple_SmallFS_LowBF
+.{203}{220,221}{1}
+
+Bin 2
+NW_c203_w02_item32_Simple_SmallFS_HighBF
+.{203}{220,221}{2}
+
+Bin 3
+NW_c203_w03_item33_Simple_SmallFS_LowBF
+.{203}{220,221}{3}
+
+Bin 4
+NW_c203_w04_item34_Simple_SmallFS_LowBF
+.{203}{220,221}{4}
+
+Bin 5
+NW_c203_w05_item35_Simple_SmallFS_HighBF
+.{203}{220,221}{5}
+
+Bin 6
+NW_c203_w06_item36_Simple_SmallFS_LowBF
+.{203}{220,221}{6}
+
+Bin 7
+NW_c203_w07_item37_Simple_SmallFS_LowBF
+.{203}{220,221}{7}
+
+Bin 8
+NW_c203_w08_item38_Simple_SmallFS_LowBF
+.{203}{220,221}{8}
+
+Bin 9
+NW_c203_w09_item39_Simple_SmallFS_LowBF
+.{203}{220,221}{9}
+
+Bin 10
+NW_c203_w10_item310_Simple_SmallFS_LowBF
+.{203}{220,221}{10}
+
+Bin 11
+NW_c203_w11_item311_Simple_SmallFS_LowBF
+.{203}{220,221}{11}
+
+Bin 12
+NW_c203_w12_item312_Simple_SmallFS_LowBF
+.{203}{220,221}{12}
+
+Bin 13
+NW_c203_w13_item313_Simple_SmallFS_LowBF
+.{203}{220,221}{13}
+
+Bin 14
+NW_c203_w14_item314_Simple_SmallFS_LowBF
+.{203}{220,221}{14}
+
+Bin 15
+NW_c203_w15_item315_Simple_SmallFS_LowBF
+.{203}{220,221}{15}
+
+Bin 16
+NW_c203_w16_item316_Simple_SmallFS_HighBF
+.{203}{220,221}{16}
+
+Bin 17
+NW_c203_w17_item317_Simple_SmallFS_HighBF
+.{203}{220,221}{17}
+
+Bin 18
+NW_c203_w18_item318_Simple_SmallFS_HighBF
+.{203}{220,221}{18}
+
+Bin 19
+NW_c203_w19_item319_Complex_SmallFS_HighBF
+.{203}{220,221}{19}
+
+Bin 20
+NW_c203_w20_item320_Simple_SmallFS_LowBF
+.{203}{220,221}{20}
+
+Bin 21
+NW_c203_w21_item321_Simple_SmallFS_LowBF
+.{203}{220,221}{21}
+
+Bin 22
+NW_c203_w22_item322_Simple_SmallFS_LowBF
+.{203}{220,221}{22}
+
+Bin 23
+NW_c203_w23_item323_Simple_SmallFS_LowBF
+.{203}{220,221}{23}
+
+Bin 24
+NW_c203_w24_item324_Simple_SmallFS_LowBF
+.{203}{220,221}{24}
+
+Bin 25
+NW_c203_w25_item325_Simple_SmallFS_LowBF
+.{203}{220,221}{25}
+
+Bin 26
+NW_c204_w01_item41_Simple_LargeFS_HighBF
+.{204}{220,221}{1}
+
+Bin 27
+NW_c204_w02_item42_Simple_LargeFS_HighBF
+.{204}{220,221}{2}
+
+Bin 28
+NW_c204_w03_item43_Simple_LargeFS_LowBF
+.{204}{220,221}{3}
+
+Bin 29
+NW_c204_w04_item44_Simple_LargeFS_LowBF
+.{204}{220,221}{4}
+
+Bin 30
+NW_c204_w05_item45_Simple_LargeFS_HighBF
+.{204}{220,221}{5}
+
+Bin 31
+NW_c204_w06_item46_Simple_LargeFS_HighBF
+.{204}{220,221}{6}
+
+Bin 32
+NW_c204_w07_item47_Simple_LargeFS_LowBF
+.{204}{220,221}{7}
+
+Bin 33
+NW_c204_w08_item48_Simple_LargeFS_LowBF
+.{204}{220,221}{8}
+
+Bin 34
+NW_c204_w09_item49_Simple_LargeFS_HighBF
+.{204}{220,221}{9}
+
+Bin 35
+NW_c204_w10_item410_Simple_LargeFS_HighBF
+.{204}{220,221}{10}
+
+Bin 36
+NW_c204_w11_item411_Simple_LargeFS_HighBF
+.{204}{220,221}{11}
+
+Bin 37
+NW_c204_w12_item412_Simple_LargeFS_HighBF
+.{204}{220,221}{12}
+
+Bin 38
+NW_c204_w13_item413_Simple_LargeFS_HighBF
+.{204}{220,221}{13}
+
+Bin 39
+NW_c204_w14_item414_Simple_LargeFS_HighBF
+.{204}{220,221}{14}
+
+Bin 40
+NW_c204_w15_item415_Simple_LargeFS_HighBF
+.{204}{220,221}{15}
+
+Bin 41
+NW_c204_w16_item416_Simple_LargeFS_LowBF
+.{204}{220,221}{16}
+
+Bin 42
+NW_c204_w17_item417_Simple_LargeFS_HighBF
+.{204}{220,221}{17}
+
+Bin 43
+NW_c204_w19_item419_Simple_LargeFS_HighBF
+.{204}{220,221}{19}
+
+Bin 44
+NW_c204_w21_item421_Simple_LargeFS_HighBF
+.{204}{220,221}{21}
+
+Bin 45
+NW_c204_w22_item422_Simple_LargeFS_LowBF
+.{204}{220,221}{22}
+
+Bin 46
+NW_c204_w23_item423_Simple_LargeFS_HighBF
+.{204}{220,221}{23}
+
+Bin 47
+NW_c204_w24_item424_Simple_LargeFS_HighBF
+.{204}{220,221}{24}
+
+Bin 48
+NW_c204_w25_item425_Simple_LargeFS_LowBF
+.{204}{220,221}{25}
+
+Bin 49
+NW_c205_w01_item51_Complex_SmallFS_LowBF
+.{205}{220,221}{1}
+
+Bin 50
+NW_c205_w02_item52_Complex_SmallFS_LowBF
+.{205}{220,221}{2}
+
+Bin 51
+NW_c205_w03_item53_Complex_SmallFS_LowBF
+.{205}{220,221}{3}
+
+Bin 52
+NW_c205_w04_item54_Complex_SmallFS_HighBF
+.{205}{220,221}{4}
+
+Bin 53
+NW_c205_w05_item55_Complex_SmallFS_LowBF
+.{205}{220,221}{5}
+
+Bin 54
+NW_c205_w06_item56_Complex_SmallFS_LowBF
+.{205}{220,221}{6}
+
+Bin 55
+NW_c205_w07_item57_Complex_SmallFS_LowBF
+.{205}{220,221}{7}
+
+Bin 56
+NW_c205_w08_item58_Complex_SmallFS_HighBF
+.{205}{220,221}{8}
+
+Bin 57
+NW_c205_w09_item59_Complex_SmallFS_HighBF
+.{205}{220,221}{9}
+
+Bin 58
+NW_c205_w10_item510_Complex_SmallFS_LowBF
+.{205}{220,221}{10}
+
+Bin 59
+NW_c205_w11_item511_Complex_SmallFS_HighBF
+.{205}{220,221}{11}
+
+Bin 60
+NW_c205_w12_item512_Complex_SmallFS_HighBF
+.{205}{220,221}{12}
+
+Bin 61
+NW_c205_w13_item513_Complex_SmallFS_LowBF
+.{205}{220,221}{13}
+
+Bin 62
+NW_c205_w14_item514_Complex_SmallFS_LowBF
+.{205}{220,221}{14}
+
+Bin 63
+NW_c205_w15_item515_Complex_SmallFS_HighBF
+.{205}{220,221}{15}
+
+Bin 64
+NW_c205_w16_item516_Complex_SmallFS_HighBF
+.{205}{220,221}{16}
+
+Bin 65
+NW_c205_w17_item517_Complex_SmallFS_LowBF
+.{205}{220,221}{17}
+
+Bin 66
+NW_c205_w18_item518_Complex_SmallFS_HighBF
+.{205}{220,221}{18}
+
+Bin 67
+NW_c205_w19_item519_Complex_SmallFS_LowBF
+.{205}{220,221}{19}
+
+Bin 68
+NW_c205_w20_item520_Complex_SmallFS_LowBF
+.{205}{220,221}{20}
+
+Bin 69
+NW_c205_w21_item521_Complex_SmallFS_LowBF
+.{205}{220,221}{21}
+
+Bin 70
+NW_c205_w22_item522_Complex_SmallFS_LowBF
+.{205}{220,221}{22}
+
+Bin 71
+NW_c205_w23_item523_Complex_SmallFS_LowBF
+.{205}{220,221}{23}
+
+Bin 72
+NW_c205_w24_item524_Complex_SmallFS_LowBF
+.{205}{220,221}{24}
+
+Bin 73
+NW_c205_w25_item525_Complex_SmallFS_LowBF
+.{205}{220,221}{25}
+
+Bin 74
+NW_c206_w01_item61_Complex_LargeFS_HighBF
+.{206}{220,221}{1}
+
+Bin 75
+NW_c206_w02_item62_Complex_LargeFS_LowBF
+.{206}{220,221}{2}
+
+Bin 76
+NW_c206_w03_item63_Complex_LargeFS_HighBF
+.{206}{220,221}{3}
+
+Bin 77
+NW_c206_w04_item64_Complex_LargeFS_LowBF
+.{206}{220,221}{4}
+
+Bin 78
+NW_c206_w05_item65_Complex_LargeFS_HighBF
+.{206}{220,221}{5}
+
+Bin 79
+NW_c206_w06_item66_Complex_LargeFS_HighBF
+.{206}{220,221}{6}
+
+Bin 80
+NW_c206_w07_item67_Complex_LargeFS_HighBF
+.{206}{220,221}{7}
+
+Bin 81
+NW_c206_w08_item68_Complex_LargeFS_LowBF
+.{206}{220,221}{8}
+
+Bin 82
+NW_c206_w09_item69_Complex_LargeFS_LowBF
+.{206}{220,221}{9}
+
+Bin 83
+NW_c206_w10_item610_Complex_LargeFS_HighBF
+.{206}{220,221}{10}
+
+Bin 84
+NW_c206_w11_item611_Complex_LargeFS_HighBF
+.{206}{220,221}{11}
+
+Bin 85
+NW_c206_w12_item612_Complex_LargeFS_LowBF
+.{206}{220,221}{12}
+
+Bin 86
+NW_c206_w13_item613_Complex_LargeFS_HighBF
+.{206}{220,221}{13}
+
+Bin 87
+NW_c206_w14_item614_Complex_LargeFS_HighBF
+.{206}{220,221}{14}
+
+Bin 88
+NW_c206_w15_item615_Complex_LargeFS_HighBF
+.{206}{220,221}{15}
+
+Bin 89
+NW_c206_w16_item616_Complex_LargeFS_HighBF
+.{206}{220,221}{16}
+
+Bin 90
+NW_c206_w17_item617_Complex_LargeFS_HighBF
+.{206}{220,221}{17}
+
+Bin 91
+NW_c206_w18_item618_Complex_LargeFS_HighBF
+.{206}{220,221}{18}
+
+Bin 92
+NW_c206_w19_item619_Complex_LargeFS_HighBF
+.{206}{220,221}{19}
+
+Bin 93
+NW_c206_w20_item620_Complex_LargeFS_HighBF
+.{206}{220,221}{20}
+
+Bin 94
+NW_c206_w21_item621_Complex_LargeFS_HighBF
+.{206}{220,221}{21}
+
+Bin 95
+NW_c206_w22_item622_Complex_LargeFS_HighBF
+.{206}{220,221}{22}
+
+Bin 96
+NW_c206_w23_item623_Complex_LargeFS_LowBF
+.{206}{220,221}{23}
+
+Bin 97
+NW_c206_w24_item624_Complex_LargeFS_HighBF
+.{206}{220,221}{24}
+
+Bin 98
+NW_c206_w25_item625_Complex_LargeFS_HighBF
+.{206}{220,221}{25}
+
+Bin 99
+W_c201_w01_SmallFS_LowBF
+.{201}{220,221}{1}
+
+Bin 100
+W_c201_w02_SmallFS_HighBF
+.{201}{220,221}{2}
+
+Bin 101
+W_c201_w03_SmallFS_HighBF
+.{201}{220,221}{3}
+
+Bin 102
+W_c201_w04_SmallFS_LowBF
+.{201}{220,221}{4}
+
+Bin 103
+W_c201_w05_SmallFS_HighBF
+.{201}{220,221}{5}
+
+Bin 104
+W_c201_w06_SmallFS_LowBF
+.{201}{220,221}{6}
+
+Bin 105
+W_c201_w07_SmallFS_LowBF
+.{201}{220,221}{7}
+
+Bin 106
+W_c201_w08_SmallFS_LowBF
+.{201}{220,221}{8}
+
+Bin 107
+W_c201_w09_SmallFS_HighBF
+.{201}{220,221}{9}
+
+Bin 108
+W_c201_w10_SmallFS_LowBF
+.{201}{220,221}{10}
+
+Bin 109
+W_c201_w11_SmallFS_LowBF
+.{201}{220,221}{11}
+
+Bin 110
+W_c201_w12_SmallFS_LowBF
+.{201}{220,221}{12}
+
+Bin 111
+W_c201_w13_SmallFS_LowBF
+.{201}{220,221}{13}
+
+Bin 112
+W_c201_w14_SmallFS_HighBF
+.{201}{220,221}{14}
+
+Bin 113
+W_c201_w15_SmallFS_HighBF
+.{201}{220,221}{15}
+
+Bin 114
+W_c201_w16_SmallFS_HighBF
+.{201}{220,221}{16}
+
+Bin 115
+W_c201_w17_SmallFS_HighBF
+.{201}{220,221}{17}
+
+Bin 116
+W_c201_w18_SmallFS_HighBF
+.{201}{220,221}{18}
+
+Bin 117
+W_c201_w19_CHECK_SmallFS_HighBF
+.{201}{220,221}{19}
+
+Bin 118
+W_c201_w20_SmallFS_HighBF
+.{201}{220,221}{20}
+
+Bin 119
+W_c201_w21_SmallFS_HighBF
+.{201}{220,221}{21}
+
+Bin 120
+W_c201_w22_SmallFS_HighBF
+.{201}{220,221}{22}
+
+Bin 121
+W_c201_w23_SmallFS_HighBF
+.{201}{220,221}{23}
+
+Bin 122
+W_c201_w24_SmallFS_LowBF
+.{201}{220,221}{24}
+
+Bin 123
+W_c201_w25_SmallFS_LowBF
+.{201}{220,221}{25}
+
+Bin 124
+W_c201_w26_SmallFS_LowBF
+.{201}{220,221}{26}
+
+Bin 125
+W_c201_w27_SmallFS_LowBF
+.{201}{220,221}{27}
+
+Bin 126
+W_c201_w28_SmallFS_LowBF
+.{201}{220,221}{28}
+
+Bin 127
+W_c201_w29_SmallFS_LowBF
+.{201}{220,221}{29}
+
+Bin 128
+W_c201_w30_SmallFS_HighBF
+.{201}{220,221}{30}
+
+Bin 129
+W_c201_w31_SmallFS_LowBF
+.{201}{220,221}{31}
+
+Bin 130
+W_c201_w32_SmallFS_LowBF
+.{201}{220,221}{32}
+
+Bin 131
+W_c201_w33_SmallFS_LowBF
+.{201}{220,221}{33}
+
+Bin 132
+W_c201_w34_SmallFS_HighBF
+.{201}{220,221}{34}
+
+Bin 133
+W_c201_w35_SmallFS_HighBF
+.{201}{220,221}{35}
+
+Bin 134
+W_c201_w36_SmallFS_HighBF
+.{201}{220,221}{36}
+
+Bin 135
+W_c201_w37_SmallFS_HighBF
+.{201}{220,221}{37}
+
+Bin 136
+W_c201_w38_SmallFS_LowBF
+.{201}{220,221}{38}
+
+Bin 137
+W_c201_w39_SmallFS_LowBF
+.{201}{220,221}{39}
+
+Bin 138
+W_c201_w40_SmallFS_HighBF
+.{201}{220,221}{40}
+
+Bin 139
+W_c201_w41_SmallFS_LowBF
+.{201}{220,221}{41}
+
+Bin 140
+W_c201_w42_SmallFS_LowBF
+.{201}{220,221}{42}
+
+Bin 141
+W_c201_w43_SmallFS_LowBF
+.{201}{220,221}{43}
+
+Bin 142
+W_c201_w44_SmallFS_HighBF
+.{201}{220,221}{44}
+
+Bin 143
+W_c201_w45_SmallFS_HighBF
+.{201}{220,221}{45}
+
+Bin 144
+W_c201_w46_SmallFS_HighBF
+.{201}{220,221}{46}
+
+Bin 145
+W_c201_w47_SmallFS_LowBF
+.{201}{220,221}{47}
+
+Bin 146
+W_c201_w48_SmallFS_LowBF
+.{201}{220,221}{48}
+
+Bin 147
+W_c201_w49_SmallFS_LowBF
+.{201}{220,221}{49}
+
+Bin 148
+W_c201_w50_SmallFS_HighBF
+.{201}{220,221}{50}
+
+Bin 149
+W_c202_w01_LargeFS_LowBF
+.{202}{220,221}{1}
+
+Bin 150
+W_c202_w02_LargeFS_LowBF
+.{202}{220,221}{2}
+
+Bin 151
+W_c202_w03_LargeFS_LowBF
+.{202}{220,221}{3}
+
+Bin 152
+W_c202_w04_LargeFS_LowBF
+.{202}{220,221}{4}
+
+Bin 153
+W_c202_w05_LargeFS_LowBF
+.{202}{220,221}{5}
+
+Bin 154
+W_c202_w06_LargeFS_LowBF
+.{202}{220,221}{6}
+
+Bin 155
+W_c202_w07_LargeFS_LowBF
+.{202}{220,221}{7}
+
+Bin 156
+W_c202_w08_LargeFS_HighBF
+.{202}{220,221}{8}
+
+Bin 157
+W_c202_w09_LargeFS_HighBF
+.{202}{220,221}{9}
+
+Bin 158
+W_c202_w10_LargeFS_HighBF
+.{202}{220,221}{10}
+
+Bin 159
+W_c202_w11_LargeFS_HighBF
+.{202}{220,221}{11}
+
+Bin 160
+W_c202_w12_LargeFS_HighBF
+.{202}{220,221}{12}
+
+Bin 161
+W_c202_w13_LargeFS_HighBF
+.{202}{220,221}{13}
+
+Bin 162
+W_c202_w14_LargeFS_HighBF
+.{202}{220,221}{14}
+
+Bin 163
+W_c202_w15_LargeFS_HighBF
+.{202}{220,221}{15}
+
+Bin 164
+W_c202_w16_LargeFS_HighBF
+.{202}{220,221}{16}
+
+Bin 165
+W_c202_w17_LargeFS_HighBF
+.{202}{220,221}{17}
+
+Bin 166
+W_c202_w18_LargeFS_HighBF
+.{202}{220,221}{18}
+
+Bin 167
+W_c202_w19_LargeFS_LowBF
+.{202}{220,221}{19}
+
+Bin 168
+W_c202_w20_LargeFS_LowBF
+.{202}{220,221}{20}
+
+Bin 169
+W_c202_w21_LargeFS_HighBF
+.{202}{220,221}{21}
+
+Bin 170
+W_c202_w22_LargeFS_LowBF
+.{202}{220,221}{22}
+
+Bin 171
+W_c202_w23_LargeFS_LowBF
+.{202}{220,221}{23}
+
+Bin 172
+W_c202_w24_LargeFS_LowBF
+.{202}{220,221}{24}
+
+Bin 173
+W_c202_w25_LargeFS_HighBF
+.{202}{220,221}{25}
+
+Bin 174
+W_c202_w26_LargeFS_HighBF
+.{202}{220,221}{26}
+
+Bin 175
+W_c202_w27_LargeFS_HighBF
+.{202}{220,221}{27}
+
+Bin 176
+W_c202_w28_LargeFS_LowBF
+.{202}{220,221}{28}
+
+Bin 177
+W_c202_w29_LargeFS_HighBF
+.{202}{220,221}{29}
+
+Bin 178
+W_c202_w30_LargeFS_LowBF
+.{202}{220,221}{30}
+
+Bin 179
+W_c202_w31_LargeFS_LowBF
+.{202}{220,221}{31}
+
+Bin 180
+W_c202_w32_LargeFS_LowBF
+.{202}{220,221}{32}
+
+Bin 181
+W_c202_w33_LargeFS_LowBF
+.{202}{220,221}{33}
+
+Bin 182
+W_c202_w34_LargeFS_HighBF
+.{202}{220,221}{34}
+
+Bin 183
+W_c202_w35_LargeFS_HighBF
+.{202}{220,221}{35}
+
+Bin 184
+W_c202_w36_LargeFS_HighBF
+.{202}{220,221}{36}
+
+Bin 185
+W_c202_w37_LargeFS_HighBF
+.{202}{220,221}{37}
+
+Bin 186
+W_c202_w38_LargeFS_HighBF
+.{202}{220,221}{38}
+
+Bin 187
+W_c202_w39_LargeFS_LowBF
+.{202}{220,221}{39}
+
+Bin 188
+W_c202_w40_LargeFS_LowBF
+.{202}{220,221}{40}
+
+Bin 189
+W_c202_w41_LargeFS_LowBF
+.{202}{220,221}{41}
+
+Bin 190
+W_c202_w42_LargeFS_HighBF
+.{202}{220,221}{42}
+
+Bin 191
+W_c202_w43_LargeFS_LowBF
+.{202}{220,221}{43}
+
+Bin 192
+W_c202_w44_LargeFS_LowBF
+.{202}{220,221}{44}
+
+Bin 193
+W_c202_w45_LargeFS_LowBF
+.{202}{220,221}{45}
+
+Bin 194
+W_c202_w46_LargeFS_HighBF
+.{202}{220,221}{46}
+
+Bin 195
+W_c202_w47_LargeFS_HighBF
+.{202}{220,221}{47}
+
+Bin 196
+W_c202_w48_LargeFS_LowBF
+.{202}{220,221}{48}
+
+Bin 197
+W_c202_w49_LargeFS_LowBF
+.{202}{220,221}{49}
+
+Bin 198
+W_c202_w50_LargeFS_LowBF
+.{202}{220,221}{50}
+

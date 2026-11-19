@@ -1,0 +1,245 @@
+Pipeline log — LDT_BF
+Run: 27-Aug-2026 09:55:15
+Location: hc   Channels: 32   Srate: 200 Hz
+Epoch: [-200 1000] ms   ARJ threshold: +/-100 uV   ARJ window: [-100 600] ms
+
+
+--- Subject S105 ---
+  Checkpoint found: S105_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 50  50  12  13  12  13  50  50  24  26  26  24  13  12  13  12
+  Stage 6: subject completed in 6.1 s (0m 06s)
+  COMPLETED
+
+--- Subject S107 ---
+  Checkpoint found: S107_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 50  50  12  13  12  13  50  49  24  26  26  24  13  12  13  12
+  Stage 6: subject completed in 6.1 s (0m 06s)
+  COMPLETED
+
+--- Subject S109 ---
+  Checkpoint found: S109_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 50  48  10  12  11  13  49  49  24  26  25  23  13  12  13  11
+  Stage 6: subject completed in 6.0 s (0m 06s)
+  COMPLETED
+
+--- Subject S111 ---
+  Checkpoint found: S111_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 38  49  11  12  12  12  45  46  18  20  26  23  13  11  12  10
+  Stage 6: subject completed in 6.1 s (0m 06s)
+  COMPLETED
+
+--- Subject S113 ---
+  Checkpoint found: S113_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 48  48  12  13  12  12  49  49  22  26  25  23  13  12  11  12
+  Stage 6: subject completed in 6.1 s (0m 06s)
+  COMPLETED
+
+--- Subject S115 ---
+  Checkpoint found: S115_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 32  35  10  11   9   6  31  38  16  16  19  16   9   9  11   9
+  Stage 6: subject completed in 6.0 s (0m 06s)
+  COMPLETED
+
+--- Subject S117 ---
+  Checkpoint found: S117_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 49  50  12  13  12  13  49  48  23  26  26  24  12  12  13  12
+  Stage 6: subject completed in 6.3 s (0m 06s)
+  COMPLETED
+
+--- Subject S119 ---
+  Checkpoint found: S119_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 47  50  12  12  12  13  48  46  22  25  26  24  13   9  12  11
+  Stage 6: subject completed in 6.4 s (0m 06s)
+  COMPLETED
+
+--- Subject S121 ---
+  Checkpoint found: S121_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 50  50  12  12  12  13  50  50  24  26  26  24  13  12  13  11
+  Stage 6: subject completed in 6.7 s (0m 07s)
+  COMPLETED
+
+--- Subject S123 ---
+  Checkpoint found: S123_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 39  47  11   7  12   9  42  42  23  16  25  22  11  12  12  10
+  Stage 6: subject completed in 6.4 s (0m 06s)
+  COMPLETED
+
+--- Subject S125 ---
+  Checkpoint found: S125_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 45  47  12  12  11  12  45  45  23  22  24  23  13  12  13  10
+  Stage 6: subject completed in 6.6 s (0m 07s)
+  COMPLETED
+
+--- Subject S127 ---
+  Checkpoint found: S127_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 49  49  12  13  12  13  50  50  23  26  25  24  13  11  13  12
+  Stage 6: subject completed in 6.4 s (0m 06s)
+  COMPLETED
+
+--- Subject S129 ---
+  Checkpoint found: S129_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 50  50  12  13  12  13  50  51  24  26  26  24  13  12  13  12
+  Stage 6: subject completed in 6.6 s (0m 07s)
+  COMPLETED
+
+--- Subject S131 ---
+  Checkpoint found: S131_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 26  31   5   9   9   7  23  23  15  11  18  13   7   9   6   8
+  Stage 6: subject completed in 6.3 s (0m 06s)
+  COMPLETED
+
+--- Subject S135 ---
+  Checkpoint found: S135_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 51  51  12  13  12  13  48  49  25  26  27  24  13  12  13  12
+  Stage 6: subject completed in 6.4 s (0m 06s)
+  COMPLETED
+
+--- Subject S138 ---
+  Checkpoint found: S138_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 50  49  12  13  12  12  47  49  24  26  25  24  13  11  11   9
+  Stage 6: subject completed in 6.6 s (0m 07s)
+  COMPLETED
+
+--- Subject S140 ---
+  Checkpoint found: S140_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 48  50  12  13  12  13  50  50  22  26  26  24  13  11  13  12
+  Stage 6: subject completed in 6.3 s (0m 06s)
+  COMPLETED
+
+--- Subject S142 ---
+  Checkpoint found: S142_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 43  47   6  11  11  11  42  47  17  23  21  23  11  11  11  11
+  Stage 6: subject completed in 6.7 s (0m 07s)
+  COMPLETED
+
+--- Subject S144 ---
+  Checkpoint found: S144_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 48  49  11  11  12  14  49  50  24  24  24  25  13  12  12  14
+  Stage 6: subject completed in 6.3 s (0m 06s)
+  COMPLETED
+
+--- Subject S147 ---
+  Checkpoint found: S147_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 50  49  12  13  12  13  50  48  24  26  25  24  13  12  13  12
+  Stage 6: subject completed in 6.5 s (0m 07s)
+  COMPLETED
+
+--- Subject S153 ---
+  Checkpoint found: S153_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 48  49  12  13  12  12  49  49  23  25  25  24  12  12  12  12
+  Stage 6: subject completed in 6.4 s (0m 06s)
+  COMPLETED
+
+--- Subject S155 ---
+  Checkpoint found: S155_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 50  50  12  13  12  12  50  47  24  26  26  24  13  10  13  12
+  Stage 6: subject completed in 6.5 s (0m 07s)
+  COMPLETED
+
+--- Subject S159 ---
+  Checkpoint found: S159_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 49  50  12  13  12  13  50  47  24  25  26  24  13  12  13  12
+  Stage 6: subject completed in 6.4 s (0m 06s)
+  COMPLETED
+
+--- Subject S163 ---
+  Checkpoint found: S163_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 48  50  12  12  12  13  50  49  22  26  26  24  13  12  13  12
+  Stage 6: subject completed in 6.6 s (0m 07s)
+  COMPLETED
+
+--- Subject S167 ---
+  Checkpoint found: S167_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 50  49  12  13  12  13  49  48  24  26  26  23  13  12  13  12
+  Stage 6: subject completed in 6.4 s (0m 06s)
+  COMPLETED
+
+--- Subject S170 ---
+  Checkpoint found: S170_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 46  44   9  10  11  12  44  47  23  23  22  22   9  12  13  12
+  Stage 6: subject completed in 6.6 s (0m 07s)
+  COMPLETED
+
+--- Subject S171 ---
+  Checkpoint found: S171_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 48  50  11  13  12  13  49  49  24  24  26  24  13  12  13  12
+  Stage 6: subject completed in 6.5 s (0m 06s)
+  COMPLETED
+
+--- Subject S173 ---
+  Checkpoint found: S173_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 49  50  12  13  11  12  50  50  24  25  26  24  13  12  13  12
+  Stage 6: subject completed in 6.6 s (0m 07s)
+  COMPLETED
+
+--- Subject S175 ---
+  Checkpoint found: S175_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 50  49  12  13  12  13  49  48  24  26  26  23  13  12  13  12
+  Stage 6: subject completed in 6.4 s (0m 06s)
+  COMPLETED
+
+--- Subject S177 ---
+  Checkpoint found: S177_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set — skipped Stages 2a-5
+  Stage 2b done: bins assigned (BF)
+  Stage 6 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]
+  Stage 6: accepted trials per bin: 48  49  11  12  12  13  49  48  24  24  26  23  12  11  12  12
+  Stage 6: subject completed in 6.6 s (0m 07s)
+  COMPLETED

@@ -1,0 +1,259 @@
+Loading required package: Matrix
+
+Attaching package: 'lmerTest'
+
+The following object is masked from 'package:lme4':
+
+    lmer
+
+The following object is masked from 'package:stats':
+
+    step
+
+Participants: 57  Words: 99  Trials per window: 4703 / 4703 
+SD(OS) = 0.945  SD(LP) = 1.247 
+
+
+====================  N250 base frequency x OS (continuous)  ====================
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 + zLogBF | SubjID) + (1 + OS | WordID) 
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 + zLogBF | SubjID) + (1 | WordID) 
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 + zLogBF || SubjID) + (1 | WordID) 
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 | SubjID) + (1 | WordID) 
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 + zLogBF | SubjID) 
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 + zLogBF || SubjID) 
+
+Random effects used: (1 | SubjID) 
+ Groups   Name        Std.Dev.
+ SubjID   (Intercept) 2.3245  
+ Residual             8.6015  
+        term estimate    SE     df     t       p
+ (Intercept)   -0.895 0.333   54.0 -2.69 0.00958
+      zLogBF    0.044 0.149 4645.3  0.29 0.76900
+          OS    0.262 0.356   54.1  0.73 0.46600
+          LP   -0.122 0.270   54.2 -0.45 0.65300
+      zLogFS    0.298 0.128 4643.6  2.34 0.01940
+      zLogWF    0.109 0.140 4644.2  0.78 0.43600
+        zLen   -0.230 0.131 4644.1 -1.76 0.07900
+   zLogBF:OS   -0.028 0.141 4644.4 -0.20 0.84400
+
+Effect of zLogBF at OS = -1 SD, mean, +1 SD:
+     OS zLogBF.trend    SE   df lower.CL upper.CL t.ratio p.value
+ -0.945       0.0697 0.195 4645   -0.312    0.452   0.358  0.7206
+  0.000       0.0436 0.149 4645   -0.248    0.335   0.293  0.7692
+  0.945       0.0176 0.204 4645   -0.382    0.417   0.086  0.9312
+
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+
+====================  N250 base frequency x OS (high vs low groups)  ====================
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 + bf | SubjID) + (1 + OS | WordID) 
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 + bf | SubjID) + (1 | WordID) 
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 + bf || SubjID) + (1 | WordID) 
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 | SubjID) + (1 | WordID) 
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 + bf | SubjID) 
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 + bf || SubjID) 
+
+Random effects used: (1 | SubjID) 
+ Groups   Name        Std.Dev.
+ SubjID   (Intercept) 2.3245  
+ Residual             8.6029  
+        term estimate    SE     df     t       p
+ (Intercept)   -0.893 0.333   54.0 -2.68 0.00973
+          bf   -0.095 0.259 4643.8 -0.37 0.71200
+          OS    0.259 0.356   54.1  0.73 0.46900
+          LP   -0.122 0.270   54.2 -0.45 0.65300
+          fs    0.514 0.253 4644.4  2.03 0.04200
+      zLogWF    0.134 0.132 4644.7  1.02 0.30800
+        zLen   -0.230 0.129 4644.0 -1.78 0.07490
+       bf:OS   -0.118 0.267 4642.6 -0.44 0.65900
+
+Effect of bf at OS = -1 SD, mean, +1 SD:
+OS = -0.945:
+ contrast         estimate    SE   df lower.CL upper.CL t.ratio p.value
+ bf0.5 - (bf-0.5)   0.0159 0.358 4643   -0.687    0.719   0.044  0.9646
+
+OS =  0.000:
+ contrast         estimate    SE   df lower.CL upper.CL t.ratio p.value
+ bf0.5 - (bf-0.5)  -0.0955 0.259 4644   -0.603    0.412  -0.369  0.7120
+
+OS =  0.945:
+ contrast         estimate    SE   df lower.CL upper.CL t.ratio p.value
+ bf0.5 - (bf-0.5)  -0.2069 0.365 4644   -0.922    0.508  -0.567  0.5704
+
+Results are averaged over the levels of: fs 
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+
+====================  N400 family size x LP (continuous)  ====================
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 + zLogFS | SubjID) + (1 + LP | WordID) 
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 + zLogFS | SubjID) + (1 | WordID) 
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 + zLogFS || SubjID) + (1 | WordID) 
+
+Random effects used: (1 | SubjID) + (1 | WordID) 
+ Groups   Name        Std.Dev.
+ WordID   (Intercept) 0.63681 
+ SubjID   (Intercept) 2.36409 
+ Residual             8.64751 
+        term estimate    SE     df     t       p
+ (Intercept)    0.849 0.344   57.1  2.47 0.01670
+      zLogFS    0.311 0.144   92.2  2.16 0.03340
+          LP   -0.051 0.274   54.3 -0.19 0.85200
+          OS    1.198 0.362   54.2  3.31 0.00165
+      zLogBF    0.061 0.167   99.0  0.37 0.71500
+      zLogWF    0.475 0.158   93.9  3.02 0.00329
+        zLen    0.000 0.147   95.5  0.00 0.99800
+   zLogFS:LP   -0.020 0.102 4570.3 -0.20 0.84400
+
+Effect of zLogFS at LP = -1 SD, mean, +1 SD:
+    LP zLogFS.trend    SE    df lower.CL upper.CL t.ratio p.value
+ -1.25        0.336 0.192 283.8  -0.0411    0.713   1.754  0.0805
+  0.00        0.311 0.144  92.2   0.0251    0.597   2.160  0.0334
+  1.25        0.286 0.192 287.8  -0.0921    0.664   1.489  0.1375
+
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+
+====================  N400 family size x LP (small vs large groups)  ====================
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 + fs | SubjID) + (1 + LP | WordID) 
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 + fs | SubjID) + (1 | WordID) 
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 + fs || SubjID) + (1 | WordID) 
+
+Random effects used: (1 | SubjID) + (1 | WordID) 
+ Groups   Name        Std.Dev.
+ WordID   (Intercept) 0.66887 
+ SubjID   (Intercept) 2.36451 
+ Residual             8.64742 
+        term estimate    SE     df     t       p
+ (Intercept)    0.853 0.345   57.5  2.47 0.01630
+          fs    0.508 0.288   93.4  1.76 0.08120
+          LP   -0.051 0.274   54.3 -0.19 0.85300
+          OS    1.198 0.362   54.2  3.31 0.00165
+          bf    0.069 0.295   91.1  0.24 0.81500
+      zLogWF    0.491 0.150   95.1  3.27 0.00152
+        zLen   -0.007 0.147   95.0 -0.05 0.96300
+       fs:LP   -0.032 0.206 4574.8 -0.16 0.87600
+
+Effect of fs at LP = -1 SD, mean, +1 SD:
+LP = -1.25:
+ contrast         estimate    SE    df lower.CL upper.CL t.ratio p.value
+ fs0.5 - (fs-0.5)    0.548 0.388 300.3  -0.2144     1.31   1.415  0.1582
+
+LP =  0.00:
+ contrast         estimate    SE    df lower.CL upper.CL t.ratio p.value
+ fs0.5 - (fs-0.5)    0.508 0.288  93.4  -0.0642     1.08   1.763  0.0812
+
+LP =  1.25:
+ contrast         estimate    SE    df lower.CL upper.CL t.ratio p.value
+ fs0.5 - (fs-0.5)    0.468 0.384 289.9  -0.2884     1.22   1.218  0.2242
+
+Results are averaged over the levels of: bf 
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+
+Nonwords: participants 57  items 100  trials per window 3855 / 3855 
+
+
+==================== Nonwords: complexity x OS x window (ROI) ====================
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 + cpx * win | SubjID) + (1 + cpx * win | ItemID) 
+boundary (singular) fit: see help('isSingular')
+Dropped (singular / convergence warning): (1 + cpx * win || SubjID) + (1 + cpx + win || ItemID) 
+
+Random effects used: (1 + cpx + win || SubjID) + (1 + cpx || ItemID) 
+ Groups   Name        Std.Dev.
+ ItemID   cpx         2.01210 
+ ItemID.1 (Intercept) 0.77176 
+ SubjID   win         2.07800 
+ SubjID.1 cpx         0.30641 
+ SubjID.2 (Intercept) 2.23405 
+ Residual             8.83415 
+        term estimate    SE     df     t      p
+ (Intercept)   -0.468 0.324   60.8 -1.44 0.1540
+         cpx    0.057 0.293   65.9  0.19 0.8470
+         win    0.644 0.345   57.7  1.87 0.0668
+          OS    0.620 0.336   55.2  1.84 0.0705
+          LP   -0.004 0.256   56.0 -0.02 0.9860
+      zLogBF   -0.095 0.174  110.6 -0.55 0.5850
+      zLogFS   -0.065 0.170  105.3 -0.38 0.7010
+     cpx:win    0.186 0.410 7369.9  0.45 0.6500
+      cpx:OS   -0.044 0.226   47.6 -0.19 0.8460
+      cpx:LP    0.055 0.176   51.0  0.31 0.7540
+      win:OS    0.810 0.369   57.7  2.19 0.0322
+      win:LP    0.116 0.282   60.0  0.41 0.6830
+  win:zLogBF    0.035 0.269 7361.4  0.13 0.8970
+  win:zLogFS   -0.093 0.267 7358.3 -0.35 0.7280
+  cpx:win:OS    0.194 0.438 7367.2  0.44 0.6570
+  cpx:win:LP    0.079 0.341 7379.7  0.23 0.8170
+
+Complexity effect (complex - simple) by window, at mean OS and LP:
+NOTE: Results may be misleading due to involvement in interactions
+win = -0.5:
+ contrast           estimate    SE  df lower.CL upper.CL t.ratio p.value
+ cpx0.5 - (cpx-0.5)   -0.041 0.357 144   -0.746    0.664  -0.115  0.9086
+
+win =  0.5:
+ contrast           estimate    SE  df lower.CL upper.CL t.ratio p.value
+ cpx0.5 - (cpx-0.5)    0.162 0.357 144   -0.543    0.866   0.453  0.6510
+
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+Complexity x OS by window (change in complexity effect per unit OS ):
+win = -0.5:
+ contrast           estimate    SE  df lower.CL upper.CL t.ratio p.value
+ cpx0.5 - (cpx-0.5)  -0.1412 0.315 178   -0.762    0.480  -0.449  0.6540
+
+win =  0.5:
+ contrast           estimate    SE  df lower.CL upper.CL t.ratio p.value
+ cpx0.5 - (cpx-0.5)   0.0532 0.315 178   -0.568    0.674   0.169  0.8660
+
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+Complexity x LP by window (change in complexity effect per unit LP ):
+win = -0.5:
+ contrast           estimate    SE  df lower.CL upper.CL t.ratio p.value
+ cpx0.5 - (cpx-0.5)   0.0158 0.245 191   -0.467    0.498   0.065  0.9485
+
+win =  0.5:
+ contrast           estimate    SE  df lower.CL upper.CL t.ratio p.value
+ cpx0.5 - (cpx-0.5)   0.0947 0.245 191   -0.388    0.577   0.387  0.6990
+
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+
+==================== Split-half reliability (ROI) ====================
+                          measure median  lower  upper
+     Nonwords N400 mean amplitude  0.855  0.788  0.907
+  Nonwords N400 complexity effect -0.718 -1.613 -0.109
+        Words N400 mean amplitude  0.875  0.811  0.918
+    Words N400 family-size effect -0.057 -0.641  0.316
+ Words N400 base-frequency effect -0.391 -1.106  0.095
+     Nonwords N250 mean amplitude  0.784  0.680  0.857
+  Nonwords N250 complexity effect -0.135 -0.656  0.255
+        Words N250 mean amplitude  0.850  0.771  0.901
+    Words N250 family-size effect  0.090 -0.447  0.412
+ Words N250 base-frequency effect -0.659 -1.555 -0.093

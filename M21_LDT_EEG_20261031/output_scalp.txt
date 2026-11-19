@@ -1,0 +1,124 @@
+Loading required package: Matrix
+
+Attaching package: 'lmerTest'
+
+The following object is masked from 'package:lme4':
+
+    lmer
+
+The following object is masked from 'package:stats':
+
+    step
+
+Rows: nonwords 70326  words 100854 
+
+Fitted in 3.4 min; singular: FALSE 
+ Groups                Name        Std.Dev.
+ TrialID.window        (Intercept) 8.8142  
+ SubjID.chlabel.window (Intercept) 1.7115  
+ ItemID                cpx         1.9149  
+ ItemID.1              (Intercept) 0.7499  
+ SubjID                win         2.1505  
+ SubjID.1              (Intercept) 2.3082  
+ Residual                          5.5020  
+
+
+====================  Nonwords by scalp (correct trials)  ====================
+                              term df1     df2    F      p eta_p2
+                               cpx   1   104.1 0.04 0.8500      0
+                           cpx:win   1  7535.3 0.09 0.7650      0
+                            cpx:OS   1  7503.6 0.00 0.9570      0
+                    cpx:Laterality   2 61713.3 3.42 0.0327      0
+                   cpx:Anteriority   2 61713.3 2.15 0.1170      0
+                            cpx:LP   1  7618.1 0.00 0.9810      0
+                        cpx:win:OS   1  7528.3 0.12 0.7330      0
+                cpx:win:Laterality   2 61713.3 0.68 0.5080      0
+                 cpx:OS:Laterality   2 61691.6 0.46 0.6320      0
+               cpx:win:Anteriority   2 61713.3 0.50 0.6040      0
+                cpx:OS:Anteriority   2 61691.6 0.00 0.9980      0
+        cpx:Laterality:Anteriority   4 61713.3 0.34 0.8530      0
+                        cpx:win:LP   1  7548.8 0.10 0.7510      0
+             cpx:win:OS:Laterality   2 61691.6 0.10 0.9020      0
+            cpx:win:OS:Anteriority   2 61691.6 0.50 0.6090      0
+    cpx:win:Laterality:Anteriority   4 61713.3 0.05 0.9950      0
+     cpx:OS:Laterality:Anteriority   4 61691.6 1.70 0.1460      0
+ cpx:win:OS:Laterality:Anteriority   4 61691.6 0.07 0.9900      0
+
+Significant terms involving the scalp factors: cpx:Laterality 
+
+Fitted in 9.9 min; singular: FALSE 
+ Groups                Name        Std.Dev.
+ TrialID.window        (Intercept) 8.54757 
+ SubjID.chlabel.window (Intercept) 1.52222 
+ WordID                (Intercept) 0.73517 
+ SubjID                win         2.02982 
+ SubjID.1              bf          0.68050 
+ SubjID.2              fs          1.18865 
+ SubjID.3              (Intercept) 2.21082 
+ Residual                          5.42832 
+
+
+====================  Words by scalp (all trials)  ====================
+                             term df1     df2    F      p eta_p2
+                               fs   1    74.3 2.34 0.1300  0.031
+                               bf   1    72.8 0.15 0.7020  0.002
+                            fs:bf   1    93.4 1.48 0.2270  0.016
+                           fs:win   1 10872.6 0.00 0.9450  0.000
+                           bf:win   1 10871.9 0.35 0.5540  0.000
+                    fs:Laterality   2 88667.9 1.15 0.3170  0.000
+                    bf:Laterality   2 88664.8 1.12 0.3250  0.000
+                   fs:Anteriority   2 88667.9 3.16 0.0425  0.000
+                   bf:Anteriority   2 88664.8 0.43 0.6530  0.000
+                        fs:bf:win   1 10869.2 0.04 0.8500  0.000
+                 fs:bf:Laterality   2 88653.8 2.01 0.1340  0.000
+                fs:win:Laterality   2 88667.9 0.06 0.9370  0.000
+                bf:win:Laterality   2 88664.8 0.01 0.9930  0.000
+                fs:bf:Anteriority   2 88653.8 0.08 0.9210  0.000
+               fs:win:Anteriority   2 88667.9 0.19 0.8230  0.000
+               bf:win:Anteriority   2 88664.8 0.56 0.5710  0.000
+        fs:Laterality:Anteriority   4 88667.9 0.44 0.7780  0.000
+        bf:Laterality:Anteriority   4 88664.8 1.32 0.2610  0.000
+             fs:bf:win:Laterality   2 88653.8 0.61 0.5430  0.000
+            fs:bf:win:Anteriority   2 88653.8 0.36 0.6980  0.000
+     fs:bf:Laterality:Anteriority   4 88653.8 0.39 0.8160  0.000
+    fs:win:Laterality:Anteriority   4 88667.9 0.08 0.9900  0.000
+    bf:win:Laterality:Anteriority   4 88664.8 0.05 0.9960  0.000
+ fs:bf:win:Laterality:Anteriority   4 88653.8 0.11 0.9800  0.000
+
+Significant terms involving the scalp factors: fs:Anteriority 
+
+--- Follow-up: cpx:Laterality ---
+NOTE: Results may be misleading due to involvement in interactions
+Laterality = Left:
+ contrast           estimate    SE  df lower.CL upper.CL t.ratio p.value
+ cpx0.5 - (cpx-0.5)   -0.103 0.291 110   -0.680    0.473  -0.355  0.7234
+
+Laterality = Midline:
+ contrast           estimate    SE  df lower.CL upper.CL t.ratio p.value
+ cpx0.5 - (cpx-0.5)    0.109 0.291 110   -0.468    0.685   0.374  0.7091
+
+Laterality = Right:
+ contrast           estimate    SE  df lower.CL upper.CL t.ratio p.value
+ cpx0.5 - (cpx-0.5)    0.154 0.291 110   -0.423    0.730   0.528  0.5987
+
+Results are averaged over the levels of: win, Anteriority 
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+--- Follow-up: fs:Anteriority ---
+NOTE: Results may be misleading due to involvement in interactions
+Anteriority = Frontal:
+ contrast         estimate    SE   df lower.CL upper.CL t.ratio p.value
+ fs0.5 - (fs-0.5)    0.296 0.276 79.1  -0.2525    0.844   1.074  0.2861
+
+Anteriority = Central:
+ contrast         estimate    SE   df lower.CL upper.CL t.ratio p.value
+ fs0.5 - (fs-0.5)    0.496 0.276 79.1  -0.0526    1.044   1.800  0.0757
+
+Anteriority = Parietal:
+ contrast         estimate    SE   df lower.CL upper.CL t.ratio p.value
+ fs0.5 - (fs-0.5)    0.454 0.276 79.1  -0.0946    1.002   1.647  0.1035
+
+Results are averaged over the levels of: bf, win, Laterality 
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 

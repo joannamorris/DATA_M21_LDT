@@ -1,0 +1,441 @@
+
+
+
+
+## Load libraries {-}
+
+library(tidyverse)
+library(ggeffects)
+library(lme4)
+library(afex)
+library(gridExtra)
+library(MuMIn)
+library(pbkrtest)
+library(effectsize)
+library(performance)
+library(cowplot)  # for use with `plot_grid(x,x,ncol = x)` function
+library(e1071) # for use with `skewness()` function
+library(lmerTest)
+library(emmeans)
+
+
+## Set emmeans options {-}
+
+
+emm_options(
+  lmer.df = "kenward-roger",
+  pbkrtest.limit = 10000,
+  disable.pbkrtest = FALSE
+)
+
+
+## Set ggplot parameters {-}
+
+# Color palette
+my_palette_1 <- c(
+  "#E31A1C",   # red
+  "#1F78B4"  # blue
+)
+
+my_palette_2 <- c(
+  "#0072B2",  # dark blue
+  "#E69F00"   # orange/gold
+)
+my_linetypes_1 <- c("dashed", "solid")
+
+# Theme
+my_theme <- theme_classic(base_size = 10) +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "horizontal",
+    legend.box = "horizontal"
+  )
+
+# Common guides
+my_guides <- guides(
+  colour = guide_legend(nrow = 1),
+  fill   = guide_legend(nrow = 1)
+)
+
+
+## Define  interaction table functions {-}
+
+compact_emm_table <- function(emm_object,
+                              by_var,
+                              condition_prefix = NULL,
+                              digits_est = 2,
+                              digits_df = 1,
+                              digits_p = 3) {
+  
+  by_var_name <- rlang::as_name(rlang::ensym(by_var))
+  
+  emm_df <- summary(emm_object) |>
+    as.data.frame()
+  
+  contrast_df <- pairs(emm_object) |>
+    summary() |>
+    as.data.frame()
+  
+  # Focal factor columns are the EMM columns other than the conditioning variable
+  focal_vars <- setdiff(
+    names(emm_df),
+    c(by_var_name, "emmean", "SE", "df", "lower.CL", "upper.CL")
+  )
+  
+  emm_part <- emm_df |>
+    rowwise() |>
+    mutate(
+      Comparison = paste(c_across(all_of(focal_vars)), collapse = " "),
+      Condition = if (is.null(condition_prefix)) {
+        as.character(.data[[by_var_name]])
+      } else {
+        paste(condition_prefix, "=", .data[[by_var_name]])
+      }
+    ) |>
+    ungroup() |>
+    transmute(
+      Comparison,
+      Condition,
+      Estimate = emmean,
+      SE,
+      df,
+      lower.CL,
+      upper.CL,
+      t.ratio = NA_real_,
+      p.value = NA_real_
+    )
+  
+  contrast_part <- contrast_df |>
+    mutate(
+      Comparison = contrast,
+      Condition = if (is.null(condition_prefix)) {
+        as.character(.data[[by_var_name]])
+      } else {
+        paste(condition_prefix, "=", .data[[by_var_name]])
+      }
+    ) |>
+    transmute(
+      Comparison,
+      Condition,
+      Estimate = estimate,
+      SE,
+      df,
+      lower.CL = NA_real_,
+      upper.CL = NA_real_,
+      t.ratio,
+      p.value
+    )
+  
+  bind_rows(emm_part, contrast_part) |>
+    arrange(Condition, Comparison) |>
+    mutate(
+      Estimate = round(Estimate, digits_est),
+      SE       = round(SE, digits_est),
+      df       = round(df, digits_df),
+      lower.CL = round(lower.CL, digits_est),
+      upper.CL = round(upper.CL, digits_est),
+      t.ratio  = round(t.ratio, digits_est),
+      p.value  = round(p.value, digits_p)
+    )
+}
+
+
+compact_3way_table <- function(emm_object,
+                               by_var,
+                               condition_prefix = NULL,
+                               factor1,
+                               factor2,
+                               digits_est = 2,
+                               digits_df = 1,
+                               digits_p = 3) {
+  
+  by_var_name <- rlang::as_name(rlang::ensym(by_var))
+  factor1_name <- rlang::as_name(rlang::ensym(factor1))
+  factor2_name <- rlang::as_name(rlang::ensym(factor2))
+  
+  emm_df <- summary(emm_object) |>
+    as.data.frame()
+  
+  make_condition <- function(x) {
+    if (is.null(condition_prefix)) {
+      as.character(x[[by_var_name]])
+    } else {
+      paste(condition_prefix, "=", x[[by_var_name]])
+    }
+  }
+  
+  emm_part <- emm_df |>
+    mutate(
+      Comparison = paste(.data[[factor1_name]], .data[[factor2_name]]),
+      Condition = make_condition(cur_data())
+    ) |>
+    transmute(
+      Comparison,
+      Condition,
+      Estimate = emmean,
+      SE,
+      df,
+      lower.CL,
+      upper.CL,
+      t.ratio = NA_real_,
+      p.value = NA_real_
+    )
+  
+  factor1_part <- pairs(emm_object, simple = factor1_name) |>
+    summary() |>
+    as.data.frame() |>
+    mutate(
+      Comparison = contrast,
+      Condition = paste(
+        if (is.null(condition_prefix)) .data[[by_var_name]] else paste(condition_prefix, "=", .data[[by_var_name]]),
+        "|",
+        factor2_name, "=",
+        .data[[factor2_name]]
+      )
+    ) |>
+    transmute(
+      Comparison,
+      Condition,
+      Estimate = estimate,
+      SE,
+      df,
+      lower.CL = NA_real_,
+      upper.CL = NA_real_,
+      t.ratio,
+      p.value
+    )
+  
+  factor2_part <- pairs(emm_object, simple = factor2_name) |>
+    summary() |>
+    as.data.frame() |>
+    mutate(
+      Comparison = contrast,
+      Condition = paste(
+        if (is.null(condition_prefix)) .data[[by_var_name]] else paste(condition_prefix, "=", .data[[by_var_name]]),
+        "|",
+        factor1_name, "=",
+        .data[[factor1_name]]
+      )
+    ) |>
+    transmute(
+      Comparison,
+      Condition,
+      Estimate = estimate,
+      SE,
+      df,
+      lower.CL = NA_real_,
+      upper.CL = NA_real_,
+      t.ratio,
+      p.value
+    )
+  
+  interaction_part <- contrast(
+    emm_object,
+    interaction = c("pairwise", "pairwise")
+  ) |>
+    summary() |>
+    as.data.frame() |>
+    mutate(
+      Comparison = paste0(
+        "Int: ",
+        .data[[paste0(factor1_name, "_pairwise")]],
+        " across ",
+        .data[[paste0(factor2_name, "_pairwise")]]
+      ),
+      Condition = make_condition(cur_data())
+    ) |>
+    transmute(
+      Comparison,
+      Condition,
+      Estimate = estimate,
+      SE,
+      df,
+      lower.CL = NA_real_,
+      upper.CL = NA_real_,
+      t.ratio,
+      p.value
+    )
+  
+  bind_rows(
+    emm_part         |> mutate(RowType = 1),
+    factor1_part     |> mutate(RowType = 2),
+    factor2_part     |> mutate(RowType = 2),
+    interaction_part |> mutate(RowType = 3)
+  ) |>
+    arrange(Condition, RowType, Comparison) |>
+    mutate(
+      Estimate = round(Estimate, digits_est),
+      SE       = round(SE, digits_est),
+      df       = round(df, digits_df),
+      lower.CL = round(lower.CL, digits_est),
+      upper.CL = round(upper.CL, digits_est),
+      t.ratio  = round(t.ratio, digits_est),
+      p.value  = round(p.value, digits_p)
+    ) |>
+    select(-RowType)
+}
+
+
+
+compact_3way_trends_table <- function(model,
+                                      focal_var,
+                                      moderator_var,
+                                      condition_var,
+                                      moderator_values,
+                                      condition_prefix = NULL,
+                                      digits_est = 2,
+                                      digits_df = 1,
+                                      digits_p = 3,
+                                      lmerTest.limit = NULL) {
+  
+  library(emmeans)
+  library(dplyr)
+  library(rlang)
+  
+  focal_name     <- rlang::as_name(rlang::ensym(focal_var))
+  moderator_name <- rlang::as_name(rlang::ensym(moderator_var))
+  condition_name <- rlang::as_name(rlang::ensym(condition_var))
+  
+  # Construct emtrends formula:
+  # ~ condition_var | moderator_var
+  trend_formula <- as.formula(
+    paste0("~ ", condition_name, " | ", moderator_name)
+  )
+  
+  # Values at which the moderator is evaluated
+  at_list <- setNames(
+    list(moderator_values),
+    moderator_name
+  )
+  
+  # ------------------------------------------------------------
+  # Estimate focal-variable slopes at each moderator value
+  # separately for each categorical condition
+  # ------------------------------------------------------------
+  
+  if (is.null(lmerTest.limit)) {
+    
+    trends <- emtrends(
+      model,
+      specs = trend_formula,
+      var = focal_name,
+      at = at_list
+    )
+    
+  } else {
+    
+    trends <- emtrends(
+      model,
+      specs = trend_formula,
+      var = focal_name,
+      at = at_list,
+      lmerTest.limit = lmerTest.limit
+    )
+  }
+  
+  trend_col <- paste0(focal_name, ".trend")
+  
+  # ------------------------------------------------------------
+  # Simple slopes
+  # ------------------------------------------------------------
+  
+  slope_part <- summary(
+    trends,
+    infer = c(TRUE, TRUE)
+  ) |>
+    as.data.frame() |>
+    mutate(
+      Comparison = paste0(
+        focal_name,
+        " slope: ",
+        .data[[condition_name]]
+      ),
+      
+      Condition = paste0(
+        moderator_name,
+        " = ",
+        .data[[moderator_name]]
+      ),
+      
+      Estimate = .data[[trend_col]],
+      
+      RowType = 1
+    ) |>
+    transmute(
+      Comparison,
+      Condition,
+      ModeratorValue = .data[[moderator_name]],
+      Estimate,
+      SE,
+      df,
+      lower.CL,
+      upper.CL,
+      t.ratio,
+      p.value,
+      RowType
+    )
+  
+  # ------------------------------------------------------------
+  # Difference between focal-variable slopes across levels
+  # of the categorical factor
+  # ------------------------------------------------------------
+  
+  contrast_part <- pairs(trends) |>
+    summary(
+      infer = c(TRUE, TRUE)
+    ) |>
+    as.data.frame() |>
+    mutate(
+      Comparison = paste0(
+        focal_name,
+        " slope difference: ",
+        contrast
+      ),
+      
+      Condition = paste0(
+        moderator_name,
+        " = ",
+        .data[[moderator_name]]
+      ),
+      
+      RowType = 2
+    ) |>
+    transmute(
+      Comparison,
+      Condition,
+      ModeratorValue = .data[[moderator_name]],
+      Estimate = estimate,
+      SE,
+      df,
+      lower.CL,
+      upper.CL,
+      t.ratio,
+      p.value,
+      RowType
+    )
+  
+  # ------------------------------------------------------------
+  # Combine and format
+  # ------------------------------------------------------------
+  
+  bind_rows(
+    slope_part,
+    contrast_part
+  ) |>
+    arrange(
+      .data$ModeratorValue,
+      .data$RowType,
+      .data$Comparison
+    ) |>
+    mutate(
+      Estimate = round(Estimate, digits_est),
+      SE       = round(SE, digits_est),
+      df       = round(df, digits_df),
+      lower.CL = round(lower.CL, digits_est),
+      upper.CL = round(upper.CL, digits_est),
+      t.ratio  = round(t.ratio, digits_est),
+      p.value  = round(p.value, digits_p)
+    ) |>
+    select(-RowType, -ModeratorValue)
+}
+

@@ -1,0 +1,4 @@
+b17 = b3 + b13 label Nonword Complex High Base Frequency
+b18 = b4 + b14 label Nonword Complex Low Base Frequency
+b19 = b5 + b15 label NonWord Simple High Base Frequency
+b20 = b6 + b16 label NonWord Simple Low Base Frequency

@@ -1,0 +1,47 @@
+Bin 1 
+Critical word small family 
+.{201}
+
+Bin 2 
+Critical word large family 
+.{202}
+
+Bin 3 
+nonword small complex 
+.{205}
+
+Bin 4
+nonword large complex 
+.{206}
+
+Bin 5
+nonword small simple 
+.{203}
+
+Bin 6
+nonword large simple 
+.{204}
+
+Bin 7
+filler word 
+.{207}
+
+Bin 8
+filler nonword 
+.{208}
+
+Bin 9 
+Critical word small FS High BF (residualized)
+.{201}{220,221}{2,3,5,9,14-23,30,34-37,40,44-46,50}
+
+Bin 10 
+Critical word small FS Low BF (residualized)
+.{201}{220,221}{1,4,6-8,10-13,24-29,31-33,38,39,41-43,47-49}
+
+Bin 11 
+Critical word large FS High BF (residualized)
+.{202}{220,221}{8-18,21,24-27,29,30,35-38,41,42,46,47}
+
+Bin 12 
+Critical word large FS Low BF (residualized)
+.{202}{220,221}{1-7,19,20,22,23,28,31-34,39,40,43-45,48-50}

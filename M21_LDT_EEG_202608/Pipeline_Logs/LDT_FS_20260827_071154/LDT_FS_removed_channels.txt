@@ -1,0 +1,95 @@
+Bad-channel removal log — LDT_FS
+Run: 27-Aug-2026 07:11:54
+
+Subject: S105
+  No channels removed.
+
+Subject: S107
+  No channels removed.
+
+Subject: S109
+  Removed: T8
+
+Subject: S111
+  No channels removed.
+
+Subject: S113
+  Removed: O1
+  Removed: O2
+
+Subject: S115
+  No channels removed.
+
+Subject: S117
+  No channels removed.
+
+Subject: S119
+  Removed: T7
+  Removed: T8
+
+Subject: S121
+  No channels removed.
+
+Subject: S123
+  Removed: T8
+
+Subject: S125
+  No channels removed.
+
+Subject: S127
+  No channels removed.
+
+Subject: S129
+  No channels removed.
+
+Subject: S131
+  No channels removed.
+
+Subject: S135
+  Removed: T7
+
+Subject: S138
+  No channels removed.
+
+Subject: S140
+  No channels removed.
+
+Subject: S142
+  Removed: CP1
+
+Subject: S144
+  No channels removed.
+
+Subject: S147
+  No channels removed.
+
+Subject: S153
+  Removed: T7
+
+Subject: S155
+  No channels removed.
+
+Subject: S159
+  No channels removed.
+
+Subject: S163
+  No channels removed.
+
+Subject: S167
+  No channels removed.
+
+Subject: S170
+  No channels removed.
+
+Subject: S171
+  No channels removed.
+
+Subject: S173
+  No channels removed.
+
+Subject: S175
+  No channels removed.
+
+Subject: S177
+  No channels removed.
+

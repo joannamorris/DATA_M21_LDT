@@ -1,0 +1,20 @@
+Pipeline log — LDT
+Run: 31-Oct-2026 18:53:18
+Location: hc   Channels: 32   Srate: 200 Hz
+Epoch: [-200 1000] ms   ARJ threshold: +/-100 uV   ARJ window: [-100 600] ms
+
+force_rerun = 0
+MATLAB 25.1.0.2943329 (R2025a)
+runica in use: /Users/jmorris/Documents/MATLAB/eeglab2026.1.0/functions/sigprocfunc/runica.m
+
+
+--- Subject S101 ---
+  Loaded: S101_LDT.set
+  Stage 2 done: filter / resample / ref / event list
+  Stage 3: no channels removed
+  Stage 4: 3 component(s) removed (4, 11, 15)
+  Stage 4: runica extended, rndreset=no (fixed random state)
+  Stage 5: channel order restored to original montage
+  Stage 5 done: checkpoint saved (S101_LDT_FLT_RSP_REF_ELS_CLN_ICA_INT.set)
+  Stage 6 done: bins assigned
+  Stage 7 artifact rejection channels: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27]

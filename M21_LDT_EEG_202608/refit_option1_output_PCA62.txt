@@ -1,0 +1,1240 @@
+rerun_pca = TRUE 
+
+
+===========================================================================
+PCA on the analysed sample
+===========================================================================
+
+	Pearson's product-moment correlation
+
+data:  pca_dat$z_vcb and pca_dat$z_spl
+t = 2.1593, df = 60, p-value = 0.03484
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ 0.02010446 0.48571607
+sample estimates:
+      cor 
+0.2685243 
+
+
+	Pearson's product-moment correlation
+
+data:  pca_dat$z_vcb and pca_dat$z_art
+t = 4.1851, df = 60, p-value = 9.453e-05
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ 0.2559725 0.6481633
+sample estimates:
+      cor 
+0.4753498 
+
+
+	Pearson's product-moment correlation
+
+data:  pca_dat$z_spl and pca_dat$z_art
+t = 1.6054, df = 60, p-value = 0.1137
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.04932242  0.43087338
+sample estimates:
+      cor 
+0.2029459 
+
+       eigenvalue percentage of variance cumulative percentage of variance
+comp 1  1.6475054               54.91685                          54.91685
+comp 2  0.8337346               27.79115                          82.70800
+comp 3  0.5187600               17.29200                         100.00000
+
+Loadings after sign alignment:
+      Dim.1 Dim.2
+z_vcb  0.82 -0.21
+z_spl  0.59  0.80
+z_art  0.79 -0.38
+
+Correlation of new with old scores (same participants):
+   LP    OS 
+0.999 0.995 
+
+
+===========================================================================
+Sample checks
+===========================================================================
+RT participants:  62  (expected 62)
+RT trials:        4224 
+ERP participants: 60  (expected 60)
+
+N250 N400 
+6480 6480 
+RT participants not in ERP:  S103 S165  (expected S103 S165)
+
+ERP sample: LP mean/SD = 0.017 1.282 ; OS mean/SD = 0.011 0.928 
+lp_vals: -1.265 0.017 1.299 
+os_vals: -0.917 0.011 0.939 
+RT sample:  LP mean/SD = 0 1.294 ; OS mean/SD = 0 0.921 
+
+
+===========================================================================
+Nonword accuracy and timeouts (RT sample, excluding ime/boil/trueness)
+===========================================================================
+# A tibble: 1 x 3
+      n pct_correct pct_timeout
+  <int>       <dbl>       <dbl>
+1  6087        69.4        14.6
+# A tibble: 2 x 4
+  cx          n pct_correct pct_timeout
+  <chr>   <int>       <dbl>       <dbl>
+1 Complex  3059        59.5        17.6
+2 Simple   3028        79.4        11.5
+
+
+===========================================================================
+RT model
+===========================================================================
+Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: logRT ~ complexity + zLogBF + zLogFS + OS + LP + (1 + complexity |  
+    SubjID) + (1 | ItemID)
+   Data: rt_nw
+Control: lmerControl(optimizer = "bobyqa")
+
+REML criterion at convergence: -3849.2
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-4.3110 -0.6714 -0.0280  0.6619  3.8909 
+
+Random effects:
+ Groups   Name        Variance  Std.Dev. Corr
+ ItemID   (Intercept) 0.0013926 0.03732      
+ SubjID   (Intercept) 0.0164808 0.12838      
+          complexity1 0.0005968 0.02443  0.03
+ Residual             0.0212238 0.14568      
+Number of obs: 4224, groups:  ItemID, 100; SubjID, 62
+
+Fixed effects:
+             Estimate Std. Error        df t value Pr(>|t|)    
+(Intercept)  6.559534   0.016906 63.490518 387.995  < 2e-16 ***
+complexity1  0.046566   0.005620 59.753947   8.286 1.64e-11 ***
+zLogBF       0.015591   0.005218 97.892951   2.988  0.00355 ** 
+zLogFS      -0.006385   0.005260 96.541379  -1.214  0.22777    
+OS          -0.039550   0.018035 57.424342  -2.193  0.03238 *  
+LP          -0.003920   0.012860 57.946498  -0.305  0.76159    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+            (Intr) cmplx1 zLogBF zLogFS OS    
+complexity1  0.037                            
+zLogBF      -0.005 -0.003                     
+zLogFS      -0.003  0.010 -0.576              
+OS          -0.002 -0.002 -0.001  0.000       
+LP          -0.005 -0.004 -0.001  0.000  0.000
+# Effect Size for ANOVA (Type III)
+
+Parameter  | Eta2 (partial) |       95% CI
+------------------------------------------
+complexity |           0.53 | [0.39, 1.00]
+zLogBF     |           0.08 | [0.02, 1.00]
+zLogFS     |           0.02 | [0.00, 1.00]
+OS         |           0.08 | [0.00, 1.00]
+LP         |       1.60e-03 | [0.00, 1.00]
+
+- One-sided CIs: upper bound fixed at [1.00].# R2 for Mixed Models
+
+  Conditional R2: 0.485
+     Marginal R2: 0.049
+  complexity   emmean         SE       df lower.CL upper.CL       ms    lo_ms
+1     Simple 6.533208 0.01719055 62.02578 6.498845 6.567572 687.6008 664.3741
+2    Complex 6.579774 0.01738933 62.23840 6.545016 6.614532 720.3766 695.7678
+     hi_ms
+1 711.6396
+2 745.8558
+Complex - Simple (ms): 32.8 
+
+
+===========================================================================
+N250 model
+===========================================================================
+Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: f
+   Data: filter(erp, time_window == win)
+Control: lmerControl(optimizer = "bobyqa")
+
+REML criterion at convergence: 29503.5
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-5.2550 -0.5556  0.0013  0.5439  4.6811 
+
+Random effects:
+ Groups         Name        Variance Std.Dev.
+ SubjID:chlabel (Intercept) 2.674    1.635   
+ SubjID         (Intercept) 3.413    1.847   
+ Residual                   3.846    1.961   
+Number of obs: 6480, groups:  SubjID:chlabel, 1620; SubjID, 60
+
+Fixed effects:
+                                 Estimate Std. Error         df t value
+(Intercept)                      -0.59208    0.24334   55.99998  -2.433
+complexity1                       0.24241    0.04876 4848.00012   4.971
+family_size1                     -0.15054    0.04876 4848.00012  -3.087
+LP                               -0.14480    0.19426   55.99998  -0.745
+OS                                0.29378    0.26482   55.99998   1.109
+complexity1:family_size1         -0.69966    0.09752 4848.00012  -7.175
+complexity1:LP                   -0.30258    0.03893 4848.00012  -7.773
+family_size1:LP                   0.03897    0.03893 4848.00012   1.001
+complexity1:OS                   -0.02096    0.05307 4848.00012  -0.395
+family_size1:OS                   0.08394    0.05307 4848.00012   1.582
+LP:OS                            -0.26811    0.24535   55.99998  -1.093
+complexity1:family_size1:LP      -0.15008    0.07785 4848.00012  -1.928
+complexity1:family_size1:OS      -0.51454    0.10613 4848.00012  -4.848
+complexity1:LP:OS                 0.18146    0.04916 4848.00012   3.691
+family_size1:LP:OS                0.07579    0.04916 4848.00012   1.542
+complexity1:family_size1:LP:OS    0.32599    0.09833 4848.00012   3.315
+                               Pr(>|t|)    
+(Intercept)                    0.018185 *  
+complexity1                    6.87e-07 ***
+family_size1                   0.002031 ** 
+LP                             0.459174    
+OS                             0.272020    
+complexity1:family_size1       8.35e-13 ***
+complexity1:LP                 9.28e-15 ***
+family_size1:LP                0.316801    
+complexity1:OS                 0.692895    
+family_size1:OS                0.113738    
+LP:OS                          0.279176    
+complexity1:family_size1:LP    0.053942 .  
+complexity1:family_size1:OS    1.29e-06 ***
+complexity1:LP:OS              0.000226 ***
+family_size1:LP:OS             0.123253    
+complexity1:family_size1:LP:OS 0.000922 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+# Effect Size for ANOVA (Type III)
+
+Parameter                    | Eta2 (partial) |       95% CI
+------------------------------------------------------------
+complexity                   |       5.07e-03 | [0.00, 1.00]
+family_size                  |       1.96e-03 | [0.00, 1.00]
+LP                           |       9.82e-03 | [0.00, 1.00]
+OS                           |           0.02 | [0.00, 1.00]
+complexity:family_size       |           0.01 | [0.01, 1.00]
+complexity:LP                |           0.01 | [0.01, 1.00]
+family_size:LP               |       2.07e-04 | [0.00, 1.00]
+complexity:OS                |       3.22e-05 | [0.00, 1.00]
+family_size:OS               |       5.16e-04 | [0.00, 1.00]
+LP:OS                        |           0.02 | [0.00, 1.00]
+complexity:family_size:LP    |       7.66e-04 | [0.00, 1.00]
+complexity:family_size:OS    |       4.82e-03 | [0.00, 1.00]
+complexity:LP:OS             |       2.80e-03 | [0.00, 1.00]
+family_size:LP:OS            |       4.90e-04 | [0.00, 1.00]
+complexity:family_size:LP:OS |       2.26e-03 | [0.00, 1.00]
+
+- One-sided CIs: upper bound fixed at [1.00].# R2 for Mixed Models
+
+  Conditional R2: 0.624
+     Marginal R2: 0.028
+
+-- N250 : LRT for the four-way term --
+Data: filter(erp, time_window == win)
+Models:
+m_red_ml: f
+m_full_ml: f
+          npar   AIC   BIC logLik deviance  Chisq Df Pr(>Chisq)    
+m_red_ml    18 29500 29622 -14732    29464                         
+m_full_ml   19 29491 29620 -14727    29453 11.007  1  0.0009079 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+-- N250 : complexity EMMs (averaged over family size) --
+ complexity emmean    SE   df lower.CL upper.CL
+ simple     -0.710 0.245 57.1   -1.200  -0.2202
+ complex    -0.473 0.245 57.1   -0.962   0.0168
+
+Results are averaged over the levels of: family_size 
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+-- N250 : complexity effect by family size, both dims at sample mean --
+family_size = small:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple    0.591 0.0689 4848   8.571  <.0001
+
+family_size = large:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple   -0.117 0.0689 4848  -1.695  0.0902
+
+Degrees-of-freedom method: satterthwaite 
+
+-- N250 : complexity effect averaged over FS, across OS (LP at mean) --
+OS = -0.917:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple    0.254 0.0693 4848   3.658  0.0003
+
+OS =  0.011:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple    0.237 0.0488 4848   4.862  <.0001
+
+OS =  0.939:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple    0.220 0.0692 4848   3.185  0.0015
+
+Results are averaged over the levels of: family_size 
+Degrees-of-freedom method: satterthwaite 
+
+-- N250 : OS slope of complexity effect at each LP (avg over FS) --
+LP = -1.265:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple  -0.2505 0.0843 4848  -2.971  0.0030
+
+LP =  0.017:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple  -0.0179 0.0530 4848  -0.337  0.7360
+
+LP =  1.299:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple   0.2147 0.0804 4848   2.672  0.0076
+
+Results are averaged over the levels of: family_size 
+Degrees-of-freedom method: satterthwaite 
+
+-- N250 : complexity effect by family size across LP --
+family_size = small, LP = -1.265:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple    0.882 0.0985 4848    0.689   1.0754   8.961  <.0001
+
+family_size = large, LP = -1.265:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple    0.362 0.0985 4848    0.169   0.5553   3.680  0.0002
+
+family_size = small, LP =  0.017:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple    0.591 0.0689 4848    0.456   0.7262   8.571  <.0001
+
+family_size = large, LP =  0.017:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple   -0.117 0.0689 4848   -0.252   0.0183  -1.695  0.0902
+
+family_size = small, LP =  1.299:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple    0.300 0.0991 4848    0.105   0.4939   3.023  0.0025
+
+family_size = large, LP =  1.299:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple   -0.596 0.0991 4848   -0.790  -0.4017  -6.014  <.0001
+
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+-- N250 : cell means across LP --
+LP = -1.265:
+ complexity family_size emmean    SE   df lower.CL upper.CL
+ simple     small       -0.743 0.353 59.4   -1.449  -0.0376
+ complex    small        0.139 0.353 59.4   -0.566   0.8448
+ simple     large       -0.683 0.353 59.4   -1.389   0.0225
+ complex    large       -0.321 0.353 59.4   -1.026   0.3848
+
+LP =  0.017:
+ complexity family_size emmean    SE   df lower.CL upper.CL
+ simple     small       -0.812 0.247 59.4   -1.306  -0.3183
+ complex    small       -0.221 0.247 59.4   -0.715   0.2727
+ simple     large       -0.607 0.247 59.4   -1.101  -0.1133
+ complex    large       -0.724 0.247 59.4   -1.218  -0.2302
+
+LP =  1.299:
+ complexity family_size emmean    SE   df lower.CL upper.CL
+ simple     small       -0.882 0.355 59.4   -1.592  -0.1715
+ complex    small       -0.582 0.355 59.4   -1.292   0.1281
+ simple     large       -0.532 0.355 59.4   -1.242   0.1784
+ complex    large       -1.128 0.355 59.4   -1.838  -0.4176
+
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+-- N250 : Complexity x FS contrast across LP --
+LP = -1.265:
+ complexity_revpairwise family_size_revpairwise estimate     SE   df t.ratio
+ complex - simple       large - small             -0.520 0.1393 4848  -3.735
+ p.value
+  0.0002
+
+LP =  0.017:
+ complexity_revpairwise family_size_revpairwise estimate     SE   df t.ratio
+ complex - simple       large - small             -0.708 0.0975 4848  -7.259
+ p.value
+  <.0001
+
+LP =  1.299:
+ complexity_revpairwise family_size_revpairwise estimate     SE   df t.ratio
+ complex - simple       large - small             -0.896 0.1401 4848  -6.390
+ p.value
+  <.0001
+
+Degrees-of-freedom method: satterthwaite 
+
+-- N250 : LP slope of complexity effect by family size --
+family_size = small:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple   -0.227 0.0552 4848  -4.119  <.0001
+
+family_size = large:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple   -0.374 0.0552 4848  -6.774  <.0001
+
+Degrees-of-freedom method: satterthwaite 
+
+-- N250 : LP slope of the Complexity x FS contrast --
+ complexity_revpairwise family_size_revpairwise estimate    SE   df t.ratio
+ complex - simple       large - small             -0.146 0.078 4848  -1.877
+ p.value
+  0.0606
+
+Degrees-of-freedom method: satterthwaite 
+
+-- N250 : complexity effect by family size across OS --
+family_size = small, OS = -0.917:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple    0.371 0.0981 4848   0.1791   0.5636   3.787  0.0002
+
+family_size = large, OS = -0.917:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple    0.136 0.0981 4848  -0.0562   0.3282   1.387  0.1656
+
+family_size = small, OS =  0.011:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple    0.591 0.0689 4848   0.4558   0.7262   8.571  <.0001
+
+family_size = large, OS =  0.011:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple   -0.117 0.0689 4848  -0.2520   0.0183  -1.695  0.0902
+
+family_size = small, OS =  0.939:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple    0.811 0.0979 4848   0.6187   1.0025   8.281  <.0001
+
+family_size = large, OS =  0.939:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple   -0.370 0.0979 4848  -0.5616  -0.1778  -3.777  0.0002
+
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+-- N250 : cell means across OS --
+OS = -0.917:
+ complexity family_size emmean    SE   df lower.CL upper.CL
+ simple     small       -0.931 0.351 59.4   -1.634 -0.22885
+ complex    small       -0.560 0.351 59.4   -1.263  0.14247
+ simple     large       -1.042 0.351 59.4   -1.744 -0.33924
+ complex    large       -0.906 0.351 59.4   -1.608 -0.20325
+
+OS =  0.011:
+ complexity family_size emmean    SE   df lower.CL upper.CL
+ simple     small       -0.812 0.247 59.4   -1.306 -0.31831
+ complex    small       -0.221 0.247 59.4   -0.715  0.27267
+ simple     large       -0.607 0.247 59.4   -1.101 -0.11333
+ complex    large       -0.724 0.247 59.4   -1.218 -0.23018
+
+OS =  0.939:
+ complexity family_size emmean    SE   df lower.CL upper.CL
+ simple     small       -0.693 0.351 59.4   -1.395  0.00816
+ complex    small        0.117 0.351 59.4   -0.584  0.81879
+ simple     large       -0.173 0.351 59.4   -0.874  0.52850
+ complex    large       -0.543 0.351 59.4   -1.244  0.15882
+
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+-- N250 : Complexity x FS contrast across OS --
+OS = -0.917:
+ complexity_revpairwise family_size_revpairwise estimate     SE   df t.ratio
+ complex - simple       large - small             -0.235 0.1387 4848  -1.697
+ p.value
+  0.0897
+
+OS =  0.011:
+ complexity_revpairwise family_size_revpairwise estimate     SE   df t.ratio
+ complex - simple       large - small             -0.708 0.0975 4848  -7.259
+ p.value
+  <.0001
+
+OS =  0.939:
+ complexity_revpairwise family_size_revpairwise estimate     SE   df t.ratio
+ complex - simple       large - small             -1.180 0.1384 4848  -8.526
+ p.value
+  <.0001
+
+Degrees-of-freedom method: satterthwaite 
+
+-- N250 : OS slope of complexity effect by family size --
+family_size = small:
+ contrast         estimate    SE   df t.ratio p.value
+ complex - simple    0.237 0.075 4848   3.156  0.0016
+
+family_size = large:
+ contrast         estimate    SE   df t.ratio p.value
+ complex - simple   -0.272 0.075 4848  -3.633  0.0003
+
+Degrees-of-freedom method: satterthwaite 
+
+-- N250 : OS slope of the Complexity x FS contrast --
+ complexity_revpairwise family_size_revpairwise estimate    SE   df t.ratio
+ complex - simple       large - small             -0.509 0.106 4848  -4.800
+ p.value
+  <.0001
+
+Degrees-of-freedom method: satterthwaite 
+
+-- N250 : Complexity x FS contrast over the LP x OS grid --
+LP = -1.265, OS = -0.917:
+ complexity_revpairwise family_size_revpairwise estimate     SE   df lower.CL
+ complex - simple       large - small              0.340 0.2019 4848  -0.0555
+ upper.CL t.ratio p.value
+   0.7361   1.685  0.0920
+
+LP =  0.017, OS = -0.917:
+ complexity_revpairwise family_size_revpairwise estimate     SE   df lower.CL
+ complex - simple       large - small             -0.235 0.1387 4848  -0.5072
+ upper.CL t.ratio p.value
+   0.0365  -1.697  0.0897
+
+LP =  1.299, OS = -0.917:
+ complexity_revpairwise family_size_revpairwise estimate     SE   df lower.CL
+ complex - simple       large - small             -0.811 0.1909 4848  -1.1852
+ upper.CL t.ratio p.value
+  -0.4368  -4.249  <.0001
+
+LP = -1.265, OS =  0.011:
+ complexity_revpairwise family_size_revpairwise estimate     SE   df lower.CL
+ complex - simple       large - small             -0.520 0.1393 4848  -0.7931
+ upper.CL t.ratio p.value
+  -0.2471  -3.735  0.0002
+
+LP =  0.017, OS =  0.011:
+ complexity_revpairwise family_size_revpairwise estimate     SE   df lower.CL
+ complex - simple       large - small             -0.708 0.0975 4848  -0.8990
+ upper.CL t.ratio p.value
+  -0.5167  -7.259  <.0001
+
+LP =  1.299, OS =  0.011:
+ complexity_revpairwise family_size_revpairwise estimate     SE   df lower.CL
+ complex - simple       large - small             -0.896 0.1401 4848  -1.1703
+ upper.CL t.ratio p.value
+  -0.6208  -6.390  <.0001
+
+LP = -1.265, OS =  0.939:
+ complexity_revpairwise family_size_revpairwise estimate     SE   df lower.CL
+ complex - simple       large - small             -1.380 0.2168 4848  -1.8054
+ upper.CL t.ratio p.value
+  -0.9554  -6.368  <.0001
+
+LP =  0.017, OS =  0.939:
+ complexity_revpairwise family_size_revpairwise estimate     SE   df lower.CL
+ complex - simple       large - small             -1.180 0.1384 4848  -1.4517
+ upper.CL t.ratio p.value
+  -0.9089  -8.526  <.0001
+
+LP =  1.299, OS =  0.939:
+ complexity_revpairwise family_size_revpairwise estimate     SE   df lower.CL
+ complex - simple       large - small             -0.980 0.2177 4848  -1.4069
+ upper.CL t.ratio p.value
+  -0.5535  -4.503  <.0001
+
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+-- N250 : OS slope of Complexity x FS at each LP --
+LP = -1.265:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df t.ratio
+ complex - simple       large - small            -0.9268 0.169 4848  -5.498
+ p.value
+  <.0001
+
+LP =  0.017:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df t.ratio
+ complex - simple       large - small            -0.5090 0.106 4848  -4.800
+ p.value
+  <.0001
+
+LP =  1.299:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df t.ratio
+ complex - simple       large - small            -0.0911 0.161 4848  -0.567
+ p.value
+  0.5707
+
+Degrees-of-freedom method: satterthwaite 
+
+-- N250 : LP slope of Complexity x FS at each OS --
+OS = -0.917:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df t.ratio
+ complex - simple       large - small             -0.449 0.109 4848  -4.136
+ p.value
+  <.0001
+
+OS =  0.011:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df t.ratio
+ complex - simple       large - small             -0.146 0.078 4848  -1.877
+ p.value
+  0.0606
+
+OS =  0.939:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df t.ratio
+ complex - simple       large - small              0.156 0.131 4848   1.195
+ p.value
+  0.2320
+
+Degrees-of-freedom method: satterthwaite 
+
+
+===========================================================================
+N400 model
+===========================================================================
+Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: f
+   Data: filter(erp, time_window == win)
+Control: lmerControl(optimizer = "bobyqa")
+
+REML criterion at convergence: 31480.6
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-5.0760 -0.5590 -0.0104  0.5658  4.6018 
+
+Random effects:
+ Groups         Name        Variance Std.Dev.
+ SubjID:chlabel (Intercept) 6.189    2.488   
+ SubjID         (Intercept) 6.517    2.553   
+ Residual                   4.580    2.140   
+Number of obs: 6480, groups:  SubjID:chlabel, 1620; SubjID, 60
+
+Fixed effects:
+                                 Estimate Std. Error         df t value
+(Intercept)                      -0.34688    0.33662   56.00001  -1.030
+complexity1                       0.38874    0.05321 4848.00005   7.306
+family_size1                     -0.25273    0.05321 4848.00005  -4.750
+LP                               -0.08760    0.26873   56.00002  -0.326
+OS                                0.51913    0.36634   56.00002   1.417
+complexity1:family_size1          0.07992    0.10641 4848.00005   0.751
+complexity1:LP                   -0.14644    0.04248 4848.00005  -3.448
+family_size1:LP                   0.24734    0.04248 4848.00005   5.823
+complexity1:OS                    0.15965    0.05790 4848.00005   2.757
+family_size1:OS                   0.05536    0.05790 4848.00005   0.956
+LP:OS                            -0.20829    0.33941   56.00002  -0.614
+complexity1:family_size1:LP      -0.33288    0.08495 4848.00005  -3.918
+complexity1:family_size1:OS       0.12214    0.11581 4848.00005   1.055
+complexity1:LP:OS                 0.07661    0.05365 4848.00005   1.428
+family_size1:LP:OS                0.04306    0.05365 4848.00005   0.803
+complexity1:family_size1:LP:OS    0.26926    0.10729 4848.00005   2.510
+                               Pr(>|t|)    
+(Intercept)                     0.30722    
+complexity1                    3.19e-13 ***
+family_size1                   2.09e-06 ***
+LP                              0.74565    
+OS                              0.16200    
+complexity1:family_size1        0.45268    
+complexity1:LP                  0.00057 ***
+family_size1:LP                6.15e-09 ***
+complexity1:OS                  0.00585 ** 
+family_size1:OS                 0.33911    
+LP:OS                           0.54190    
+complexity1:family_size1:LP    9.03e-05 ***
+complexity1:family_size1:OS     0.29163    
+complexity1:LP:OS               0.15336    
+family_size1:LP:OS              0.42220    
+complexity1:family_size1:LP:OS  0.01212 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+# Effect Size for ANOVA (Type III)
+
+Parameter                    | Eta2 (partial) |       95% CI
+------------------------------------------------------------
+complexity                   |           0.01 | [0.01, 1.00]
+family_size                  |       4.63e-03 | [0.00, 1.00]
+LP                           |       1.89e-03 | [0.00, 1.00]
+OS                           |           0.03 | [0.00, 1.00]
+complexity:family_size       |       1.16e-04 | [0.00, 1.00]
+complexity:LP                |       2.45e-03 | [0.00, 1.00]
+family_size:LP               |       6.95e-03 | [0.00, 1.00]
+complexity:OS                |       1.57e-03 | [0.00, 1.00]
+family_size:OS               |       1.88e-04 | [0.00, 1.00]
+LP:OS                        |       6.68e-03 | [0.00, 1.00]
+complexity:family_size:LP    |       3.16e-03 | [0.00, 1.00]
+complexity:family_size:OS    |       2.29e-04 | [0.00, 1.00]
+complexity:LP:OS             |       4.20e-04 | [0.00, 1.00]
+family_size:LP:OS            |       1.33e-04 | [0.00, 1.00]
+complexity:family_size:LP:OS |       1.30e-03 | [0.00, 1.00]
+
+- One-sided CIs: upper bound fixed at [1.00].# R2 for Mixed Models
+
+  Conditional R2: 0.741
+     Marginal R2: 0.022
+
+-- N400 : LRT for the four-way term --
+Data: filter(erp, time_window == win)
+Models:
+m_red_ml: f
+m_full_ml: f
+          npar   AIC   BIC logLik deviance  Chisq Df Pr(>Chisq)  
+m_red_ml    18 31477 31599 -15721    31441                       
+m_full_ml   19 31473 31602 -15718    31435 6.3093  1    0.01201 *
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+-- N400 : complexity EMMs (averaged over family size) --
+ complexity emmean    SE   df lower.CL upper.CL
+ simple     -0.537 0.338 56.7   -1.213    0.139
+ complex    -0.149 0.338 56.7   -0.825    0.528
+
+Results are averaged over the levels of: family_size 
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+-- N400 : complexity effect by family size, both dims at sample mean --
+family_size = small:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple    0.350 0.0752 4848   4.655  <.0001
+
+family_size = large:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple    0.426 0.0752 4848   5.660  <.0001
+
+Degrees-of-freedom method: satterthwaite 
+
+-- N400 : complexity effect averaged over FS, across OS (LP at mean) --
+OS = -0.917:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple    0.239 0.0757 4848   3.154  0.0016
+
+OS =  0.011:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple    0.388 0.0532 4848   7.294  <.0001
+
+OS =  0.939:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple    0.537 0.0755 4848   7.116  <.0001
+
+Results are averaged over the levels of: family_size 
+Degrees-of-freedom method: satterthwaite 
+
+-- N400 : OS slope of complexity effect at each LP (avg over FS) --
+LP = -1.265:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple   0.0628 0.0920 4848   0.682  0.4951
+
+LP =  0.017:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple   0.1610 0.0579 4848   2.782  0.0054
+
+LP =  1.299:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple   0.2591 0.0877 4848   2.955  0.0031
+
+Results are averaged over the levels of: family_size 
+Degrees-of-freedom method: satterthwaite 
+
+-- N400 : complexity effect by family size across LP --
+family_size = small, LP = -1.265:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple   0.3254 0.1074 4848    0.115    0.536   3.028  0.0025
+
+family_size = large, LP = -1.265:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple   0.8239 0.1074 4848    0.613    1.035   7.668  <.0001
+
+family_size = small, LP =  0.017:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple   0.3502 0.0752 4848    0.203    0.498   4.655  <.0001
+
+family_size = large, LP =  0.017:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple   0.4259 0.0752 4848    0.278    0.573   5.660  <.0001
+
+family_size = small, LP =  1.299:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple   0.3750 0.1081 4848    0.163    0.587   3.468  0.0005
+
+family_size = large, LP =  1.299:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple   0.0278 0.1081 4848   -0.184    0.240   0.257  0.7971
+
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+-- N400 : cell means across LP --
+LP = -1.265:
+ complexity family_size  emmean    SE   df lower.CL upper.CL
+ simple     small       -0.1074 0.485 58.1   -1.078 0.863736
+ complex    small        0.2180 0.485 58.1   -0.753 1.189123
+ simple     large       -0.9222 0.485 58.1   -1.893 0.048922
+ complex    large       -0.0983 0.485 58.1   -1.069 0.872835
+
+LP =  0.017:
+ complexity family_size  emmean    SE   df lower.CL upper.CL
+ simple     small       -0.3938 0.340 58.1   -1.074 0.286171
+ complex    small       -0.0436 0.340 58.1   -0.724 0.636373
+ simple     large       -0.6796 0.340 58.1   -1.360 0.000438
+ complex    large       -0.2537 0.340 58.1   -0.934 0.426296
+
+LP =  1.299:
+ complexity family_size  emmean    SE   df lower.CL upper.CL
+ simple     small       -0.6803 0.488 58.1   -1.658 0.297028
+ complex    small       -0.3053 0.488 58.1   -1.283 0.672045
+ simple     large       -0.4369 0.488 58.1   -1.414 0.540377
+ complex    large       -0.4091 0.488 58.1   -1.386 0.568179
+
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+-- N400 : Complexity x FS contrast across LP --
+LP = -1.265:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df t.ratio
+ complex - simple       large - small             0.4985 0.152 4848   3.281
+ p.value
+  0.0010
+
+LP =  0.017:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df t.ratio
+ complex - simple       large - small             0.0757 0.106 4848   0.711
+ p.value
+  0.4771
+
+LP =  1.299:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df t.ratio
+ complex - simple       large - small            -0.3472 0.153 4848  -2.271
+ p.value
+  0.0232
+
+Degrees-of-freedom method: satterthwaite 
+
+-- N400 : LP slope of complexity effect by family size --
+family_size = small:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple   0.0194 0.0602 4848   0.321  0.7479
+
+family_size = large:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple  -0.3106 0.0602 4848  -5.157  <.0001
+
+Degrees-of-freedom method: satterthwaite 
+
+-- N400 : LP slope of the Complexity x FS contrast --
+ complexity_revpairwise family_size_revpairwise estimate     SE   df t.ratio
+ complex - simple       large - small              -0.33 0.0852 4848  -3.874
+ p.value
+  0.0001
+
+Degrees-of-freedom method: satterthwaite 
+
+-- N400 : complexity effect by family size across OS --
+family_size = small, OS = -0.917:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple    0.260 0.1070 4848  0.04985    0.469   2.426  0.0153
+
+family_size = large, OS = -0.917:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple    0.218 0.1070 4848  0.00788    0.427   2.034  0.0420
+
+family_size = small, OS =  0.011:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple    0.350 0.0752 4848  0.20270    0.498   4.655  <.0001
+
+family_size = large, OS =  0.011:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple    0.426 0.0752 4848  0.27836    0.573   5.660  <.0001
+
+family_size = small, OS =  0.939:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple    0.441 0.1068 4848  0.23139    0.650   4.127  <.0001
+
+family_size = large, OS =  0.939:
+ contrast         estimate     SE   df lower.CL upper.CL t.ratio p.value
+ complex - simple    0.634 0.1068 4848  0.42468    0.843   5.936  <.0001
+
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+-- N400 : cell means across OS --
+OS = -0.917:
+ complexity family_size  emmean    SE   df lower.CL  upper.CL
+ simple     small       -0.8011 0.483 58.1   -1.768  0.165922
+ complex    small       -0.5415 0.483 58.1   -1.509  0.425526
+ simple     large       -1.0801 0.483 58.1   -2.047 -0.113064
+ complex    large       -0.8625 0.483 58.1   -1.829  0.104569
+
+OS =  0.011:
+ complexity family_size  emmean    SE   df lower.CL  upper.CL
+ simple     small       -0.3938 0.340 58.1   -1.074  0.286171
+ complex    small       -0.0436 0.340 58.1   -0.724  0.636373
+ simple     large       -0.6796 0.340 58.1   -1.360  0.000438
+ complex    large       -0.2537 0.340 58.1   -0.934  0.426296
+
+OS =  0.939:
+ complexity family_size  emmean    SE   df lower.CL  upper.CL
+ simple     small        0.0135 0.482 58.1   -0.952  0.978859
+ complex    small        0.4543 0.482 58.1   -0.511  1.419658
+ simple     large       -0.2790 0.482 58.1   -1.244  0.686380
+ complex    large        0.3551 0.482 58.1   -0.610  1.320461
+
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+-- N400 : Complexity x FS contrast across OS --
+OS = -0.917:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df t.ratio
+ complex - simple       large - small            -0.0420 0.151 4848  -0.277
+ p.value
+  0.7815
+
+OS =  0.011:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df t.ratio
+ complex - simple       large - small             0.0757 0.106 4848   0.711
+ p.value
+  0.4771
+
+OS =  0.939:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df t.ratio
+ complex - simple       large - small             0.1933 0.151 4848   1.280
+ p.value
+  0.2008
+
+Degrees-of-freedom method: satterthwaite 
+
+-- N400 : OS slope of complexity effect by family size --
+family_size = small:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple   0.0976 0.0818 4848   1.193  0.2330
+
+family_size = large:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple   0.2243 0.0818 4848   2.742  0.0061
+
+Degrees-of-freedom method: satterthwaite 
+
+-- N400 : OS slope of the Complexity x FS contrast --
+ complexity_revpairwise family_size_revpairwise estimate    SE   df t.ratio
+ complex - simple       large - small              0.127 0.116 4848   1.095
+ p.value
+  0.2735
+
+Degrees-of-freedom method: satterthwaite 
+
+-- N400 : Complexity x FS contrast over the LP x OS grid --
+LP = -1.265, OS = -0.917:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df lower.CL
+ complex - simple       large - small             0.7013 0.220 4848    0.269
+ upper.CL t.ratio p.value
+   1.1332   3.183  0.0015
+
+LP =  0.017, OS = -0.917:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df lower.CL
+ complex - simple       large - small            -0.0420 0.151 4848   -0.339
+ upper.CL t.ratio p.value
+   0.2547  -0.277  0.7815
+
+LP =  1.299, OS = -0.917:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df lower.CL
+ complex - simple       large - small            -0.7852 0.208 4848   -1.194
+ upper.CL t.ratio p.value
+  -0.3769  -3.770  0.0002
+
+LP = -1.265, OS =  0.011:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df lower.CL
+ complex - simple       large - small             0.4985 0.152 4848    0.201
+ upper.CL t.ratio p.value
+   0.7964   3.281  0.0010
+
+LP =  0.017, OS =  0.011:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df lower.CL
+ complex - simple       large - small             0.0757 0.106 4848   -0.133
+ upper.CL t.ratio p.value
+   0.2842   0.711  0.4771
+
+LP =  1.299, OS =  0.011:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df lower.CL
+ complex - simple       large - small            -0.3472 0.153 4848   -0.647
+ upper.CL t.ratio p.value
+  -0.0474  -2.271  0.0232
+
+LP = -1.265, OS =  0.939:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df lower.CL
+ complex - simple       large - small             0.2958 0.237 4848   -0.168
+ upper.CL t.ratio p.value
+   0.7595   1.250  0.2112
+
+LP =  0.017, OS =  0.939:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df lower.CL
+ complex - simple       large - small             0.1933 0.151 4848   -0.103
+ upper.CL t.ratio p.value
+   0.4894   1.280  0.2008
+
+LP =  1.299, OS =  0.939:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df lower.CL
+ complex - simple       large - small             0.0908 0.238 4848   -0.375
+ upper.CL t.ratio p.value
+   0.5564   0.382  0.7023
+
+Degrees-of-freedom method: satterthwaite 
+Confidence level used: 0.95 
+
+-- N400 : OS slope of Complexity x FS at each LP --
+LP = -1.265:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df t.ratio
+ complex - simple       large - small             -0.218 0.184 4848  -1.187
+ p.value
+  0.2352
+
+LP =  0.017:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df t.ratio
+ complex - simple       large - small              0.127 0.116 4848   1.095
+ p.value
+  0.2735
+
+LP =  1.299:
+ complexity_revpairwise family_size_revpairwise estimate    SE   df t.ratio
+ complex - simple       large - small              0.472 0.175 4848   2.690
+ p.value
+  0.0072
+
+Degrees-of-freedom method: satterthwaite 
+
+-- N400 : LP slope of Complexity x FS at each OS --
+OS = -0.917:
+ complexity_revpairwise family_size_revpairwise estimate     SE   df t.ratio
+ complex - simple       large - small              -0.58 0.1185 4848  -4.894
+ p.value
+  <.0001
+
+OS =  0.011:
+ complexity_revpairwise family_size_revpairwise estimate     SE   df t.ratio
+ complex - simple       large - small              -0.33 0.0852 4848  -3.874
+ p.value
+  0.0001
+
+OS =  0.939:
+ complexity_revpairwise family_size_revpairwise estimate     SE   df t.ratio
+ complex - simple       large - small              -0.08 0.1425 4848  -0.561
+ p.value
+  0.5747
+
+Degrees-of-freedom method: satterthwaite 
+
+
+===========================================================================
+Combined N250 + N400 model
+===========================================================================
+Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: f_tw
+   Data: erp
+Control: lmerControl(optimizer = "bobyqa")
+
+REML criterion at convergence: 60437.2
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-6.3164 -0.5547 -0.0041  0.5568  4.7668 
+
+Random effects:
+ Groups                     Name        Variance Std.Dev.
+ SubjID:chlabel:time_window (Intercept) 1.026    1.013   
+ SubjID:chlabel             (Intercept) 3.406    1.845   
+ SubjID:time_window         (Intercept) 2.387    1.545   
+ SubjID                     (Intercept) 2.578    1.606   
+ Residual                               4.213    2.053   
+Number of obs: 12960, groups:  
+SubjID:chlabel:time_window, 3240; SubjID:chlabel, 1620; SubjID:time_window, 120; SubjID, 60
+
+Fixed effects:
+                                              Estimate Std. Error         df
+(Intercept)                                   -0.46948    0.25632   56.00025
+complexity1                                    0.31557    0.03608 9695.99994
+family_size1                                  -0.20163    0.03608 9695.99994
+LP                                            -0.11620    0.20463   56.00025
+OS                                             0.40646    0.27895   56.00025
+time_window1                                   0.24520    0.28678   55.99972
+complexity1:family_size1                      -0.30987    0.07217 9695.99994
+complexity1:LP                                -0.22451    0.02881 9695.99994
+family_size1:LP                                0.14316    0.02881 9695.99994
+complexity1:OS                                 0.06935    0.03927 9695.99994
+family_size1:OS                                0.06965    0.03927 9695.99994
+LP:OS                                         -0.23820    0.25844   56.00025
+complexity1:time_window1                       0.14634    0.07217 9695.99994
+family_size1:time_window1                     -0.10219    0.07217 9695.99994
+LP:time_window1                                0.05719    0.22895   55.99972
+OS:time_window1                                0.22535    0.31211   55.99972
+complexity1:family_size1:LP                   -0.24148    0.05762 9695.99994
+complexity1:family_size1:OS                   -0.19620    0.07854 9695.99994
+complexity1:LP:OS                              0.12903    0.03638 9695.99994
+family_size1:LP:OS                             0.05942    0.03638 9695.99994
+complexity1:family_size1:time_window1          0.77957    0.14434 9695.99994
+complexity1:LP:time_window1                    0.15614    0.05762 9695.99994
+family_size1:LP:time_window1                   0.20837    0.05762 9695.99994
+complexity1:OS:time_window1                    0.18061    0.07854 9695.99994
+family_size1:OS:time_window1                  -0.02859    0.07854 9695.99994
+LP:OS:time_window1                             0.05982    0.28916   55.99972
+complexity1:family_size1:LP:OS                 0.29763    0.07277 9695.99994
+complexity1:family_size1:LP:time_window1      -0.18280    0.11523 9695.99994
+complexity1:family_size1:OS:time_window1       0.63667    0.15708 9695.99994
+complexity1:LP:OS:time_window1                -0.10485    0.07277 9695.99994
+family_size1:LP:OS:time_window1               -0.03273    0.07277 9695.99994
+complexity1:family_size1:LP:OS:time_window1   -0.05673    0.14553 9695.99994
+                                            t value Pr(>|t|)    
+(Intercept)                                  -1.832 0.072331 .  
+complexity1                                   8.745  < 2e-16 ***
+family_size1                                 -5.588 2.36e-08 ***
+LP                                           -0.568 0.572405    
+OS                                            1.457 0.150681    
+time_window1                                  0.855 0.396189    
+complexity1:family_size1                     -4.294 1.77e-05 ***
+complexity1:LP                               -7.793 7.19e-15 ***
+family_size1:LP                               4.969 6.83e-07 ***
+complexity1:OS                                1.766 0.077449 .  
+family_size1:OS                               1.774 0.076161 .  
+LP:OS                                        -0.922 0.360649    
+complexity1:time_window1                      2.028 0.042621 *  
+family_size1:time_window1                    -1.416 0.156806    
+LP:time_window1                               0.250 0.803657    
+OS:time_window1                               0.722 0.473281    
+complexity1:family_size1:LP                  -4.191 2.80e-05 ***
+complexity1:family_size1:OS                  -2.498 0.012505 *  
+complexity1:LP:OS                             3.546 0.000392 ***
+family_size1:LP:OS                            1.633 0.102444    
+complexity1:family_size1:time_window1         5.401 6.78e-08 ***
+complexity1:LP:time_window1                   2.710 0.006738 ** 
+family_size1:LP:time_window1                  3.617 0.000300 ***
+complexity1:OS:time_window1                   2.300 0.021495 *  
+family_size1:OS:time_window1                 -0.364 0.715896    
+LP:OS:time_window1                            0.207 0.836864    
+complexity1:family_size1:LP:OS                4.090 4.35e-05 ***
+complexity1:family_size1:LP:time_window1     -1.586 0.112688    
+complexity1:family_size1:OS:time_window1      4.053 5.09e-05 ***
+complexity1:LP:OS:time_window1               -1.441 0.149647    
+family_size1:LP:OS:time_window1              -0.450 0.652907    
+complexity1:family_size1:LP:OS:time_window1  -0.390 0.696666    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+-- Omnibus: OS x window terms (8 df) --
+Data: erp
+Models:
+m_noOSxTW: drop_window_terms("OS")
+m_tw_ml: f_tw
+          npar   AIC   BIC logLik deviance  Chisq Df Pr(>Chisq)   
+m_noOSxTW   29 60423 60640 -30183    60365                        
+m_tw_ml     37 60415 60691 -30170    60341 24.423  8   0.001946 **
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+-- Omnibus: LP x window terms (8 df) --
+Data: erp
+Models:
+m_noLPxTW: drop_window_terms("LP")
+m_tw_ml: f_tw
+          npar   AIC   BIC logLik deviance  Chisq Df Pr(>Chisq)    
+m_noLPxTW   29 60427 60643 -30184    60369                         
+m_tw_ml     37 60415 60691 -30170    60341 27.998  8  0.0004746 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+-- OS slope of complexity effect, by family size and window (LP at mean) --
+family_size = small, time_window = N250:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple   0.2366 0.0785 9696   3.015  0.0026
+
+family_size = large, time_window = N250:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple  -0.2724 0.0785 9696  -3.471  0.0005
+
+family_size = small, time_window = N400:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple   0.0976 0.0785 9696   1.244  0.2136
+
+family_size = large, time_window = N400:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple   0.2243 0.0785 9696   2.859  0.0043
+
+Degrees-of-freedom method: satterthwaite 
+family_size = small:
+ complexity_revpairwise time_window_revpairwise estimate    SE   df t.ratio
+ complex - simple       N400 - N250               -0.139 0.111 9696  -1.253
+ p.value
+  0.2103
+
+family_size = large:
+ complexity_revpairwise time_window_revpairwise estimate    SE   df t.ratio
+ complex - simple       N400 - N250                0.497 0.111 9696   4.476
+ p.value
+  <.0001
+
+Degrees-of-freedom method: satterthwaite 
+
+-- LP slope of complexity effect, by window (OS at mean, avg over FS) --
+time_window = N250:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple   -0.301 0.0408 9696  -7.360  <.0001
+
+time_window = N400:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple   -0.146 0.0408 9696  -3.565  0.0004
+
+Results are averaged over the levels of: family_size 
+Degrees-of-freedom method: satterthwaite 
+ complexity_revpairwise time_window_revpairwise estimate     SE   df t.ratio
+ complex - simple       N400 - N250                0.155 0.0578 9696   2.683
+ p.value
+  0.0073
+
+Results are averaged over the levels of: family_size 
+Degrees-of-freedom method: satterthwaite 
+
+-- LP slope of family size effect, by window (OS at mean, avg over complexity) --
+time_window = N250:
+ contrast      estimate     SE   df t.ratio p.value
+ large - small   0.0398 0.0408 9696   0.975  0.3297
+
+time_window = N400:
+ contrast      estimate     SE   df t.ratio p.value
+ large - small   0.2478 0.0408 9696   6.068  <.0001
+
+Results are averaged over the levels of: complexity 
+Degrees-of-freedom method: satterthwaite 
+ family_size_revpairwise time_window_revpairwise estimate     SE   df t.ratio
+ large - small           N400 - N250                0.208 0.0578 9696   3.601
+ p.value
+  0.0003
+
+Results are averaged over the levels of: complexity 
+Degrees-of-freedom method: satterthwaite 
+
+-- LP slope of complexity effect, by family size and window (OS at mean) --
+family_size = small, time_window = N250:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple  -0.2273 0.0578 9696  -3.936  0.0001
+
+family_size = large, time_window = N250:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple  -0.3738 0.0578 9696  -6.472  <.0001
+
+family_size = small, time_window = N400:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple   0.0194 0.0578 9696   0.335  0.7375
+
+family_size = large, time_window = N400:
+ contrast         estimate     SE   df t.ratio p.value
+ complex - simple  -0.3106 0.0578 9696  -5.377  <.0001
+
+Degrees-of-freedom method: satterthwaite 
+family_size = small:
+ complexity_revpairwise time_window_revpairwise estimate     SE   df t.ratio
+ complex - simple       N400 - N250               0.2467 0.0817 9696   3.020
+ p.value
+  0.0025
+
+family_size = large:
+ complexity_revpairwise time_window_revpairwise estimate     SE   df t.ratio
+ complex - simple       N400 - N250               0.0633 0.0817 9696   0.775
+ p.value
+  0.4386
+
+Degrees-of-freedom method: satterthwaite 

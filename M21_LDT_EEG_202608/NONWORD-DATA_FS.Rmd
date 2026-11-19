@@ -1,0 +1,326 @@
+---
+title: "M21 2026 July 2026 N250 Component"
+author: "Joanna Morris"
+date: "`r Sys.Date()`"
+output: 
+  bookdown::pdf_document2:
+    latex_engine: xelatex
+    toc: true
+    toc_depth: 4
+    number_sections: true
+header-includes:
+  - \setcounter{secnumdepth}{3}
+editor_options: 
+  chunk_output_type: inline
+---
+
+\scriptsize
+
+# Setup {-}
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      error = FALSE,
+                      comment = "||",
+                      fig.height = 4,
+                      fig.width = 7)
+options(width = 150)
+```
+
+## Load libraries {-}
+
+```{r load_libraries, echo=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(ggeffects)
+library(lme4)
+library(afex)
+library(gridExtra)
+library(MuMIn)
+library(pbkrtest)
+library(effectsize)
+library(performance)
+library(cowplot)  # for use with `plot_grid(x,x,ncol = x)` function
+library(e1071) # for use with `skewness()` function
+library(lmerTest)
+library(emmeans)
+# emm_options(lmer.df = "satterthwaite")
+```
+
+## Set emmeans options {-}
+
+```{r emmeans_options}
+emm_options(lmer.df = "satterthwaite", lmerTest.limit = 20000)
+```
+
+
+# Load Files
+
+```{r load_files, message=FALSE, warning=FALSE}
+
+# Load data: erp_fs nonwords
+erp_fs_nw <- read_csv("erp_fs_dmg.csv") |>
+  filter(lexical_status == "nonword") |>
+  mutate(
+    SubjID = factor(SubjID),
+    chlabel = factor(chlabel),
+    family_size = factor(family_size, 
+                         levels = c("small", "large")),
+    complexity = factor(complexity,
+                    levels = c("simple", "complex")),
+    time_window = factor(time_window),
+    OS = as.numeric(Dim.2),
+    LP = as.numeric(Dim.1)
+  )
+
+range(erp_fs_nw$OS, na.rm = TRUE)
+```
+
+## Model
+
+**Random intercepts**: one per participant, and one per electrode within each participant, one per participant per window and one per electrode per participant per window
+
+
+```{r  model}
+# ---------------------------------------------------------------------------
+# N250 and N400 nonwords in one model: does the role of OS (and LP) differ
+# between the two components?
+# Requires: erp_fs_nw with BOTH time windows (do not filter on time_window)
+# ---------------------------------------------------------------------------
+
+dat <- erp_fs_nw |>
+  filter(!is.na(OS), !is.na(LP)) |>
+  mutate(time_window = factor(time_window, levels = c("N250", "N400")))
+
+# Same +/-0.5 coding as the separate models; time window coded the same way,
+# so every term WITHOUT time_window is the average of the two components and
+# every term WITH time_window is the N400 - N250 difference in that term.
+contrasts(dat$complexity)  <- c(-0.5, 0.5)   # simple, complex
+contrasts(dat$family_size) <- c(-0.5, 0.5)   # small, large
+contrasts(dat$time_window) <- c(-0.5, 0.5)   # N250, N400
+
+table(dat$time_window)            # should be 6804 each
+n_distinct(dat$SubjID)            # should be 63
+
+# Random intercepts: participant and electrode-within-participant, each allowed
+# a separate baseline in each time window (the separate models had these
+# implicitly, because each window was fit on its own).
+re <- "(1 | SubjID) + (1 | SubjID:time_window) + (1 | SubjID:chlabel) + (1 | SubjID:chlabel:time_window)"
+
+f_full <- as.formula(paste("value ~ complexity * family_size * LP * OS * time_window +", re))
+
+m_tw <- lmer(f_full, data = dat, REML = TRUE,
+             control = lmerControl(optimizer = "bobyqa"))
+summary(m_tw)
+```
+
+In the full model, every OS effect is allowed to differ between windows. There are eight terms that contain both `OS` and `time window`:
+  - `OS × window`
+  - `Complexity × OS × window`
+  - `Family Size × OS × window`
+  - `LP × OS × window`
+  - `Complexity × Family Size × OS × window`
+  - `Complexity × LP × OS × window`
+  - `Family Size × LP × OS × window`
+  - `Complexity × Family Size × LP × OS × window`
+  
+fitted a second model with those eight terms removed. That model forces every OS effect to be the same at the N250 and the N400. Comparing the two models asks whether letting OS differ between windows fits the data reliably better
+
+```{r omnibus_tests}
+# ---------------------------------------------------------------------------
+# Omnibus tests (ML fits): remove every term that contains BOTH the
+# individual-difference dimension AND time window, and compare.
+# ---------------------------------------------------------------------------
+fixed_terms <- attr(terms(f_full), "term.labels")
+fixed_terms <- fixed_terms[!grepl("\\|", fixed_terms)]   # drop random-effect bits
+
+has <- function(term, var) var %in% strsplit(term, ":")[[1]]
+
+drop_window_terms <- function(var) {
+  keep <- fixed_terms[!(sapply(fixed_terms, has, var = var) &
+                        sapply(fixed_terms, has, var = "time_window"))]
+  as.formula(paste("value ~", paste(keep, collapse = " + "), "+", re))
+}
+
+m_full_ml <- lmer(f_full, data = dat, REML = FALSE,
+                  control = lmerControl(optimizer = "bobyqa"))
+m_noOSxTW <- lmer(drop_window_terms("OS"), data = dat, REML = FALSE,
+                  control = lmerControl(optimizer = "bobyqa"))
+m_noLPxTW <- lmer(drop_window_terms("LP"), data = dat, REML = FALSE,
+                  control = lmerControl(optimizer = "bobyqa"))
+
+# Does OS's contribution differ between N250 and N400? (8 df)
+anova(m_noOSxTW, m_full_ml)
+# Does LP's contribution differ between N250 and N400? (8 df)
+anova(m_noLPxTW, m_full_ml)
+```
+
+The omnibus test says OS differs between windows somewhere. The individual terms say where. Each `...:time_window1 row` is the N400 minus N250 difference in one effect.
+
+```{r term_by_term_differeces}
+# ---------------------------------------------------------------------------
+# Term-by-term: which OS (or LP) terms differ between components?
+# Each "...:time_window1" row is (N400 term) - (N250 term).
+# ---------------------------------------------------------------------------
+cf <- as.data.frame(coef(summary(m_tw)))
+cf$term <- rownames(cf)
+cf |>
+  filter(grepl("time_window", term), grepl("OS|LP", term)) |>
+  select(term, Estimate, `Std. Error`, df, `t value`, `Pr(>|t|)`) |>
+  mutate(across(where(is.numeric), ~ round(.x, 4)))
+```
+
+Explore the highest-order significant interaction that contains both the skill dimension and time window. For OS, the largest is `Complexity × Family Size × OS × time window` = $0.633 (t = 3.98, p = .0001$). The three-way reverses sign from one component to the next.
+
+
+```{r targeted_contrasts}
+# ---------------------------------------------------------------------------
+# Targeted contrasts: the same OS slopes as before, estimated in each
+# window and compared directly (N400 - N250).
+# ---------------------------------------------------------------------------
+lp_mean <- mean(distinct(dat, SubjID, LP)$LP)
+os_mean <- mean(distinct(dat, SubjID, OS)$OS)
+
+# OS slope of the complexity effect, within each family size, by window
+emtrends(m_tw, ~ complexity | family_size * time_window, var = "OS",
+         at = list(LP = lp_mean)) |>
+  contrast("revpairwise")
+
+# ... and the N400 - N250 difference in that slope
+emtrends(m_tw, ~ complexity * time_window | family_size, var = "OS",
+         at = list(LP = lp_mean)) |>
+  contrast(interaction = "revpairwise")
+
+```
+
+
+For LP the four-way with window isn’t significant, so there are two separate terms to explore: `Complexity × LP × window` and `Family Size × LP × window`. Neither is contained in a significant higher-order window term.
+
+Complexity × LP: the LP slope of the complexity effect is −0.31 at the N250 and −0.14 at the N400. Higher LP shrinks the complexity effect at both components, but less at the N400.
+Family Size × LP: the LP slope of the family size effect is 0.08 at the N250 and 0.30 at the N400. LP’s influence on the family size effect is stronger at the N400. These are the coefficients from the two separate time-window models, now compared directly.
+
+For LP, its effect on the complexity effect weakens from the N250 to the N400, and its effect on the family size effect strengthens.
+
+
+```{r}
+# ---- OS: Complexity x Family Size x OS x window ----
+# Slopes in each cell
+emtrends(m_tw, ~ complexity | family_size * time_window, var = "OS",
+         at = list(LP = lp_mean)) |>
+  contrast("revpairwise")
+# N400 - N250 difference within each family size
+emtrends(m_tw, ~ complexity * time_window | family_size, var = "OS",
+         at = list(LP = lp_mean)) |>
+  contrast(interaction = "revpairwise")
+
+# ---- LP: Complexity x LP x window (averaged over family size) ----
+emtrends(m_tw, ~ complexity | time_window, var = "LP",
+         at = list(OS = os_mean)) |>
+  contrast("revpairwise")
+emtrends(m_tw, ~ complexity * time_window, var = "LP",
+         at = list(OS = os_mean)) |>
+  contrast(interaction = "revpairwise")
+
+# ---- LP: Family Size x LP x window (averaged over complexity) ----
+emtrends(m_tw, ~ family_size | time_window, var = "LP",
+         at = list(OS = os_mean)) |>
+  contrast("revpairwise")
+emtrends(m_tw, ~ family_size * time_window, var = "LP",
+         at = list(OS = os_mean)) |>
+  contrast(interaction = "revpairwise")
+```
+
+
+```{r}
+# ---------------------------------------------------------------------------
+# Combined N250 + N400 model: the three interactions with time window
+#   A. Complexity x Family Size x OS x window
+#   B. Complexity x LP x window          (averaged over family size)
+#   C. Family Size x LP x window         (averaged over complexity)
+# In every panel: colour = time window, x = skill score, y = an effect.
+# Where the two coloured lines have different slopes, that effect changes
+# between the N250 and the N400.
+# Requires: m_tw (REML fit from combined_window_model.R) and dat
+# ---------------------------------------------------------------------------
+library(tidyverse)
+library(emmeans)
+library(patchwork)
+emm_options(lmer.df = "satterthwaite", lmerTest.limit = 20000)
+
+fix_ci <- function(df) {
+  names(df)[names(df) == "asymp.LCL"] <- "lower.CL"
+  names(df)[names(df) == "asymp.UCL"] <- "upper.CL"
+  df
+}
+
+subj    <- dat |> distinct(SubjID, OS, LP)
+os_mean <- mean(subj$OS); lp_mean <- mean(subj$LP)
+os_grid <- seq(min(subj$OS), max(subj$OS), length.out = 30)
+lp_grid <- seq(min(subj$LP), max(subj$LP), length.out = 30)
+
+tw_cols <- c(N250 = "#1b9e77", N400 = "#7570b3")
+tw_lty  <- c(N250 = "solid",   N400 = "dashed")
+
+effect_plot <- function(df, xvar, xlab, ylab, rug_var) {
+  ggplot(df, aes(.data[[xvar]], estimate, colour = time_window, fill = time_window,
+                 linetype = time_window)) +
+    geom_hline(yintercept = 0, linewidth = 0.3, colour = "grey50") +
+    geom_ribbon(aes(ymin = lower.CL, ymax = upper.CL), alpha = 0.15, colour = NA) +
+    geom_line(linewidth = 0.9) +
+    geom_rug(data = subj, aes(x = .data[[rug_var]]), inherit.aes = FALSE,
+             sides = "b", alpha = 0.5, length = unit(0.02, "npc")) +
+    scale_colour_manual(values = tw_cols) +
+    scale_fill_manual(values = tw_cols) +
+    scale_linetype_manual(values = tw_lty) +
+    labs(x = xlab, y = ylab, colour = "Window", fill = "Window", linetype = "Window") +
+    theme_bw(base_size = 10) +
+    theme(panel.grid.minor = element_blank(), legend.position = "bottom")
+}
+
+# ---- A. Complexity effect across OS, by family size and window --------------
+dA <- emmeans(m_tw, ~ complexity | OS * family_size * time_window,
+              at = list(OS = os_grid, LP = lp_mean), nesting = NULL) |>
+  contrast("revpairwise") |>                       # complex - simple
+  summary(infer = TRUE) |> as.data.frame() |> fix_ci() |>
+  mutate(family_size = factor(family_size, levels = c("small", "large"),
+                              labels = c("Small family", "Large family")))
+
+pA <- effect_plot(dA, "OS", "Orthographic Sensitivity (PCA score)",
+                  expression("Complexity effect, Complex-Simple (" * mu * "V)"), "OS") +
+  facet_wrap(~ family_size) +
+  ggtitle("A. Complexity x Family Size x OS x window")
+
+# ---- B. Complexity effect across LP, by window (averaged over family size) --
+dB <- emmeans(m_tw, ~ complexity | LP * time_window,
+              at = list(LP = lp_grid, OS = os_mean), nesting = NULL) |>
+  contrast("revpairwise") |>
+  summary(infer = TRUE) |> as.data.frame() |> fix_ci()
+
+pB <- effect_plot(dB, "LP", "Language Proficiency (PCA score)",
+                  expression("Complexity effect, Complex-Simple (" * mu * "V)"), "LP") +
+  ggtitle("B. Complexity x LP x window")
+
+# ---- C. Family size effect across LP, by window (averaged over complexity) --
+dC <- emmeans(m_tw, ~ family_size | LP * time_window,
+              at = list(LP = lp_grid, OS = os_mean), nesting = NULL) |>
+  contrast("revpairwise") |>                       # large - small
+  summary(infer = TRUE) |> as.data.frame() |> fix_ci()
+
+pC <- effect_plot(dC, "LP", "Language Proficiency (PCA score)",
+                  expression("Family size effect, Large-Small (" * mu * "V)"), "LP") +
+  ggtitle("C. Family Size x LP x window")
+
+# ---- Show and save ------------------------------------------------------------
+pA; pB; pC
+
+# combined <- pA / (pB | pC) + plot_layout(guides = "collect") &
+#   theme(legend.position = "bottom")
+# combined
+
+ggsave("Window_A_CxFSxOS.png", pA, width = 8,   height = 4,   dpi = 300)
+ggsave("Window_B_CxLP.png",    pB, width = 4.5, height = 4,   dpi = 300)
+ggsave("Window_C_FSxLP.png",   pC, width = 4.5, height = 4,   dpi = 300)
+# ggsave("Window_all.png",  combined, width = 8.5, height = 8,  dpi = 300)
+
+```
+

@@ -1,0 +1,709 @@
+---
+title: "M21 2026 July 2026 N250 Component"
+author: "Joanna Morris"
+date: "`r Sys.Date()`"
+output: 
+  bookdown::pdf_document2:
+    latex_engine: xelatex
+    toc: true
+    toc_depth: 4
+    number_sections: true
+header-includes:
+  - \setcounter{secnumdepth}{3}
+editor_options: 
+  chunk_output_type: inline
+---
+
+\scriptsize
+
+# Setup {-}
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      error = FALSE,
+                      comment = "||",
+                      fig.height = 4,
+                      fig.width = 7)
+options(width = 150)
+```
+
+## Load libraries {-}
+
+```{r load_libraries, echo=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(ggeffects)
+library(lme4)
+library(afex)
+library(gridExtra)
+library(MuMIn)
+library(pbkrtest)
+library(effectsize)
+library(performance)
+library(cowplot)  # for use with `plot_grid(x,x,ncol = x)` function
+library(e1071) # for use with `skewness()` function
+library(lmerTest)
+library(emmeans)
+# emm_options(lmer.df = "satterthwaite")
+```
+
+## Set emmeans options {-}
+
+```{r emmeans_options}
+emm_options(lmer.df = "satterthwaite", lmerTest.limit = 20000)
+```
+
+# Functions {-}
+
+
+```{r echo=FALSE}
+## Define  interaction table functions {-}
+
+compact_emm_table <- function(emm_object,
+                              by_var,
+                              condition_prefix = NULL,
+                              reverse = FALSE,      # TRUE = later level minus earlier (revpairwise)
+                              adjust = NULL,        # NULL = emmeans default; e.g. "none", "tukey", "holm"
+                              digits_est = 2,
+                              digits_df = 1,
+                              digits_p = 3,
+                              digits_by = 2) {      # decimals shown for numeric by-values (e.g. OS, LP)
+
+  emm_df <- summary(emm_object) |> as.data.frame()
+
+  # by_var can be one bare name (by_var = OS) or several (by_var = c(family_size, OS))
+  by_names <- names(tidyselect::eval_select(rlang::enquo(by_var), emm_df))
+
+  contrast_df <- if (is.null(adjust)) {
+    pairs(emm_object, reverse = reverse)
+  } else {
+    pairs(emm_object, reverse = reverse, adjust = adjust)
+  }
+  contrast_df <- contrast_df |> summary() |> as.data.frame()
+
+  # Exclude BOTH Satterthwaite/KR-style and asymptotic-style CI/df column names
+  non_focal_cols <- c(by_names, "emmean", "SE", "df",
+                      "lower.CL", "upper.CL",
+                      "asymp.LCL", "asymp.UCL")
+  focal_vars <- setdiff(names(emm_df), non_focal_cols)
+
+  # Detect whichever CI column names are actually present
+  lcl_col <- intersect(c("lower.CL", "asymp.LCL"), names(emm_df))
+  ucl_col <- intersect(c("upper.CL", "asymp.UCL"), names(emm_df))
+
+  # Condition label: a bare value (single by-variable, no prefix, as before),
+  # "prefix = value" (single by-variable with prefix), or
+  # "name = value, name = value" (several by-variables)
+  fmt_by <- function(x) {
+    if (is.numeric(x)) formatC(x, format = "f", digits = digits_by) else as.character(x)
+  }
+  make_condition <- function(df) {
+    if (length(by_names) == 1) {
+      v <- fmt_by(df[[by_names]])
+      if (is.null(condition_prefix)) v else paste(condition_prefix, "=", v)
+    } else {
+      parts <- lapply(by_names, function(n) paste(n, "=", fmt_by(df[[n]])))
+      do.call(paste, c(parts, sep = ", "))
+    }
+  }
+
+  emm_part <- emm_df |>
+    rowwise() |>
+    mutate(Comparison = paste(c_across(all_of(focal_vars)), collapse = " ")) |>
+    ungroup() |>
+    mutate(Condition = make_condition(pick(everything()))) |>
+    transmute(
+      across(all_of(by_names)),          # kept temporarily for sorting
+      Comparison,
+      Condition,
+      Estimate = emmean,
+      SE,
+      df,
+      lower.CL = if (length(lcl_col) > 0) .data[[lcl_col]] else NA_real_,
+      upper.CL = if (length(ucl_col) > 0) .data[[ucl_col]] else NA_real_,
+      t.ratio = NA_real_,
+      p.value = NA_real_
+    )
+
+  # Detect whichever test-statistic column name is present (t.ratio vs z.ratio)
+  ratio_col <- intersect(c("t.ratio", "z.ratio"), names(contrast_df))
+
+  contrast_part <- contrast_df |>
+    mutate(Comparison = as.character(contrast),
+           Condition  = make_condition(pick(everything()))) |>
+    transmute(
+      across(all_of(by_names)),
+      Comparison,
+      Condition,
+      Estimate = estimate,
+      SE,
+      df,
+      lower.CL = NA_real_,
+      upper.CL = NA_real_,
+      t.ratio = if (length(ratio_col) > 0) .data[[ratio_col]] else NA_real_,
+      p.value
+    )
+
+  # Sort by the by-variables' actual values (numeric order for OS/LP, level
+  # order for factors), not by the text label, then drop them
+  bind_rows(emm_part, contrast_part) |>
+    arrange(across(all_of(by_names)), Comparison) |>
+    select(-all_of(by_names)) |>
+    mutate(
+      Estimate = round(Estimate, digits_est),
+      SE       = round(SE, digits_est),
+      df       = round(df, digits_df),
+      lower.CL = round(lower.CL, digits_est),
+      upper.CL = round(upper.CL, digits_est),
+      t.ratio  = round(t.ratio, digits_est),
+      p.value  = round(p.value, digits_p)
+    )
+}
+
+
+```
+
+
+# Load Files
+
+```{r load_files, message=FALSE, warning=FALSE}
+
+# Load data: erp_fs nonwords
+erp_fs_nw <- read_csv("erp_fs_dmg.csv") |>
+  filter(lexical_status == "nonword") |>
+  mutate(
+    SubjID = factor(SubjID),
+    chlabel = factor(chlabel),
+    family_size = factor(family_size, 
+                         levels = c("small", "large")),
+    complexity = factor(complexity,
+                    levels = c("simple", "complex")),
+    time_window = factor(time_window),
+    OS = as.numeric(Dim.2),
+    LP = as.numeric(Dim.1)
+  )
+
+range(erp_fs_nw$OS, na.rm = TRUE)
+```
+
+
+
+# N250 NONWORD DATA : SYMMETRICAL MODEL, INTERACTION WITH LP AND OS
+
+For the nonword N250, does the symmetric model we just ran replace the separate LP and OS models, or do all three get reported?**
+
+The symmetric model is the cleanest solution — it tests both dimensions in the same model and provides the strongest evidence for the dissociation. The separate models are now superseded.
+
+## N250 NONWORD DATA: Family Size
+
+### Model Comparisons
+```{r}
+contrasts(erp_fs_nw$complexity)   <- c(-0.5, 0.5)
+contrasts(erp_fs_nw$family_size)  <- c(-0.5, 0.5)
+
+# Full four-way
+m_full_nw_n250_fs <- lmer(
+  value ~ complexity * family_size * LP * OS +
+    (1 | SubjID) + (1 | SubjID:chlabel),
+  data = subset(erp_fs_nw, time_window == "N250"),
+  REML = TRUE,
+  control = lmerControl(optimizer = "bobyqa")
+)
+
+print(summary(m_full_nw_n250_fs), correlation = TRUE)
+
+# Effect Sizes
+eta_squared(m_full_nw_n250_fs, partial = TRUE)
+
+# R-squared
+r2_nakagawa(m_full_nw_n250_fs)
+```
+
+
+
+
+```{r}
+library(emmeans)
+library(dplyr)
+library(rlang)
+library(purrr)
+
+emm_options(lmer.df = "satterthwaite", lmerTest.limit = 20000)
+
+# Representative levels: mean ± 1 SD for both continuous ID dimensions
+subj <- erp_fs_nw |>
+  distinct(SubjID, OS, LP) |>
+  filter(!is.na(OS), !is.na(LP))
+
+nrow(subj)   # should be 63
+
+os_vals <- mean(subj$OS) + c(-1, 0, 1) * sd(subj$OS)
+lp_vals <- mean(subj$LP) + c(-1, 0, 1) * sd(subj$LP)
+os_labels <- c("Low OS", "Mean OS", "High OS")
+lp_labels <- c("Low LP", "Mean LP", "High LP")
+
+os_vals
+lp_vals
+```
+
+
+## Complexity x Family Size x LP x OS
+
+```{r  n250_fourway}
+# 1. Complexity effect (complex - simple) within each family size,
+#    across the full LP x OS grid (cell means plus simple effects)
+n250_4way_1 <- emmeans(m_full_nw_n250_fs, ~ complexity | family_size * LP * OS,
+                       at = list(LP = lp_vals, OS = os_vals), nesting = NULL) |>
+  compact_emm_table(by_var = c(family_size, LP, OS), reverse = TRUE)
+as_tibble(n250_4way_1) |> print(n = 60)
+
+# 2. Complexity x Family Size interaction contrast across the LP x OS grid
+#    (this is the 3 x 3 table: does the complexity effect differ by family size,
+#     for each combination of LP and OS?)
+n250_4way_2 <- emmeans(m_full_nw_n250_fs, ~ complexity * family_size | LP * OS,
+                       at = list(LP = lp_vals, OS = os_vals), nesting = NULL) |>
+  contrast(interaction = "revpairwise") |>
+  summary(infer = TRUE) |>
+  as.data.frame()
+as_tibble(n250_4way_2) |> print(n = 50)
+
+# 3a. The Complexity x Family Size x OS three-way (slope of OS) at each LP level
+#     -- how the OS three-way changes with LP is the four-way
+emtrends(m_full_nw_n250_fs, ~ complexity * family_size | LP, var = "OS",
+         at = list(LP = lp_vals)) |>
+  contrast(interaction = "revpairwise")
+
+# 3b. The Complexity x Family Size x LP three-way (slope of LP) at each OS level
+emtrends(m_full_nw_n250_fs, ~ complexity * family_size | OS, var = "LP",
+         at = list(OS = os_vals)) |>
+  contrast(interaction = "revpairwise")
+```
+
+
+```{r}
+# ---------------------------------------------------------------------------
+# N250 nonwords: Complexity x Family Size x LP x OS
+# Requires: m_full_nw_n250_fs (REML fit), erp_fs_nw, lp_vals, os_vals
+# ---------------------------------------------------------------------------
+library(tidyverse)
+library(emmeans)
+emm_options(lmer.df = "satterthwaite", lmerTest.limit = 20000)
+
+fix_ci <- function(df) {
+  names(df)[names(df) == "asymp.LCL"] <- "lower.CL"
+  names(df)[names(df) == "asymp.UCL"] <- "upper.CL"
+  df
+}
+
+lp_lab <- c("Low LP (-1 SD)", "Mean LP", "High LP (+1 SD)")
+os_lab <- c("Low OS (-1 SD)", "Mean OS", "High OS (+1 SD)")
+cols   <- c(Simple = "#1b6ca8", Complex = "#d1495b")
+
+# ---- Plot 1: cell means in a 3 x 3 grid (rows = LP, columns = OS) ----------
+cells <- emmeans(m_full_nw_n250_fs, ~ complexity * family_size | LP * OS,
+                 at = list(LP = lp_vals, OS = os_vals), nesting = NULL) |>
+  as.data.frame() |> fix_ci() |>
+  mutate(LP_level = factor(LP, levels = lp_vals, labels = lp_lab),
+         OS_level = factor(OS, levels = os_vals, labels = os_lab),
+         family_size = factor(family_size, levels = c("small", "large"),
+                              labels = c("Small", "Large")),
+         complexity  = factor(complexity, levels = c("simple", "complex"),
+                              labels = c("Simple", "Complex")))
+
+pd <- position_dodge(width = 0.25)
+p1 <- ggplot(cells, aes(family_size, emmean, colour = complexity, linetype = complexity, group = complexity)) +
+  geom_hline(yintercept = 0, linewidth = 0.3, colour = "grey60") +
+  geom_line(position = pd, linewidth = 0.8) +
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL), width = 0.12,
+                position = pd, linewidth = 0.4, linetype = "solid") +
+  geom_point(position = pd, size = 2.2) +
+  facet_grid(LP_level ~ OS_level) +
+  scale_colour_manual(values = cols) +
+  scale_linetype_manual(values = c(Simple = "dashed", Complex = "solid")) +
+  labs(x = "Family size", y = expression("Predicted N250 amplitude (" * mu * "V)"),
+       colour = "Complexity", linetype = "Complexity") +
+  theme_bw(base_size = 10) +
+  theme(panel.grid.minor = element_blank(), legend.position = "bottom")
+p1
+
+# ---- Plot 2: complexity effect (Complex - Simple) by family size, same grid --
+#      A flat line = no Complexity x Family Size interaction in that panel;
+#      a steep line = a strong interaction.
+cx <- emmeans(m_full_nw_n250_fs, ~ complexity | family_size * LP * OS,
+              at = list(LP = lp_vals, OS = os_vals), nesting = NULL) |>
+  contrast("revpairwise") |>
+  summary(infer = TRUE) |>
+  as.data.frame() |> fix_ci() |>
+  mutate(LP_level = factor(LP, levels = lp_vals, labels = lp_lab),
+         OS_level = factor(OS, levels = os_vals, labels = os_lab),
+         family_size = factor(family_size, levels = c("small", "large"),
+                              labels = c("Small", "Large")))
+
+p2 <- ggplot(cx, aes(family_size, estimate, group = 1)) +
+  geom_hline(yintercept = 0, linewidth = 0.4, colour = "grey50") +
+  geom_line(linewidth = 0.8, colour = "grey30") +
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL), width = 0.1, colour = "grey30") +
+  geom_point(size = 2.4, colour = "grey15") +
+  facet_grid(LP_level ~ OS_level) +
+  labs(x = "Family size",
+       y = expression("Complexity effect, Complex-Simple (" * mu * "V)")) +
+  theme_bw(base_size = 10) +
+  theme(panel.grid.minor = element_blank())
+p2
+
+# ---- Plot 3: the interaction contrast as a continuous surface ---------------
+#      Colour = Complexity x Family Size interaction contrast
+#      ((Complex-Simple for large) - (Complex-Simple for small)).
+#      Black contour = |t| = 1.96; points = participants.
+subj <- erp_fs_nw |> distinct(SubjID, OS, LP) |> filter(!is.na(OS), !is.na(LP))
+grid_lp <- seq(min(subj$LP), max(subj$LP), length.out = 40)
+grid_os <- seq(min(subj$OS), max(subj$OS), length.out = 40)
+
+surf <- emmeans(m_full_nw_n250_fs, ~ complexity * family_size | LP * OS,
+                at = list(LP = grid_lp, OS = grid_os), nesting = NULL) |>
+  contrast(interaction = "revpairwise") |>
+  as.data.frame()
+surf$t <- surf$estimate / surf$SE
+
+lim <- max(abs(surf$estimate))
+p3 <- ggplot(surf, aes(OS, LP)) +
+  geom_raster(aes(fill = estimate), interpolate = TRUE) +
+  geom_contour(aes(z = t), breaks = c(-1.96, 1.96), colour = "black", linewidth = 0.5) +
+  geom_point(data = subj, aes(OS, LP), inherit.aes = FALSE,
+             shape = 21, fill = "white", colour = "black", size = 1.6) +
+  geom_vline(xintercept = os_vals, linetype = "dotted", colour = "grey40") +
+  geom_hline(yintercept = lp_vals, linetype = "dotted", colour = "grey40") +
+  scale_fill_gradient2(low = "#2166ac", mid = "white", high = "#b2182b",
+                       midpoint = 0, limits = c(-lim, lim),
+                       name = "Interaction\ncontrast (uV)") +
+  coord_cartesian(expand = FALSE) +
+  labs(x = "Orthographic Sensitivity (PCA score)",
+       y = "Language Proficiency (PCA score)") +
+  theme_bw(base_size = 10)
+p3
+
+ggsave("N250_4way_cells.png",    p1, width = 7.5, height = 7,   dpi = 300)
+ggsave("N250_4way_cxeffect.png", p2, width = 7,   height = 6.5, dpi = 300)
+ggsave("N250_4way_surface.png",  p3, width = 6.5, height = 5,   dpi = 300)
+
+```
+
+## Complexity x Family Size X LP
+
+
+```{r}
+# Complexity effect (complex - simple) within each family size, at each LP level
+n250_fs_3way_LP_2 <- emmeans(m_full_nw_n250_fs, ~ complexity | family_size * LP,
+                             at = list(LP = lp_vals, OS = os_vals[2]), nesting = NULL) |>
+  compact_emm_table(by_var = c(family_size, LP), reverse = TRUE)
+as.tibble(n250_fs_3way_LP_2) |> print(n = 50)
+
+# Gives ((complex − simple) for large) minus ((complex − simple) for small)
+n250_fs_3way_LP_2b <- emmeans(m_full_nw_n250_fs, ~ complexity * family_size | LP,
+                              at = list(LP = lp_vals, OS = os_vals[2]), nesting = NULL) |>
+  contrast(interaction = "revpairwise") |>
+  as.data.frame() 
+as.tibble(n250_fs_3way_LP_2b) |> print(n = 50)
+
+# Gives the LP slope for complex nonwords minus the LP slope for simple nonwords, within each family size. 
+# That difference is the Complexity × LP interaction at that family size. 
+emtrends(m_full_nw_n250_fs, ~ complexity | family_size, var = "LP") |> contrast("revpairwise")
+
+# Gives the large-family complexity slop difference minus the small-family complexity slope difference
+emtrends(m_full_nw_n250_fs, ~ complexity * family_size, var = "LP",
+         at = list(OS = os_vals[2])) |>
+  contrast(interaction = "revpairwise")
+```
+
+
+```{r}
+# ---------------------------------------------------------------------------
+# N250 nonwords: Complexity x Family Size x LP
+# Requires: m_full_nw_n250_fs (REML fit) and erp_fs_nw from your Rmd
+# ---------------------------------------------------------------------------
+library(tidyverse)
+library(emmeans)
+emm_options(lmer.df = "satterthwaite", lmerTest.limit = 20000)
+
+# Participant-level LP scores (one row per participant, not per observation)
+subj   <- erp_fs_nw |> distinct(SubjID, LP) |> filter(!is.na(LP))
+lp_m   <- mean(subj$LP)
+lp_sd  <- sd(subj$LP)
+lp_pts <- c(lp_m - lp_sd, lp_m, lp_m + lp_sd)
+
+# Some emmeans settings name the CI columns asymp.LCL / asymp.UCL; standardise them
+fix_ci <- function(df) {
+  names(df)[names(df) == "asymp.LCL"] <- "lower.CL"
+  names(df)[names(df) == "asymp.UCL"] <- "upper.CL"
+  df
+}
+
+# ---- Plot A: cell means at LP = -1 SD, mean, +1 SD ------------------------
+emm_A <- emmeans(m_full_nw_n250_fs, ~ complexity * family_size | LP,
+                 at = list(LP = lp_pts)) |>
+  as.data.frame() |>
+  fix_ci() |>
+  mutate(OS_level = factor(LP, levels = lp_pts,
+                           labels = c("LP -1 SD", "LP mean", "LP +1 SD")),
+         family_size = factor(family_size, levels = c("small", "large"),
+                              labels = c("Small", "Large")),
+         complexity  = factor(complexity, levels = c("simple", "complex"),
+                              labels = c("Simple", "Complex")))
+
+pd <- position_dodge(width = 0.25)
+
+p_A <- ggplot(emm_A, aes(x = family_size, y = emmean,
+                         colour = complexity, linetype = complexity, group = complexity)) +
+  geom_hline(yintercept = 0, linewidth = 0.3, colour = "grey60") +
+  geom_line(position = pd, linewidth = 0.8) +
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL),
+                width = 0.12, position = pd, linewidth = 0.5, linetype = "solid") +
+  geom_point(position = pd, size = 2.5) +
+  facet_wrap(~ OS_level) +
+  scale_colour_manual(values = c(Simple = "#1b6ca8", Complex = "#d1495b")) +
+  scale_linetype_manual(values = c(Simple = "dashed", Complex = "solid")) +
+  labs(x = "Family size", y = expression("Predicted N250 amplitude (" * mu * "V)"),
+       colour = "Complexity", linetype = "Complexity") +
+  theme_bw(base_size = 11) +
+  theme(panel.grid.minor = element_blank(), legend.position = "bottom")
+# Add scale_y_reverse() if you want negative plotted up.
+
+p_A
+
+# ---- Plot B: family size effect (Large - Small) across the observed LP range --
+lp_grid <- seq(min(subj$LP), max(subj$LP), length.out = 40)
+
+emm_B <- emmeans(m_full_nw_n250_fs, ~ family_size | complexity * LP,
+                 at = list(LP = lp_grid)) |>
+  contrast("revpairwise") |>          # large - small
+  confint() |>
+  as.data.frame() |>
+  fix_ci() |>
+  mutate(complexity = factor(complexity, levels = c("simple", "complex"),
+                             labels = c("Simple", "Complex")))
+
+p_B <- ggplot(emm_B, aes(x = LP, y = estimate,
+                         colour = complexity, linetype = complexity, fill = complexity)) +
+  geom_hline(yintercept = 0, linewidth = 0.3, colour = "grey50") +
+  geom_vline(xintercept = lp_pts, linetype = "dotted", colour = "grey60") +
+  geom_ribbon(aes(ymin = lower.CL, ymax = upper.CL), alpha = 0.18, colour = NA) +
+  geom_line(linewidth = 0.9) +
+  geom_rug(data = subj, aes(x = LP), inherit.aes = FALSE,
+           sides = "b", alpha = 0.5, length = unit(0.02, "npc")) +
+  scale_colour_manual(values = c(Simple = "#1b6ca8", Complex = "#d1495b")) +
+  scale_fill_manual(values   = c(Simple = "#1b6ca8", Complex = "#d1495b")) +
+  scale_linetype_manual(values = c(Simple = "dashed", Complex = "solid")) +
+  labs(x = "Orthographic Sensitivity (PCA score)",
+       y = expression("Family size effect, Large-Small (" * mu * "V)"),
+       colour = "Complexity", fill = "Complexity", linetype = "Complexity") +
+  theme_bw(base_size = 11) +
+  theme(panel.grid.minor = element_blank(), legend.position = "bottom")
+
+p_B
+
+# ---- Save -------------------------------------------------------------------
+ggsave("Figure_N250_CxFSxLP_cells.png", p_A, width = 7.5, height = 3.6, dpi = 300)
+ggsave("Figure_N250_CxFSxLP_FSeffect.png", p_B, width = 5.5, height = 4, dpi = 300)
+
+```
+
+
+## Complexity x Family Size X OS
+
+
+```{r}
+# Complexity effect (complex - simple) within each family size, at each OS level
+n250_fs_3way_OS_2 <- emmeans(m_full_nw_n250_fs, ~ complexity | family_size * OS,
+                             at = list(OS = os_vals, LP = lp_vals[2]), nesting = NULL) |>
+  compact_emm_table(by_var = c(family_size, OS), reverse = TRUE)
+as.tibble(n250_fs_3way_OS_2) |> print(n = 50)
+
+# Gives ((complex − simple) for large) minus ((complex − simple) for small)
+n250_fs_3way_OS_2b <- emmeans(m_full_nw_n250_fs, ~ complexity * family_size | OS,
+                              at = list(OS = os_vals, LP = lp_vals[2]), nesting = NULL) |>
+  contrast(interaction = "revpairwise") |>
+  as.data.frame() 
+as.tibble(n250_fs_3way_OS_2b) |> print(n = 50)
+
+# Gives the OS slope for complex nonwords minus the OS slope for simple nonwords, within each family size. 
+# That difference is the Complexity × OS interaction at that family size. 
+emtrends(m_full_nw_n250_fs, ~ complexity | family_size, var = "OS") |> contrast("revpairwise")
+
+# Gives the large-family complexity slop difference minus the small-family complexity slope difference
+emtrends(m_full_nw_n250_fs, ~ complexity * family_size, var = "OS",
+         at = list(OS = os_vals[2])) |>
+  contrast(interaction = "revpairwise")
+```
+
+```{r}
+# ---------------------------------------------------------------------------
+# N250 nonwords: Complexity x Family Size x OS
+# Requires: m_full_nw_n250_fs (REML fit) and erp_fs_nw from your Rmd
+# ---------------------------------------------------------------------------
+library(tidyverse)
+library(emmeans)
+emm_options(lmer.df = "satterthwaite", lmerTest.limit = 20000)
+
+# Participant-level OS scores (one row per participant, not per observation)
+subj   <- erp_fs_nw |> distinct(SubjID, OS) |> filter(!is.na(OS))
+os_m   <- mean(subj$OS)
+os_sd  <- sd(subj$OS)
+os_pts <- c(os_m - os_sd, os_m, os_m + os_sd)
+
+# Some emmeans settings name the CI columns asymp.LCL / asymp.UCL; standardise them
+fix_ci <- function(df) {
+  names(df)[names(df) == "asymp.LCL"] <- "lower.CL"
+  names(df)[names(df) == "asymp.UCL"] <- "upper.CL"
+  df
+}
+
+# ---- Plot A: cell means at OS = -1 SD, mean, +1 SD ------------------------
+emm_A <- emmeans(m_full_nw_n250_fs, ~ complexity * family_size | OS,
+                 at = list(OS = os_pts)) |>
+  as.data.frame() |>
+  fix_ci() |>
+  mutate(OS_level = factor(OS, levels = os_pts,
+                           labels = c("OS -1 SD", "OS mean", "OS +1 SD")),
+         family_size = factor(family_size, levels = c("small", "large"),
+                              labels = c("Small", "Large")),
+         complexity  = factor(complexity, levels = c("simple", "complex"),
+                              labels = c("Simple", "Complex")))
+
+pd <- position_dodge(width = 0.25)
+
+p_A <- ggplot(emm_A, aes(x = family_size, y = emmean,
+                         colour = complexity, linetype = complexity, group = complexity)) +
+  geom_hline(yintercept = 0, linewidth = 0.3, colour = "grey60") +
+  geom_line(position = pd, linewidth = 0.8) +
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL),
+                width = 0.12, position = pd, linewidth = 0.5, linetype = "solid") +
+  geom_point(position = pd, size = 2.5) +
+  facet_wrap(~ OS_level) +
+  scale_colour_manual(values = c(Simple = "#1b6ca8", Complex = "#d1495b")) +
+  scale_linetype_manual(values = c(Simple = "dashed", Complex = "solid")) +
+  labs(x = "Family size", y = expression("Predicted N250 amplitude (" * mu * "V)"),
+       colour = "Complexity", linetype = "Complexity") +
+  theme_bw(base_size = 11) +
+  theme(panel.grid.minor = element_blank(), legend.position = "bottom")
+# Add scale_y_reverse() if you want negative plotted up.
+
+p_A
+
+# ---- Plot B: family size effect (Large - Small) across the observed OS range --
+os_grid <- seq(min(subj$OS), max(subj$OS), length.out = 40)
+
+emm_B <- emmeans(m_full_nw_n250_fs, ~ family_size | complexity * OS,
+                 at = list(OS = os_grid)) |>
+  contrast("revpairwise") |>          # large - small
+  confint() |>
+  as.data.frame() |>
+  fix_ci() |>
+  mutate(complexity = factor(complexity, levels = c("simple", "complex"),
+                             labels = c("Simple", "Complex")))
+
+p_B <- ggplot(emm_B, aes(x = OS, y = estimate,
+                         colour = complexity, linetype = complexity, fill = complexity)) +
+  geom_hline(yintercept = 0, linewidth = 0.3, colour = "grey50") +
+  geom_vline(xintercept = os_pts, linetype = "dotted", colour = "grey60") +
+  geom_ribbon(aes(ymin = lower.CL, ymax = upper.CL), alpha = 0.18, colour = NA) +
+  geom_line(linewidth = 0.9) +
+  geom_rug(data = subj, aes(x = OS), inherit.aes = FALSE,
+           sides = "b", alpha = 0.5, length = unit(0.02, "npc")) +
+  scale_colour_manual(values = c(Simple = "#1b6ca8", Complex = "#d1495b")) +
+  scale_fill_manual(values   = c(Simple = "#1b6ca8", Complex = "#d1495b")) +
+  scale_linetype_manual(values = c(Simple = "dashed", Complex = "solid")) +
+  labs(x = "Orthographic Sensitivity (PCA score)",
+       y = expression("Family size effect, Large-Small (" * mu * "V)"),
+       colour = "Complexity", fill = "Complexity", linetype = "Complexity") +
+  theme_bw(base_size = 11) +
+  theme(panel.grid.minor = element_blank(), legend.position = "bottom")
+
+p_B
+
+# ---- Save -------------------------------------------------------------------
+ggsave("Figure_N250_CxFSxOS_cells.png", p_A, width = 7.5, height = 3.6, dpi = 300)
+ggsave("Figure_N250_CxFSxOS_FSeffect.png", p_B, width = 5.5, height = 4, dpi = 300)
+
+```
+
+
+
+
+```{r}
+# Each row is the OS slope of the complexity effect at one LP level, averaged over family size. 
+# Because the four-way is significant, that average is a summary, not the full picture.
+emtrends(m_full_nw_n250_fs, ~ complexity | LP, var = "OS",
+         at = list(LP = lp_vals)) |>
+  contrast("revpairwise")
+```
+
+```{r}
+# ---------------------------------------------------------------------------
+# N250 nonwords: Complexity x LP x OS
+# Complexity effect (Complex - Simple) across the observed OS range,
+# one line per LP level (-1 SD, mean, +1 SD).
+# Requires: m_full_nw_n250_fs (REML fit), erp_fs_nw, lp_vals
+# ---------------------------------------------------------------------------
+library(tidyverse)
+library(emmeans)
+emm_options(lmer.df = "satterthwaite", lmerTest.limit = 20000)
+
+fix_ci <- function(df) {
+  names(df)[names(df) == "asymp.LCL"] <- "lower.CL"
+  names(df)[names(df) == "asymp.UCL"] <- "upper.CL"
+  df
+}
+
+subj    <- erp_fs_nw |> distinct(SubjID, OS, LP) |> filter(!is.na(OS), !is.na(LP))
+os_grid <- seq(min(subj$OS), max(subj$OS), length.out = 40)
+os_pts  <- mean(subj$OS) + c(-1, 0, 1) * sd(subj$OS)
+lp_lab  <- c("Low LP (-1 SD)", "Mean LP", "High LP (+1 SD)")
+lp_cols <- c("#e08214", "grey35", "#5e3c99")
+lp_lnty <- c("solid", "dashed","dotdash" )
+names(lp_cols) <- lp_lab
+
+# Complexity effect at each OS value x LP level
+cx_os_lp <- function(by_family_size = FALSE) {
+  spec <- if (by_family_size) ~ complexity | OS * LP * family_size else ~ complexity | OS * LP
+  emmeans(m_full_nw_n250_fs, spec,
+          at = list(OS = os_grid, LP = lp_vals), nesting = NULL) |>
+    contrast("revpairwise") |>                  # complex - simple
+    summary(infer = TRUE) |>
+    as.data.frame() |>
+    fix_ci() |>
+    mutate(LP_level = factor(LP, levels = lp_vals, labels = lp_lab))
+}
+
+base_plot <- function(df) {
+  ggplot(df, aes(OS, estimate, colour = LP_level, fill = LP_level, linetype = LP_level)) +
+    geom_hline(yintercept = 0, linewidth = 0.3, colour = "grey50") +
+    geom_vline(xintercept = os_pts, linetype = "dotted", colour = "grey60") +
+    geom_ribbon(aes(ymin = lower.CL, ymax = upper.CL), alpha = 0.15, colour = NA) +
+    geom_line(linewidth = 0.9) +
+    geom_rug(data = subj, aes(x = OS), inherit.aes = FALSE,
+             sides = "b", alpha = 0.5, length = unit(0.02, "npc")) +
+    scale_colour_manual(values = lp_cols) +
+    scale_fill_manual(values = lp_cols) +
+    scale_linetype_manual(values = lp_lnty) +
+    labs(x = "Orthographic Sensitivity (PCA score)",
+         y = expression("Complexity effect, Complex-Simple (" * mu * "V)"),
+         colour = NULL, fill = NULL) +
+    theme_bw(base_size = 11) +
+    theme(panel.grid.minor = element_blank(), legend.position = "bottom")
+}
+
+# ---- Plot 1: averaged over family size (what the three-way term describes) --
+p1 <- base_plot(cx_os_lp(FALSE))
+p1
+
+# ---- Plot 2: the same, split by family size (shows what the average hides) --
+p2 <- base_plot(cx_os_lp(TRUE) |>
+                  mutate(family_size = factor(family_size, levels = c("small", "large"),
+                                              labels = c("Small family", "Large family")))) +
+  facet_wrap(~ family_size)
+p2
+
+ggsave("N250_CxLPxOS_avg.png",   p1, width = 5.5, height = 4.2, dpi = 300)
+ggsave("N250_CxLPxOS_byFS.png",  p2, width = 8.5, height = 4.2, dpi = 300)
+```
+
